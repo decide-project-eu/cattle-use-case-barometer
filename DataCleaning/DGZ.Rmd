@@ -2,18 +2,10 @@
 
 ## Load the libraries
 ```{r}
-library(data.table)
-library(tidyverse)
-library(naniar)
-library(stringr)
-library(readr)
-library(dplyr)
-library(magrittr)
-
 
 # lib = where to save the library  (zonder = default)
 
-package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr"
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxlsx"
                   )
 
 for (pkg in package_list) {
@@ -23,4 +15,40 @@ for (pkg in package_list) {
 }
 
 ```
+## Data loading
+
+```{r}
+
+barometer_dt_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_14nov2022.xlsx")
+barometer_aero_cult <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_BAC_AERO_14nov2022.xlsx")
+barometer_myco_cult <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENTBAC_MYCO_14nov2022.xlsx")
+
+```
+
+## Data manipulation 
+```{r}
+barometer_dt <- barometer_dt_raw %>% 
+  dplyr::rename(
+    Filenumber=Dossiernummer, 
+    Sample_type = Staaltype
+    ) %>%
+  dplyr::mutate(
+    Country='Belgium',
+    Lab_reference='1', 
+    Sample_type = case_when(
+      Sample_type == "RU Broncho-alveolar lavage (BAL)" ~ 'BAL', 
+      Sample_type == "RU Anderen" ~'Unknown',
+      Sample_type %in% c("RU Swabs", "RU Swab", 'RU Neusswab', 'RU Neusswabs') ~ 'Swab',
+      Sample_type %in% c("RU Kadaver", "RU Organen") ~ 'Autopsy',
+      TRUE ~ 'Missing'
+    )
+  ) %>% 
+  dplyr::select(-Identificatie) 
+
+```
+
+barometer_dt$Sample_type[barometer_dt$Sample_type == "RU Broncho-alveolar lavage (BAL)"] <- 'BAL'
+barometer_dt$Sample_type[barometer_dt$Sample_type == "RU Anderen"] <- 'Unknown'
+barometer_dt$Sample_type[barometer_dt$Sample_type %in% c("RU Swabs", "RU Swab", 'RU Neusswab', 'RU Neusswabs')] <- 'Swab'
+barometer_dt$Sample_type[barometer_dt$Sample_type %in% c("RU Kadaver", "RU Organen")] <- 'Autopsy'
 
