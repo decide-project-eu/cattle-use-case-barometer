@@ -1,0 +1,26 @@
+# DATACLEANING FOR DGZ
+
+## Load the libraries
+```{r}
+library(data.table)
+library(tidyverse)
+library(naniar)
+library(stringr)
+library(readr)
+library(dplyr)
+library(magrittr)
+
+
+# lib = where to save the library  (zonder = default)
+
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr"
+                  )
+
+for (pkg in package_list) {
+  if (pkg %in% rownames(.packages()) == FALSE)
+  {library(pkg, character.only = TRUE)}
+
+}
+
+```
+
