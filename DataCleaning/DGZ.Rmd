@@ -5,7 +5,7 @@
 
 # lib = where to save the library  (zonder = default)
 
-package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxlsx"
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl"
                   )
 
 for (pkg in package_list) {
@@ -20,20 +20,116 @@ for (pkg in package_list) {
 ```{r}
 
 barometer_dt_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_14nov2022.xlsx")
-barometer_aero_cult <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_BAC_AERO_14nov2022.xlsx")
-barometer_myco_cult <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENTBAC_MYCO_14nov2022.xlsx")
+barometer_aero_cult_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_BAC_AERO_14nov2022.xlsx")
+barometer_myco_cult_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENTBAC_MYCO_14nov2022.xlsx")
 
 ```
 
-## Data manipulation 
+## Data manipulation AEROBIC CULTURE results
+
+```{r}
+barometer_aero_cult <- barometer_aero_cult_raw %>%
+  dplyr::rename(
+    Filenumber = Dossiernummer,
+    Pathogen_identification = 'KIEMSTAAL IDENTIFICATIE',
+    Pathogen_result = 'KIEMSTAAL RESULTAAT'
+  )%>%
+  
+  dplyr::mutate(
+    Country='Belgium',
+    Lab_reference='1',
+    Parameter_code = 'BAC_AERO',
+    Result = 'OK',
+    Breed = case_when(
+      Bedrijfstype == 'VCALF' ~ 'Veal',
+      is.na(MEAT) ~ 'Unknown',
+      (as.numeric(MEAT)/as.numeric(TOTAL))>0.9 ~ 'Beef', 
+      (as.numeric(MILK)/as.numeric(TOTAL))>0.9 ~ 'Dairy',
+      TRUE ~ 'Mixed' 
+    )
+  ) %>%
+  dplyr::select(
+    Breed,
+    Country,
+    Lab_reference,
+    Filenumber,
+    Pathogen_identification,
+    Pathogen_result,
+    Parameter_code,
+    Result)  %>%
+  dplyr::filter(
+    Pathogen_identification %in% c("Pasteurella multocida","Mannheimia haemolytica","Histophilus somni","Mycoplasma bovis")
+  ) %>%
+  dplyr::distinct()
+```
+ 
+Intermediate table is needed
+
+```{r}
+df_samples <- data.frame(
+  Result =  c('OK', 'OK', 'OK', 'OK'),
+  Parameter_code =c('BAC_AERO','BAC_AERO','BAC_AERO', 'BAC_MYCOPLASMA'),
+  Diagnostic_test=c('Culture','Culture','Culture', 'Culture'),
+  Pathogen_identification=c("Pasteurella multocida","Mannheimia haemolytica","Histophilus somni", 'MB')
+)
+```
+
+## Data manipulation MYCOPLASMA CULTURE results
+
+```{r}
+barometer_myco_cult <- barometer_myco_cult_raw %>%
+  dplyr::rename(
+    Filenumber = Dossiernummer,
+    Pathogen_identification = 'KIEMSTAAL IDENTIFICATIE',
+    Mycoplasma_result = 'KIEMSTAAL RESULTAAT'
+  )%>%
+  dplyr::mutate(
+    Country='Belgium',
+    Lab_reference='1',
+    Parameter_code = 'BAC_MYCOPLASMA',
+    Result = 'OK',
+    Breed = case_when(
+      Bedrijfstype == 'VCALF' ~ 'Veal',
+      is.na(MEAT) ~ 'Unknown',
+      (as.numeric(MEAT)/as.numeric(TOTAL))>0.9 ~ 'Beef', 
+      (as.numeric(MILK)/as.numeric(TOTAL))>0.9 ~ 'Dairy',
+      TRUE ~ 'Mixed' 
+    )
+  ) %>%
+  dplyr::select(
+    Breed,
+    Country,
+    Lab_reference,
+    Filenumber,
+    Pathogen_identification,
+    Mycoplasma_result,
+    Parameter_code,
+    Result)  %>%
+  dplyr::filter(
+    Pathogen_identification %in% c("Mycoplasma bovis")
+  ) %>%
+  dplyr::mutate(Pathogen_identification = 'MB') %>%
+  dplyr::distinct()
+```
+ 
+## Data manipulation PCR results
+
 ```{r}
 barometer_dt <- barometer_dt_raw %>% 
   dplyr::rename(
     Filenumber=Dossiernummer, 
-    Sample_type = Staaltype
+    Samplenumber = Staalnummer,
+    Sample_type = Staaltype,
+    Parameter_code = PARAMETER_CODE,
+    Pathogen = Onderzoek,
+    Result = Resultaat
     ) %>%
   dplyr::mutate(
     Country='Belgium',
+    Diagnostic_test = case_when(
+      Parameter_code %in% c('BAC_AERO','BAC_MYCOPLASMA') ~ 'Culture',
+      TRUE ~ 'PCR'
+    ),
     Lab_reference='1', 
     Sample_type = case_when(
       Sample_type == "RU Broncho-alveolar lavage (BAL)" ~ 'BAL', 
@@ -41,14 +137,144 @@ barometer_dt <- barometer_dt_raw %>%
       Sample_type %in% c("RU Swabs", "RU Swab", 'RU Neusswab', 'RU Neusswabs') ~ 'Swab',
       Sample_type %in% c("RU Kadaver", "RU Organen") ~ 'Autopsy',
       TRUE ~ 'Missing'
+    ),
+    Breed = case_when(
+      Bedrijfstype == 'VCALF' ~ 'Veal',
+      is.na(MEAT) ~ 'Unknown',
+      (as.numeric(MEAT)/as.numeric(TOTAL))>0.9 ~ 'Beef', 
+      (as.numeric(MILK)/as.numeric(TOTAL))>0.9 ~ 'Dairy',
+      TRUE ~ 'Mixed' 
+    ),
+    Pathogen = case_when(
+      Pathogen %in% c(
+        "AD Pasteurella multocida Ag (PCR)", 
+        "AD Pasteurella multocida Ag pool (PCR)", 
+        "AD P. multocida Ag (PCR)", 
+        "AD P. multocida Ag pool (PCR)") ~ 'PM',
+      Pathogen %in% c(
+        "AD Mannheimia haemolytica Ag (PCR)", 
+        "AD Mannheimia haemolytica Ag pool (PCR)") ~ 'MH',
+      Pathogen %in% c("RU PI3 Ag (PCR)", "RU PI3 Ag pool (PCR)") ~ 'PI3',
+      Pathogen %in% c("RU BRSV Ag (PCR)", "RU BRSV Ag pool (PCR)") ~ 'BRSV',
+      Pathogen %in% c(
+        "AD Histophilus somnus (PCR)", 
+        "AD Histophilus somnus Ag (PCR)", 
+        "AD Histophilus somnus Ag pool (PCR)", 
+        "AD Histophilus somni Ag (PCR)",
+        "AD Histophilus somni Ag pool (PCR)") ~ 'HS',
+      Pathogen %in% c(
+        "RU Mycoplasma bovis (PCR)", 
+        "RU Mycoplasma bovis Ag pool (PCR)", 
+        "RU Mycoplasma bovis Ag (PCR)") ~ 'MB',
+      Pathogen %in% c("AD Corona Ag (PCR)", "AD Corona Ag pool (PCR)") ~ 'BCV',
+      Pathogen == "BA Mycoplasma cultuur" ~ 'MB culture',
+      Pathogen == "BA Aërobe standaard cultuur" ~ 'Aerobic culture'
     )
-  ) %>% 
-  dplyr::select(-Identificatie) 
-
+  )%>%
+  dplyr::select(
+    Filenumber,
+    Diagnostic_test,
+    Samplenumber,
+    Country,
+    Lab_reference,
+    Sample_type,
+    Breed,
+    Parameter_code,
+    Result,
+    Pathogen
+  ) %>%
+  dplyr::distinct()
 ```
 
-barometer_dt$Sample_type[barometer_dt$Sample_type == "RU Broncho-alveolar lavage (BAL)"] <- 'BAL'
-barometer_dt$Sample_type[barometer_dt$Sample_type == "RU Anderen"] <- 'Unknown'
-barometer_dt$Sample_type[barometer_dt$Sample_type %in% c("RU Swabs", "RU Swab", 'RU Neusswab', 'RU Neusswabs')] <- 'Swab'
-barometer_dt$Sample_type[barometer_dt$Sample_type %in% c("RU Kadaver", "RU Organen")] <- 'Autopsy'
 
+
+
+```{r}
+barometer <-
+  barometer_dt %>%
+  dplyr::left_join(df_samples, by = c('Diagnostic_test','Result', 'Parameter_code')) %>%
+  dplyr::left_join(
+      barometer_aero_cult, by = c('Country', 'Lab_reference', 'Breed', 'Filenumber', 'Result', 'Parameter_code', 'Pathogen_identification')
+      ) %>%
+  dplyr::left_join(
+      barometer_myco_cult, by = c('Country', 'Lab_reference', 'Breed', 'Filenumber', 'Result', 'Parameter_code', 'Pathogen_identification')
+  ) %>%
+  dplyr::mutate(
+    Pathogen = case_when(
+      (Parameter_code == 'BAC_AERO' & Pathogen_identification == 'Pasteurella multocida') ~ 'PM',
+      (Parameter_code == 'BAC_AERO' & Pathogen_identification == 'Histophilus somni') ~ 'HS',
+      (Parameter_code == 'BAC_AERO' & Pathogen_identification == 'Mannheimia haemolytica') ~ 'MH',
+      TRUE ~ Pathogen
+    )
+  ) 
+
+
+    
+```
+
+
+
+
+
+```{r}
+
+%>%
+  dplyr::select(
+    Filenumber,
+    Samplenumber,
+    Country,
+    Diagnostic_test,
+    Breed,
+    Pathogen,
+    
+  )
+
+    Result = case_when(
+      Result  %in% c("Twijfelachtig (PCR)", "POSITIEF", "GEDETECTEERD", "GEDETECTEERD (sterk)", "GEDETECTEERD (zwak)", "GEDETECTEERD (matig)","GEDETECTEERD (zeer sterk)", "GEDETECTEERD (zeer zwak)") ~ '1',
+      Result %in% c("negatief", "Niet gedetecteerd") ~ '0',
+      Result %in% c("NI", "niet interpreteerbaar", "Inhibitie") ~ NA,
+      Parameter_code == 'BAC_AERO' & is.na(Pathogen_result) ~ '0',
+      Parameter_code == 'BAC_AERO' & !is.na(Pathogen_result) ~ '1'
+    )
+
+
+      Parameter_code == 'BAC_MYCOPLASMA' & is.na(Pathogen_result) ~ '0',
+      Parameter_code == 'BAC_MYCOPLASMA' & !is.na(Pathogen_result) ~ '1',
+
+
+    HS = case_when(
+      Pathogen_inv == 'HS' & Pathogen_det == '1' ~ 1, 
+      Pathogen_inv == 'HS' & Pathogen_det == '0' ~ 0,
+      Pathogen_inv == 'Aerobic culture' & Pathogen_det == 'OK' ~ 0
+      ),
+    PM = case_when(
+      Pathogen_inv == 'PM' & Pathogen_det == '1' ~ 1, 
+      Pathogen_inv == 'PM' & Pathogen_det == '0' ~ 0,
+      Pathogen_inv == 'Aerobic culture' & Pathogen_det == 'OK' ~ 0
+      ),
+    MB = case_when (
+      Pathogen_inv == 'MB' & Pathogen_det == '1' ~ 1, 
+      Pathogen_inv == 'MB' & Pathogen_det == '0' ~ 0,
+      Pathogen_inv == 'MB culture' & Pathogen_det == 'OK' ~ 0
+      ),
+    MH = case_when (
+      Pathogen_inv == 'MH' & Pathogen_det == '1' ~ 1, 
+      Pathogen_inv == 'MH' & Pathogen_det == '0' ~ 0,
+      Pathogen_inv == 'Aerobic culture' & Pathogen_det == 'OK' ~ 0
+      ),
+    BRSV = case_when (
+      Pathogen_inv == 'BRSV' & Pathogen_det == '1' ~ 1, 
+      Pathogen_inv == 'BRSV' & Pathogen_det == '0' ~ 0
+      ),
+    PI3 = case_when (
+      Pathogen_inv == 'PI3' & Pathogen_det == '1' ~ 1, 
+      Pathogen_inv == 'PI3' & Pathogen_det == '0' ~ 0
+      ),
+    BCV = case_when (
+      Pathogen_inv == 'BCV' & Pathogen_det == '1' ~ 1, 
+      Pathogen_inv == 'BCV' & Pathogen_det == '0' ~ 0
+      )
+```
+
+  
+} 
