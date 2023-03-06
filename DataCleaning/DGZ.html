@@ -352,12 +352,21 @@ display: none;
 </div>
 
 
+<hr />
 <div id="datacleaning-for-dgz" class="section level1">
 <h1>DATACLEANING FOR DGZ</h1>
 <div id="load-the-libraries" class="section level2">
 <h2>Load the libraries</h2>
-<pre class="r"><code>library(data.table)
-library(tidyverse)</code></pre>
+<pre class="r"><code># lib = where to save the library  (zonder = default)
+
+package_list &lt;- c(&quot;data.table&quot;, &quot;tidyverse&quot;, &quot;naniar&quot;, &quot;stringr&quot;, &quot;readr&quot;,  &quot;dplyr&quot;, &quot;magrittr&quot;, &quot;readxl&quot;, &quot;sjmisc&quot;, &quot;tidyr&quot;
+                  )
+
+for (pkg in package_list) {
+  if (pkg %in% rownames(.packages()) == FALSE)
+  {library(pkg, character.only = TRUE)}
+
+}</code></pre>
 <pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
 ## ✔ ggplot2 3.4.0      ✔ purrr   1.0.1 
 ## ✔ tibble  3.1.8      ✔ dplyr   1.0.10
@@ -369,32 +378,261 @@ library(tidyverse)</code></pre>
 ## ✖ dplyr::first()     masks data.table::first()
 ## ✖ dplyr::lag()       masks stats::lag()
 ## ✖ dplyr::last()      masks data.table::last()
-## ✖ purrr::transpose() masks data.table::transpose()</code></pre>
-<pre class="r"><code>library(naniar)
-library(stringr)
-library(readr)
-library(dplyr)
-library(magrittr)</code></pre>
-<pre><code>## 
+## ✖ purrr::transpose() masks data.table::transpose()
+## 
 ## Attaching package: &#39;magrittr&#39;
+## 
 ## 
 ## The following object is masked from &#39;package:purrr&#39;:
 ## 
 ##     set_names
 ## 
+## 
 ## The following object is masked from &#39;package:tidyr&#39;:
 ## 
-##     extract</code></pre>
-<pre class="r"><code># lib = where to save the library  (zonder = default)
+##     extract
+## 
+## 
+## 
+## Attaching package: &#39;sjmisc&#39;
+## 
+## 
+## The following object is masked from &#39;package:naniar&#39;:
+## 
+##     all_na
+## 
+## 
+## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     is_empty
+## 
+## 
+## The following object is masked from &#39;package:tidyr&#39;:
+## 
+##     replace_na
+## 
+## 
+## The following object is masked from &#39;package:tibble&#39;:
+## 
+##     add_case</code></pre>
+</div>
+<div id="data-loading" class="section level2">
+<h2>Data loading</h2>
+<pre class="r"><code>barometer_dt_raw &lt;- readxl::read_excel(&quot;../Data/DGZ/DECIDE_MTA_UGENT_14nov2022.xlsx&quot;)
+barometer_aero_cult_raw &lt;- readxl::read_excel(&quot;../Data/DGZ/DECIDE_MTA_UGENT_BAC_AERO_14nov2022.xlsx&quot;)
+barometer_myco_cult_raw &lt;- readxl::read_excel(&quot;../Data/DGZ/DECIDE_MTA_UGENTBAC_MYCO_14nov2022.xlsx&quot;)</code></pre>
+</div>
+<div id="data-manipulation-aerobic-culture-results" class="section level2">
+<h2>Data manipulation AEROBIC CULTURE results</h2>
+<pre class="r"><code>barometer_aero_cult &lt;- barometer_aero_cult_raw %&gt;%
+  dplyr::rename(
+    Filenumber = Dossiernummer,
+    Pathogen_identification = &#39;KIEMSTAAL IDENTIFICATIE&#39;,
+    Pathogen_result = &#39;KIEMSTAAL RESULTAAT&#39;,
+    Samplenumber = &#39;Staalnummer&#39;, 
+  )%&gt;%
+  
+  dplyr::mutate(
+    Parameter_code = &#39;BAC_AERO&#39;,
+    Result = &#39;OK&#39;
+  )%&gt;%
+  dplyr::select(
+    Filenumber,
+    Pathogen_identification,
+    Pathogen_result,
+    Parameter_code,
+    Samplenumber,
+    Result)  %&gt;%
+  dplyr::filter(
+    Pathogen_identification %in% c(&quot;Pasteurella multocida&quot;,&quot;Mannheimia haemolytica&quot;,&quot;Histophilus somni&quot;,&quot;Mycoplasma bovis&quot;)
+  ) %&gt;%
+  dplyr::distinct()</code></pre>
+<p>Intermediate table is needed</p>
+<pre class="r"><code>df_samples &lt;- data.frame(
+  Result = c(&#39;OK&#39;, &#39;OK&#39;, &#39;OK&#39;, &#39;OK&#39;),
+  Parameter_code = c(&#39;BAC_AERO&#39;,&#39;BAC_AERO&#39;,&#39;BAC_AERO&#39;, &#39;BAC_MYCOPLASMA&#39;),
+  Diagnostic_test= c(&#39;Culture&#39;,&#39;Culture&#39;,&#39;Culture&#39;, &#39;Culture&#39;),
+  Pathogen_identification=c(&quot;Pasteurella multocida&quot;,&quot;Mannheimia haemolytica&quot;,&quot;Histophilus somni&quot;, &#39;Mycoplasma bovis&#39;)
+)</code></pre>
+</div>
+<div id="data-manipulation-mycoplasma-culture-results" class="section level2">
+<h2>Data manipulation MYCOPLASMA CULTURE results</h2>
+<pre class="r"><code>barometer_myco_cult &lt;- barometer_myco_cult_raw %&gt;%
+  dplyr::rename(
+    Filenumber = Dossiernummer,
+    Pathogen_identification = &#39;KIEMSTAAL IDENTIFICATIE&#39;,
+    Mycoplasma_result = &#39;KIEMSTAAL RESULTAAT&#39;,
+    Samplenumber = &#39;Staalnummer&#39;
+  )%&gt;%
+  dplyr::mutate(
+    Parameter_code = &#39;BAC_MYCOPLASMA&#39;,
+    Result = &#39;OK&#39;
+  ) %&gt;%
+  dplyr::select(
+    Filenumber,
+    Pathogen_identification,
+    Mycoplasma_result,
+    Parameter_code,
+    Samplenumber,
+    Result)  %&gt;%
+  dplyr::filter(
+    Pathogen_identification %in% c(&quot;Mycoplasma bovis&quot;)
+  ) %&gt;%
+  dplyr::distinct()</code></pre>
+</div>
+<div id="data-manipulation-pcr-results" class="section level2">
+<h2>Data manipulation PCR results</h2>
+<pre class="r"><code>barometer_dt &lt;- barometer_dt_raw %&gt;% 
+  dplyr::rename(
+    Filenumber=Dossiernummer, 
+    Samplenumber = Staalnummer,
+    Sample_type = Staaltype,
+    Parameter_code = PARAMETER_CODE,
+    Pathogen = Onderzoek,
+    Result = Resultaat,
+    Date = Creatiedatum,
+    Postal_code = Postcode, 
+    Farm_ID = ANON_ID
+    ) %&gt;%
+  dplyr::mutate(
+    Country=&#39;Belgium&#39;,
+    Diagnostic_test = case_when(
+      Parameter_code %in% c(&#39;BAC_AERO&#39;,&#39;BAC_MYCOPLASMA&#39;) ~ &#39;Culture&#39;,
+      TRUE ~ &#39;PCR&#39;
+    ),
+    Lab_reference=&#39;1&#39;, 
+    Sample_type = case_when(
+      Sample_type == &quot;RU Broncho-alveolar lavage (BAL)&quot; ~ &#39;BAL&#39;, 
+      Sample_type == &quot;RU Anderen&quot; ~&#39;Unknown&#39;,
+      Sample_type %in% c(&quot;RU Swabs&quot;, &quot;RU Swab&quot;, &#39;RU Neusswab&#39;, &#39;RU Neusswabs&#39;) ~ &#39;Swab&#39;,
+      Sample_type %in% c(&quot;RU Kadaver&quot;, &quot;RU Organen&quot;) ~ &#39;Autopsy&#39;,
+      TRUE ~ &#39;Missing&#39;
+    ),
+    Breed = case_when(
+      Bedrijfstype == &#39;VCALF&#39; ~ &#39;Veal&#39;,
+      is.na(MEAT) ~ &#39;Unknown&#39;,
+      (as.numeric(MEAT)/as.numeric(TOTAL))&gt;0.9 ~ &#39;Beef&#39;, 
+      (as.numeric(MILK)/as.numeric(TOTAL))&gt;0.9 ~ &#39;Dairy&#39;,
+      TRUE ~ &#39;Mixed&#39; 
+    ),
+    Pathogen = case_when(
+      Pathogen %in% c(
+        &quot;AD Pasteurella multocida Ag (PCR)&quot;, 
+        &quot;AD Pasteurella multocida Ag pool (PCR)&quot;, 
+        &quot;AD P. multocida Ag (PCR)&quot;, 
+        &quot;AD P. multocida Ag pool (PCR)&quot;) ~ &#39;Pasteurella multocida&#39;,
+      Pathogen %in% c(
+        &quot;AD Mannheimia haemolytica Ag (PCR)&quot;, 
+        &quot;AD Mannheimia haemolytica Ag pool (PCR)&quot;) ~ &#39;Mannheimia haemolytica&#39;,
+      Pathogen %in% c(&quot;RU PI3 Ag (PCR)&quot;, &quot;RU PI3 Ag pool (PCR)&quot;) ~ &#39;PI3&#39;,
+      Pathogen %in% c(&quot;RU BRSV Ag (PCR)&quot;, &quot;RU BRSV Ag pool (PCR)&quot;) ~ &#39;BRSV&#39;,
+      Pathogen %in% c(
+        &quot;AD Histophilus somnus (PCR)&quot;, 
+        &quot;AD Histophilus somnus Ag (PCR)&quot;, 
+        &quot;AD Histophilus somnus Ag pool (PCR)&quot;, 
+        &quot;AD Histophilus somni Ag (PCR)&quot;,
+        &quot;AD Histophilus somni Ag pool (PCR)&quot;) ~ &#39;Histophilus somni&#39;,
+      Pathogen %in% c(
+        &quot;RU Mycoplasma bovis (PCR)&quot;, 
+        &quot;RU Mycoplasma bovis Ag pool (PCR)&quot;, 
+        &quot;RU Mycoplasma bovis Ag (PCR)&quot;) ~ &#39;Mycoplasma bovis&#39;,
+      Pathogen %in% c(&quot;AD Corona Ag (PCR)&quot;, &quot;AD Corona Ag pool (PCR)&quot;) ~ &#39;BCV&#39;
+    ),
+      Province = case_when(
+        between(Postal_code, 1000, 1299) ~ &#39;Brussels Hoofdstedelijk Gewest&#39;,
+        between(Postal_code, 1300, 1499) ~ &#39;Waals-Brabant&#39;,
+        between(Postal_code, 1500, 1999) ~ &#39;Vlaams-Brabant&#39;,
+        between(Postal_code, 3000, 3499) ~ &#39;Antwerpen&#39;,
+        between(Postal_code, 2000, 2999) ~ &#39;Limburg&#39;,
+        between(Postal_code, 3500, 3999) ~ &#39;Limburg&#39;,
+        between(Postal_code, 4000, 4999) ~ &#39;Luik&#39;,
+        between(Postal_code, 5000, 5999) ~ &#39;Namen&#39;,
+        between(Postal_code, 6000, 6599) ~ &#39;Henegouwen&#39;,
+        between(Postal_code, 7000, 7999) ~ &#39;Henegouwen&#39;,
+        between(Postal_code, 6600, 6999) ~ &#39;Luxemburg&#39;,
+        between(Postal_code, 8000, 8999) ~ &#39;West-Vlaanderen&#39;,
+        TRUE ~ &#39;Oost-Vlaanderen&#39;
+            )
+  
+  )%&gt;%
+  dplyr::select(
+    Filenumber,
+    Diagnostic_test,
+    Samplenumber,
+    Country,
+    Lab_reference,
+    Sample_type,
+    Breed,
+    Parameter_code,
+    Result,
+    Pathogen,
+    Date,
+    Postal_code,
+    Province,
+    Farm_ID
+  ) %&gt;%
+  dplyr::distinct()</code></pre>
+</div>
+<div id="join-all-three-files" class="section level2">
+<h2>Join all three files</h2>
+<pre class="r"><code>barometer &lt;-
+  barometer_dt %&gt;%
+  dplyr::left_join(df_samples, by = c(&#39;Diagnostic_test&#39;,&#39;Result&#39;, &#39;Parameter_code&#39;)) %&gt;%
+  dplyr::left_join(
+      barometer_aero_cult, by = c(&#39;Filenumber&#39;, &#39;Samplenumber&#39;, &#39;Result&#39;, &#39;Parameter_code&#39;, &#39;Pathogen_identification&#39;)
+      ) %&gt;%
+  dplyr::left_join(
+      barometer_myco_cult, by = c(&#39;Filenumber&#39;, &#39;Samplenumber&#39;, &#39;Result&#39;, &#39;Parameter_code&#39;, &#39;Pathogen_identification&#39;)
+  ) %&gt;%
+  dplyr::mutate(
+      Pathogen = case_when(
+      (Pathogen == &#39;Pasteurella multocida&#39;) ~ &#39;PM&#39;,
+      (Pathogen == &#39;Histophilus somni&#39;) ~ &#39;HS&#39;,
+      (Pathogen == &#39;Mannheimia haemolytica&#39;) ~ &#39;MH&#39;,
+      (Pathogen == &#39;Mycoplasma bovis&#39;) ~ &#39;MB&#39;,
+      TRUE ~ Pathogen
+    ),
+    Pathogen = case_when(
+      (Pathogen_identification == &#39;Pasteurella multocida&#39;) ~ &#39;PM&#39;,
+      (Pathogen_identification == &#39;Histophilus somni&#39;) ~ &#39;HS&#39;,
+      (Pathogen_identification == &#39;Mannheimia haemolytica&#39;) ~ &#39;MH&#39;,
+      (Pathogen_identification == &#39;Mycoplasma bovis&#39;) ~ &#39;MB&#39;,
+      TRUE ~ Pathogen
+    ),
+      Result = case_when(
+        Result %in% c(&quot;Twijfelachtig (PCR)&quot;, &quot;POSITIEF&quot;, &quot;GEDETECTEERD&quot;, &quot;GEDETECTEERD (sterk)&quot;, &quot;GEDETECTEERD (zwak)&quot;, &quot;GEDETECTEERD  
+                       (matig)&quot;,&quot;GEDETECTEERD (zeer sterk)&quot;, &quot;GEDETECTEERD (zeer zwak)&quot;) ~ 1,
+        Result %in% c(&quot;negatief&quot;, &quot;Niet gedetecteerd&quot;) ~ 0,
+        Result %in% c(&quot;NI&quot;, &quot;niet interpreteerbaar&quot;, &quot;Inhibitie&quot;) ~ as.numeric(NA),
+      Parameter_code == &#39;BAC_AERO&#39; &amp; is.na(Pathogen_result) ~ 0,
+      Parameter_code == &#39;BAC_AERO&#39; &amp; !is.na(Pathogen_result) ~ 1, 
+      Parameter_code == &#39;BAC_MYCOPLASMA&#39; &amp; is.na(Mycoplasma_result) ~ as.numeric(NA),
+      Parameter_code == &#39;BAC_MYCOPLASMA&#39; &amp; Mycoplasma_result == &#39;neg&#39; ~ 0,
+      Parameter_code == &#39;BAC_MYCOPLASMA&#39; &amp; sjmisc::str_contains(Mycoplasma_result, &#39;POS&#39;) ~ 1,
+      TRUE ~ as.numeric(NA)
+    )
 
-package_list &lt;- c(&quot;data.table&quot;, &quot;tidyverse&quot;, &quot;naniar&quot;, &quot;stringr&quot;, &quot;readr&quot;,  &quot;dplyr&quot;, &quot;magrittr&quot;
-                  )
-
-for (pkg in package_list) {
-  if (pkg %in% rownames(.packages()) == FALSE)
-  {library(pkg, character.only = TRUE)}
-
-}</code></pre>
+  )</code></pre>
+</div>
+<div id="wide-format" class="section level2">
+<h2>Wide format</h2>
+<pre class="r"><code>barometer_wide &lt;- barometer %&gt;%
+  dplyr::select(
+    Filenumber,
+    Samplenumber,
+    Country,
+    Diagnostic_test,
+    Breed,
+    Pathogen,
+    Result,
+    Date,
+    Postal_code,
+    Farm_ID,
+    Province
+  )%&gt;%
+  tidyr::pivot_wider(names_from = Pathogen, values_from = Result, values_fn = max)%&gt;% 
+  mutate_all( ~replace(., lengths(.)==0, NA))</code></pre>
+<p>}</p>
 </div>
 </div>
 

@@ -1,11 +1,16 @@
+---
+---
+---
+
 # DATACLEANING FOR DGZ
 
 ## Load the libraries
+
 ```{r}
 
 # lib = where to save the library  (zonder = default)
 
-package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "sjmisc", "tidyr"
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr"
                   )
 
 for (pkg in package_list) {
@@ -15,6 +20,7 @@ for (pkg in package_list) {
 }
 
 ```
+
 ## Data loading
 
 ```{r}
@@ -34,7 +40,6 @@ barometer_aero_cult <- barometer_aero_cult_raw %>%
     Pathogen_identification = 'KIEMSTAAL IDENTIFICATIE',
     Pathogen_result = 'KIEMSTAAL RESULTAAT',
     Samplenumber = 'Staalnummer', 
-    Farm_ID = 'ANON_ID'
   )%>%
   
   dplyr::mutate(
@@ -47,14 +52,13 @@ barometer_aero_cult <- barometer_aero_cult_raw %>%
     Pathogen_result,
     Parameter_code,
     Samplenumber,
-    Farm_ID, 
     Result)  %>%
   dplyr::filter(
     Pathogen_identification %in% c("Pasteurella multocida","Mannheimia haemolytica","Histophilus somni","Mycoplasma bovis")
   ) %>%
   dplyr::distinct()
 ```
- 
+
 Intermediate table is needed
 
 ```{r}
@@ -92,7 +96,7 @@ barometer_myco_cult <- barometer_myco_cult_raw %>%
   ) %>%
   dplyr::distinct()
 ```
- 
+
 ## Data manipulation PCR results
 
 ```{r}
@@ -105,7 +109,8 @@ barometer_dt <- barometer_dt_raw %>%
     Pathogen = Onderzoek,
     Result = Resultaat,
     Date = Creatiedatum,
-    Postal_code = Postcode
+    Postal_code = Postcode, 
+    Farm_ID = ANON_ID
     ) %>%
   dplyr::mutate(
     Country='Belgium',
@@ -187,7 +192,6 @@ barometer_dt <- barometer_dt_raw %>%
   dplyr::distinct()
 ```
 
-
 ## Join all three files
 
 ```{r}
@@ -216,8 +220,8 @@ barometer <-
       TRUE ~ Pathogen
     ),
       Result = case_when(
-        Result %in% c("Twijfelachtig (PCR)", "POSITIEF", "GEDETECTEERD", "GEDETECTEERD (sterk)", "GEDETECTEERD (zwak)", "GEDETECTEERD  
-                       (matig)","GEDETECTEERD (zeer sterk)", "GEDETECTEERD (zeer zwak)") ~ 1,
+        Result %in% c("Twijfelachtig (PCR)", "POSITIEF", "GEDETECTEERD", "GEDETECTEERD (sterk)", "GEDETECTEERD (zwak)",
+        "GEDETECTEERD (matig)","GEDETECTEERD (zeer sterk)", "GEDETECTEERD (zeer zwak)") ~ 1,
         Result %in% c("negatief", "Niet gedetecteerd") ~ 0,
         Result %in% c("NI", "niet interpreteerbaar", "Inhibitie") ~ as.numeric(NA),
       Parameter_code == 'BAC_AERO' & is.na(Pathogen_result) ~ 0,
@@ -233,11 +237,9 @@ barometer <-
 
     
 ```
-        
-          
-  
-## Wide format       
-     
+
+## Wide format
+
 ```{r}
 barometer_wide <- barometer %>%
   dplyr::select(
@@ -259,16 +261,12 @@ barometer_wide <- barometer %>%
 
 
 ```
-     
-
-
 
 ```{r}
-
+writexl::write_xlsx(barometer_wide, "barometer_wide_DGZ.xlsx")
 
 
 
 ```
 
-  
-} 
+}
