@@ -1,7 +1,3 @@
----
----
----
-
 # DATACLEANING FOR DGZ
 
 ## Load the libraries
@@ -157,19 +153,19 @@ barometer_dt <- barometer_dt_raw %>%
       Pathogen %in% c("AD Corona Ag (PCR)", "AD Corona Ag pool (PCR)") ~ 'BCV'
     ),
       Province = case_when(
-        between(Postal_code, 1000, 1299) ~ 'Brussels Hoofdstedelijk Gewest',
-        between(Postal_code, 1300, 1499) ~ 'Waals-Brabant',
-        between(Postal_code, 1500, 1999) ~ 'Vlaams-Brabant',
-        between(Postal_code, 3000, 3499) ~ 'Antwerpen',
-        between(Postal_code, 2000, 2999) ~ 'Limburg',
-        between(Postal_code, 3500, 3999) ~ 'Limburg',
-        between(Postal_code, 4000, 4999) ~ 'Luik',
-        between(Postal_code, 5000, 5999) ~ 'Namen',
-        between(Postal_code, 6000, 6599) ~ 'Henegouwen',
-        between(Postal_code, 7000, 7999) ~ 'Henegouwen',
-        between(Postal_code, 6600, 6999) ~ 'Luxemburg',
-        between(Postal_code, 8000, 8999) ~ 'West-Vlaanderen',
-        TRUE ~ 'Oost-Vlaanderen'
+        between(as.numeric(Postal_code), 1000, 1299) ~ 'Brussels',
+        between(as.numeric(Postal_code), 1300, 1499) ~ 'Walloon Brabant',
+        between(as.numeric(Postal_code), 1500, 1999) ~ 'Flemish Brabant',
+        between(as.numeric(Postal_code), 3000, 3499) ~ 'Antwerp',
+        between(as.numeric(Postal_code), 2000, 2999) ~ 'Limburg',
+        between(as.numeric(Postal_code), 3500, 3999) ~ 'Limburg',
+        between(as.numeric(Postal_code), 4000, 4999) ~ 'Liège',
+        between(as.numeric(Postal_code), 5000, 5999) ~ 'Namur',
+        between(as.numeric(Postal_code), 6000, 6599) ~ 'Hainaut',
+        between(as.numeric(Postal_code), 7000, 7999) ~ 'Hainaut',
+        between(as.numeric(Postal_code), 6600, 6999) ~ 'Luxembourg',
+        between(as.numeric(Postal_code), 8000, 8999) ~ 'West Flanders',
+        TRUE ~ 'East Flanders'
             )
   
   )%>%
@@ -238,35 +234,9 @@ barometer <-
     
 ```
 
-## Wide format
-
 ```{r}
-barometer_wide <- barometer %>%
-  dplyr::select(
-    Filenumber,
-    Samplenumber,
-    Country,
-    Diagnostic_test,
-    Breed,
-    Pathogen,
-    Result,
-    Date,
-    Postal_code,
-    Farm_ID,
-    Province
-  )%>%
-  tidyr::pivot_wider(names_from = Pathogen, values_from = Result, values_fn = max)%>% 
-  mutate_all( ~replace(., lengths(.)==0, NA))
-
-
-
-```
-
-```{r}
-writexl::write_xlsx(barometer_wide, "barometer_wide_DGZ.xlsx")
-
-
-
+#write.csv(barometer, "../Data/DGZ/barometer.csv", row.names=TRUE)
+write.to.ontolgoy(barometer)
 ```
 
 }
