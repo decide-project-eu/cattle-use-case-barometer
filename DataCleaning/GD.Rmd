@@ -1,0 +1,111 @@
+---
+---
+---
+
+# DATACLEANING FOR GD
+
+## Load the libraries
+
+```{r}
+
+# lib = where to save the library  (zonder = default)
+
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr"
+                  )
+
+for (pkg in package_list) {
+  if (pkg %in% rownames(.packages()) == FALSE)
+  {library(pkg, character.only = TRUE)}
+
+}
+
+```
+
+## Data loading
+
+```{r}
+
+barometer_dt_raw <- readxl::read_excel("../Data/GD_opgeschoond/221122_data_RGD_DECIDE_nw.xlsx")
+
+```
+
+## Data manipulation
+
+```{r}
+barometer_dt <- barometer_dt_raw %>% 
+  dplyr::rename(
+    Filenumber = Dossier_ID,
+    Samplenumber = sample_id,
+    Farm_ID = farm_ID,
+    Project = project,
+    Date = date
+    ) %>%
+  dplyr::mutate(
+    Country ='The Netherlands',
+    Lab_reference ='2', 
+    Sample_type = case_when(
+      reason_of_sampling == 'Autopsy' ~ 'Autopsy',
+      sample == 'BAL' ~ 'BAL',
+      sample == 'SWABS' ~ 'Swab', 
+      sample == 'OTHER' ~ 'Unknown',
+      TRUE ~ 'Missing' 
+    ),
+    Diagnostic_test = case_when(
+      test == 'PCR' ~ 'PCR',
+      test == 'Kweek' ~ "Culture",
+      TRUE ~ 'Missing' 
+    ),
+    Breed = case_when(
+      breed == "beef" ~ 'Beef', 
+      breed == "dairy" ~'Dairy',
+      breed == "mixed" ~ 'Mixed',
+      breed == "veal" ~ 'Veal',
+      breed %in% c("other", "rearing", "unknown") ~ 'Unknown',
+      TRUE ~ 'Unknown'
+    ),
+    Province = case_when(
+      provincie == "DR" ~ 'Drenthe', 
+      provincie == "FL" ~'Flevoland',
+      provincie == "FR" ~'Friesland',
+      provincie == "GL" ~'Gelderland',
+      provincie == "GR" ~'Groningen',
+      provincie == "LB" ~'Limburg',
+      provincie == "NB" ~'North Brabant',
+      provincie == "NH" ~'North Holland',
+      provincie == "OV" ~'Overijssel',
+      provincie == "UT" ~'Utrecht',
+      provincie == "ZH" ~'South Holland',
+      provincie == "ZL" ~'Zeeland',
+      TRUE ~ 'Missing'
+    )
+  
+  )%>%
+  dplyr::select(
+    Filenumber,
+    Diagnostic_test,
+    Samplenumber,
+    Country,
+    Lab_reference,
+    Sample_type,
+    Breed,
+    PM,
+    MH,
+    HS,
+    MB,
+    BRSV,
+    PI3,
+    BCV,
+    Date,
+    Province,
+    Project,
+    Farm_ID
+  ) %>%
+  dplyr::distinct()
+```
+
+## Write to excel
+
+```{r}
+
+writexl::write_xlsx(barometer_dt, "barometer_wide_GD.xlsx")
+```
