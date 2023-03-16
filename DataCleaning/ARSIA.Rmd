@@ -117,5 +117,5 @@ barometer_dt <- barometer_dt_raw %>%
 
 ```{r}
 
-writexl::write_xlsx(barometer_wide, "barometer_wide_ARSIA.xlsx")
+writexl::write_xlsx(barometer_dt, "barometer_wide_ARSIA.xlsx")
 ```
