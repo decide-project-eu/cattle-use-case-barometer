@@ -113,6 +113,8 @@ barometer_dt <- barometer_dt_raw %>%
   dplyr::distinct()
 ```
 
+## Write to excel 
+
 ```{r}
 
 writexl::write_xlsx(barometer_wide, "barometer_wide_ARSIA.xlsx")
