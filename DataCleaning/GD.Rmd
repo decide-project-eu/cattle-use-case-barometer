@@ -103,6 +103,10 @@ barometer_dt <- barometer_dt_raw %>%
   dplyr::distinct()
 ```
 
+```{r}
+barometer_dt_filtered <- filter(barometer_dt, Project == 'monitoring' | Project == 'no project')
+```
+
 ## Write to excel
 
 ```{r}
