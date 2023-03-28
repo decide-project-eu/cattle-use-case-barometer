@@ -107,6 +107,14 @@ barometer_dt <- barometer_dt_raw %>%
 barometer_dt_filtered <- filter(barometer_dt, Project == 'monitoring' | Project == 'no project')
 ```
 
+## Aggregate data based on file number (WIDE)
+
+```{r}
+barometer_groupby <- barometer_dt_filtered %>%
+  group_by(Lab_reference, Country, Breed, Date, Province, Farm_ID, Filenumber, Diagnostic_test, Sample_type) %>%
+  summarise(across(c(PM, MH, HS, MB, BRSV, PI3, BCV), max))
+```
+
 ## Write to excel
 
 ```{r}
