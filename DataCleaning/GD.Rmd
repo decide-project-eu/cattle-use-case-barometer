@@ -109,9 +109,25 @@ barometer_dt_filtered <- filter(barometer_dt, Project == 'monitoring' | Project 
 
 ## Aggregate data based on file number (WIDE)
 
+?? missing values
+
 ```{r}
 barometer_groupby <- barometer_dt_filtered %>%
   group_by(Lab_reference, Country, Breed, Date, Province, Farm_ID, Filenumber, Diagnostic_test, Sample_type) %>%
+  summarise(across(c(PM, MH, HS, MB, BRSV, PI3, BCV), max))
+```
+
+## Aggregate per month
+
+?? How to summarise by month?
+
+```{r}
+barometer_groupby$Month <- strftime(barometer_groupby$Date, "%m")
+barometer_groupby$Year <- strftime(barometer_groupby$Date, "%Y")
+
+agg_barometer_monthly <- barometer_groupby %>% 
+  group_by(Lab_reference, Country, Breed, Date, Province, Farm_ID, Filenumber,
+           Diagnostic_test, Sample_type, Year, Month) %>%
   summarise(across(c(PM, MH, HS, MB, BRSV, PI3, BCV), max))
 ```
 

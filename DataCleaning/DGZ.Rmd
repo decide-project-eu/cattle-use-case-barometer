@@ -247,7 +247,20 @@ barometer_groupby <- barometer %>%
   summarise(across(c(Result), max))
 ```
 
-## Save file 
+## Aggregate per month
+
+```{r}
+barometer_groupby$Month <- strftime(barometer_groupby$Date, "%m")
+barometer_groupby$Year <- strftime(barometer_groupby$Date, "%Y")
+
+agg_barometer_monthly <- barometer_groupby %>% 
+  group_by(Lab_reference, Country, Breed, Date, Postal_code, Province, Farm_ID, Filenumber, Diagnostic_test,
+           Sample_type, Year, Month, Pathogen) %>%
+  summarise(across(c(Result), max))
+
+```
+
+## Save file
 
 ```{r}
 #write.csv(barometer, "../Data/DGZ/barometer.csv", row.names=TRUE)
