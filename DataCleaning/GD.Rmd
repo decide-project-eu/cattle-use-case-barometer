@@ -103,37 +103,43 @@ barometer_dt <- barometer_dt_raw %>%
   dplyr::distinct()
 ```
 
+## Filter data for 'monitoring' and 'no projects' 
+
 ```{r}
 barometer_dt_filtered <- filter(barometer_dt, Project == 'monitoring' | Project == 'no project')
 ```
 
-## Aggregate data based on file number (WIDE)
-
-?? missing values
+## Floor date to 1st of the month
 
 ```{r}
+
+barometer_dt_filtered$Floored_date <- lubridate::floor_date(barometer_dt_filtered$Date, "month")
+```
+
+## Aggregate data based on farm_ID and month (WIDE)
+
+```{r}
+
 barometer_groupby <- barometer_dt_filtered %>%
-  group_by(Lab_reference, Country, Breed, Date, Province, Farm_ID, Filenumber, Diagnostic_test, Sample_type) %>%
+  group_by(Lab_reference, Country, Breed, Floored_date, Province, Farm_ID, Diagnostic_test, Sample_type) %>%
   summarise(across(c(PM, MH, HS, MB, BRSV, PI3, BCV), max))
 ```
 
-## Aggregate per month
-
-?? How to summarise by month?
+## Convert to LONG
 
 ```{r}
-barometer_groupby$Month <- strftime(barometer_groupby$Date, "%m")
-barometer_groupby$Year <- strftime(barometer_groupby$Date, "%Y")
 
-agg_barometer_monthly <- barometer_groupby %>% 
-  group_by(Lab_reference, Country, Breed, Date, Province, Farm_ID, Filenumber,
-           Diagnostic_test, Sample_type, Year, Month) %>%
-  summarise(across(c(PM, MH, HS, MB, BRSV, PI3, BCV), max))
+barometer_long <- barometer_groupby %>%
+  tidyr::pivot_longer(
+    cols = c('PM', 'MH', 'HS', 'MB', 'BRSV', 'PI3', 'BCV'),
+    names_to = 'Pathogen',
+    values_to = 'Result',
+  )
 ```
 
 ## Write to excel
 
 ```{r}
 
-writexl::write_xlsx(barometer_dt, "barometer_wide_GD.xlsx")
+writexl::write_xlsx(barometer_dt, "barometer_long_GD.xlsx")
 ```
