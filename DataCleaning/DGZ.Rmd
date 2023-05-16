@@ -1,3 +1,7 @@
+---
+---
+---
+
 # DATACLEANING FOR DGZ
 
 ## Load the libraries
@@ -234,9 +238,35 @@ barometer <-
     
 ```
 
+## Floor date to 1st of month
+
+```{r}
+
+barometer$Floored_date <- lubridate::floor_date(barometer$Date, "month")
+```
+
+## Aggregate data based on farm_ID & month 
+
+```{r}
+barometer_groupby <- barometer %>%
+  group_by(Lab_reference, Country, Breed, Floored_date, Postal_code, Province,
+           Farm_ID, Diagnostic_test, Sample_type, Pathogen) %>%
+  summarise(across(c(Result), max))
+```
+
+## Save file (long version)
+
 ```{r}
 #write.csv(barometer, "../Data/DGZ/barometer.csv", row.names=TRUE)
-write.to.ontolgoy(barometer)
+#write.to.ontology(barometer)
+```
+
+## Convert to wide version
+
+```{r}
+
+barometer_wide <- barometer_groupby %>%
+  tidyr::pivot_wider(names_from = c(Pathogen), values_from = Result) 
 ```
 
 }

@@ -113,7 +113,35 @@ barometer_dt <- barometer_dt_raw %>%
   dplyr::distinct()
 ```
 
-## Write to excel 
+## Floor date to 1st of month 
+
+```{r}
+
+barometer_dt$Floored_date <- lubridate::floor_date(barometer_dt$Date, "month")
+```
+
+## Aggregate data based on farm_ID and month (WIDE)
+
+```{r}
+barometer_groupby <- barometer_dt %>%
+  group_by(Lab_reference, Country, Breed, Floored_date, Province, Farm_ID, Diagnostic_test, Sample_type) %>%
+  summarise(across(c(PM, MH, HS, MB, BRSV, PI3, BCV), max))
+```
+
+## Convert to LONG
+
+```{r}
+
+barometer_wide <- barometer_groupby %>%
+  tidyr::pivot_longer(
+    cols = c('PM', 'MH', 'HS', 'MB', 'BRSV', 'PI3', 'BCV'),
+    names_to = 'Pathogen',
+    values_to = 'Result',
+  )
+      
+```
+
+## Write to excel
 
 ```{r}
 
