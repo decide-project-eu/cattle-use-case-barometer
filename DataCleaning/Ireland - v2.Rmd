@@ -34,27 +34,25 @@ barometer_dt_combined <- rbind(barometer_dt_raw_2021, barometer_dt_raw_2022)
 
 ```
 
-## Filter data
+## Filter data 
 
 ```{r}
 
 barometer_dt_filter <- barometer_dt_combined %>% 
   dplyr::filter(SYSTEM %in% c('Respiratory', 'NA')
                 )
-
 barometer_dt_filter2 <- barometer_dt_filter %>% 
   dplyr::filter(ALIQUOTMATRIXTYPE %in% c('Pleural Fluid', 'Tissue swab', 'Tonsil',  'Lymph Node - Multiple',  'Trachea',  'Thoracic Fluid', 'Lung', 'Swab', 'Culture',  'Thymus', 'Part Carcass', 'Tissue swab', 'Nasal Swab', 'Nasal Fluid', 'Tissue-Pool', 'Tissue (VTM)', 'Carcass', 'Lymph Node', 'Pooled swab', 'Misc.')
                 ) 
 barometer_dt_filter3 <- barometer_dt_filter2 %>% 
-  dplyr::filter(TEST %in% c("PI3V PCR", "PCR M. haemolytica - ARVL", "Maldi ToF",
-                            "Mycoplasma bovis (PCR)", "PCR H. somni - ARVL", 
-                            "PCR P. multocida - ARVL", "Miscellaneous Test",
+  dplyr::filter(TEST %in% c("PI3V PCR", "PCR M. haemolytica - ARVL", "Mycoplasma bovis (PCR)", 
+                            "PCR H. somni - ARVL", "PCR P. multocida - ARVL", "Miscellaneous Test",
                             "Routine Culture", "PCR M. bovis - ARVL", "BRSV PCR", 
-                            "Culture Growth", "Next Generation Sequencing", 
-                            "PCR BoCoV", "Mycoplasma bovis (PCR)")
+                            "Culture Growth", "PCR BoCoV", "Mycoplasma bovis (PCR)")
 ) 
 
-
+# Removal of 'Maldi ToF'(filter3) because 'Routine Culture' reports the result to be reported. 
+# Removal of 'Next Generation Sequencing' because so far only reported twice - may be adjusted in future 
 ```
 
 ## Data manipulation
@@ -90,18 +88,20 @@ barometer_dt <- barometer_dt_filter3 %>%
                   "PCR M. bovis - ARVL", "BRSV PCR", "PCR BoCoV", 
                   "Mycoplasma bovis (PCR)", "PCR P. multocida - ARVL") ~ 'PCR',
       TEST %in% c("Routine Culture", "Culture Growth") ~ "Culture",
-      TEST == 'Maldi ToF' ~ 'MALDI-TOF',
-      TEST == "Next Generation Sequencing" ~ 'NGS',
-      TEST == "Miscellaneous Test" ~ 'Unknown',
+      #TEST == 'Maldi ToF' ~ 'MALDI-TOF',
+      #TEST == "Next Generation Sequencing" ~ 'NGS',
+      #TEST == "Miscellaneous Test" ~ 'Unknown', 
+      ## Otherwise 'Unknown' without results in final format (could also be removed?)
       TRUE ~ 'Missing'
     ), 
     Breed = case_when(
-      breed == "BEEF" ~ 'Beef',  ## could add 'SUCKLER' here?? 
+      breed == "BEEF" ~ 'Beef',  
       breed == "DAIRY" ~'Dairy',
+      breed == "SUCKLER" ~ 'Suckler', ## not sure to add another production system or 'unknown'/'other? 
       breed %in% c("OTHER") ~ 'Unknown',
       TRUE ~ 'Unknown' 
     ),
-    Province = case_when(     ## data per county or region?? 
+    Province = case_when(     
       Region == "LEINSTER" ~ 'Leinster', 
       Region == "MUNSTER" ~'Munster',
       Region == "ULSTER" ~'Ulster',
@@ -241,8 +241,7 @@ barometer_groupby <- barometer_results %>%
 ## Save file (long version)
 
 ```{r}
-write.csv(barometer_groupby, "../Data/Ireland/barometer.csv", row.names=TRUE)
-write.to.ontology(barometer)
+write.csv(barometer_groupby, "../DataCleaning/Cleaned_data/barometer_Ireland.csv", row.names=TRUE)
 ```
 
 ## Convert to wide version

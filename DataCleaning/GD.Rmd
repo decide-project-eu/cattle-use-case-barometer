@@ -103,7 +103,7 @@ barometer_dt <- barometer_dt_raw %>%
   dplyr::distinct()
 ```
 
-## Filter data for 'monitoring' and 'no projects' 
+## Filter data for 'monitoring' and 'no projects'
 
 ```{r}
 barometer_dt_filtered <- filter(barometer_dt, Project == 'monitoring' | Project == 'no project')
@@ -135,6 +135,12 @@ barometer_long <- barometer_groupby %>%
     names_to = 'Pathogen',
     values_to = 'Result',
   )
+```
+
+## Save file to csv (long version)
+
+```{r}
+write.csv(barometer_long, "../DataCleaning/Cleaned_data/barometer_GD.csv", row.names=TRUE)
 ```
 
 ## Write to excel

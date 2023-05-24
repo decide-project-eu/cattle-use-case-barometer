@@ -62,7 +62,7 @@ barometer_dt <- barometer_dt_raw %>%
   dplyr::mutate(
     Lab_reference ='4',
     Diagnostic_test = 'NPS',
-    Breed = NA,
+    Breed = 'Unknown',
     Province = NA, 
     Country = case_when(
       country == 'BE' ~ 'Belgium',
@@ -122,7 +122,7 @@ barometer_groupby <- barometer_dt %>%
 # If all are NA, than NA, if not (else): max in group, while ignoring NA 
 ```
 
-## Convert to long 
+## Convert to long
 
 ```{r}
 
@@ -137,13 +137,7 @@ barometer_long <- barometer_groupby %>%
 ## Save file (long version)
 
 ```{r}
-write.csv(barometer_groupby, "../DataCleaning/Cleaned_data/barometer_PathoSense.csv", row.names=TRUE)
+write.csv(barometer_long, "../DataCleaning/Cleaned_data/barometer_PathoSense.csv", row.names=TRUE)
 ```
 
-## Convert to wide version
-
-```{r}
-
-barometer_wide <- barometer_groupby %>%
-  tidyr::pivot_wider(names_from = c(Pathogen), values_from = Result) 
-```
+## 

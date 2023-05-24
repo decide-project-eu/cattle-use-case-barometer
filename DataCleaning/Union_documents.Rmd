@@ -36,7 +36,7 @@ barometer_PathoSense <- read.csv("../DataCleaning/Cleaned_data/barometer_PathoSe
 
 ```
 
-## Combine data to one format 
+## Combine data to one format
 
 ```{r}
 
