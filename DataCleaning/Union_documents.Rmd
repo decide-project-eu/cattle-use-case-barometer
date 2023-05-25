@@ -36,11 +36,17 @@ barometer_PathoSense <- read.csv("../DataCleaning/Cleaned_data/barometer_PathoSe
 
 ```
 
-## Combine data to one format
+## Combine data to one format and add column with month and year for Tableau 
 
 ```{r}
 
-barometer_Tableau <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, barometer_Ireland, barometer_PathoSense)
+barometer_combined <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, barometer_Ireland, barometer_PathoSense)
+
+barometer_Tableau <- barometer_combined %>% 
+  dplyr::mutate(
+    Month = month(as.Date(Floored_date)),
+    Year = year(as.Date(Floored_date))
+    )
 
 ```
 
