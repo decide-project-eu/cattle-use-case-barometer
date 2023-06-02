@@ -1,0 +1,68 @@
+---
+title: "Union_docs"
+output: html_document
+date: "2023-05-24"
+---
+
+# Union of documents
+
+## Loading libraries
+
+```{r}
+
+# lib = where to save the library  (zonder = default)
+
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr"
+                  )
+
+for (pkg in package_list) {
+  if (pkg %in% rownames(.packages()) == FALSE)
+  {library(pkg, character.only = TRUE)}
+
+}
+```
+
+## Data loading
+
+```{r}
+
+barometer_DGZ <- read.csv("../DataCleaning/Cleaned_data/barometer_DGZ.csv")
+barometer_ARSIA <- read.csv("../DataCleaning/Cleaned_data/barometer_ARSIA.csv")
+barometer_GD <- read.csv("../DataCleaning/Cleaned_data/barometer_GD.csv")
+barometer_Ireland <- read.csv("../DataCleaning/Cleaned_data/barometer_Ireland.csv")
+barometer_PathoSense <- read.csv("../DataCleaning/Cleaned_data/barometer_PathoSense.csv")
+                                
+
+
+```
+
+## Combine data to one format and add column with month and year for Tableau 
+
+```{r}
+
+barometer_combined <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, barometer_Ireland, barometer_PathoSense)
+
+barometer_Tableau <- barometer_combined %>% 
+  dplyr::mutate(
+    Month = month(as.Date(Floored_date)),
+    Year = year(as.Date(Floored_date))
+    )
+
+```
+
+## Save file (with current date)
+
+```{r}
+#Generate current date, give basic filename/path, combine, and safe 
+
+current_date <- format(Sys.Date(), "%Y-%m-%d")
+
+base_filename <- "barometer_combined"
+
+folder_path <- "../DataCleaning/Cleaned_data/"
+
+new_filename <- paste0(folder_path, base_filename, "_", current_date, ".csv")
+
+write.csv(barometer_Tableau, file = new_filename) 
+
+```

@@ -1,3 +1,7 @@
+---
+---
+---
+
 # DATACLEANING FOR DGZ
 
 ## Load the libraries
@@ -201,7 +205,6 @@ barometer_dt <- barometer_dt_raw %>%
     Result,
     Pathogen,
     Date,
-    Postal_code,
     Province,
     Farm_ID
   ) %>%
@@ -228,8 +231,10 @@ barometer <-
   dplyr::left_join(
       barometer_myco_cult, by = c('Filenumber_anon', 'Samplenumber_anon', 'Result', 'Parameter_code', 'Pathogen_identification')
   ) %>%
-  dplyr::mutate(
+  dplyr::mutate( 
+    Floored_date <- lubridate::floor_date(Date, "month"),
       Pathogen = case_when(
+      
       (Pathogen == 'Pasteurella multocida') ~ 'PM',
       (Pathogen == 'Histophilus somni') ~ 'HS',
       (Pathogen == 'Mannheimia haemolytica') ~ 'MH',
@@ -262,10 +267,41 @@ barometer <-
     
 ```
 
+## Floor date to 1st of month
+
 ```{r}
+
 write.csv(barometer, "../Data/DGZ/barometer.csv", row.names=TRUE)
 
-print(barometer)
+
+
+```
+
+## Aggregate data based on farm_ID & month
+
+```{r}
+barometer_groupby <- barometer %>%
+  group_by(Lab_reference, Country, Breed, Floored_date, Province,
+           Farm_ID, Diagnostic_test, Sample_type, Pathogen) %>%
+  summarise(across(c(Result), max))
+```
+
+## Save file (long version)
+
+```{r}
+write.csv(barometer_groupby, "../DataCleaning/Cleaned_data/barometer_DGZ.csv", row.names=TRUE)
+#write.to.ontology(barometer)
+
+
+```
+
+## Convert to wide version
+
+```{r}
+
+barometer_wide <- barometer_groupby %>%
+  tidyr::pivot_wider(names_from = c(Pathogen), values_from = Result) 
+>>>>>>> 04b09b352111dcce0038251a1a8862d3d8d7b889
 ```
 
 
