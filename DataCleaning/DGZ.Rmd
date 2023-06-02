@@ -18,12 +18,17 @@ for (pkg in package_list) {
   {library(pkg, character.only = TRUE)}
 
 }
+
+
+```
+## Function to apply SHA-256 hashing
+```{r}
 # Function to apply SHA-256 hashing
 sha256_hash <- function(data) {
   openssl::sha256(data)
 }
-
 ```
+
 
 ## Data loading
 
@@ -65,7 +70,7 @@ barometer_aero_cult <- barometer_aero_cult_raw %>%
     Samplenumber_anon = sha256_hash(as.character(Samplenumber))
   ) %>%
   dplyr::select(-Filenumber, -Samplenumber)
-print(barometer_aero_cult)
+
 
 ```
 
@@ -113,8 +118,7 @@ barometer_myco_cult <- barometer_myco_cult_raw %>%
   ) %>%
   dplyr::select(-Filenumber, -Samplenumber)
 
-# Print the barometer_myco_cult dataset
-print(barometer_myco_cult)
+
 ```
 
 ## Data manipulation PCR results
@@ -215,8 +219,6 @@ barometer_dt <- barometer_dt_raw %>%
   ) %>%
   dplyr::select(-Filenumber, -Samplenumber)
 
-# Print the barometer_dt dataset
-print(barometer_dt)
 ```
 
 ## Join all three files
@@ -301,7 +303,7 @@ write.csv(barometer_groupby, "../DataCleaning/Cleaned_data/barometer_DGZ.csv", r
 
 barometer_wide <- barometer_groupby %>%
   tidyr::pivot_wider(names_from = c(Pathogen), values_from = Result) 
->>>>>>> 04b09b352111dcce0038251a1a8862d3d8d7b889
+
 ```
 
 
