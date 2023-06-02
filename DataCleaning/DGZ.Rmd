@@ -1,5 +1,7 @@
 ---
----
+title: "DGZ Notebook"
+output: 
+  pdf_document: default
 ---
 
 # DATACLEANING FOR DGZ
