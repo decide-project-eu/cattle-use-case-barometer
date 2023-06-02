@@ -6,13 +6,17 @@
 
 # lib = where to save the library  (zonder = default)
 
-package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr"
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr", "openssl"
                   )
 
 for (pkg in package_list) {
   if (pkg %in% rownames(.packages()) == FALSE)
   {library(pkg, character.only = TRUE)}
 
+}
+# Function to apply SHA-256 hashing
+sha256_hash <- function(data) {
+  openssl::sha256(data)
 }
 
 ```
@@ -27,32 +31,38 @@ barometer_myco_cult_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENTBAC_M
 
 ```
 
-## Data manipulation AEROBIC CULTURE results
-
+# Data manipulation AEROBIC CULTURE results
 ```{r}
 barometer_aero_cult <- barometer_aero_cult_raw %>%
   dplyr::rename(
     Filenumber = Dossiernummer,
     Pathogen_identification = 'KIEMSTAAL IDENTIFICATIE',
     Pathogen_result = 'KIEMSTAAL RESULTAAT',
-    Samplenumber = 'Staalnummer', 
-  )%>%
-  
+    Samplenumber = 'Staalnummer'
+  ) %>%
   dplyr::mutate(
     Parameter_code = 'BAC_AERO',
     Result = 'OK'
-  )%>%
+  ) %>%
   dplyr::select(
     Filenumber,
     Pathogen_identification,
     Pathogen_result,
     Parameter_code,
     Samplenumber,
-    Result)  %>%
+    Result
+  ) %>%
   dplyr::filter(
     Pathogen_identification %in% c("Pasteurella multocida","Mannheimia haemolytica","Histophilus somni","Mycoplasma bovis")
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct() %>%
+  dplyr::mutate(
+    Filenumber_anon = sha256_hash(as.character(Filenumber)),
+    Samplenumber_anon = sha256_hash(as.character(Samplenumber))
+  ) %>%
+  dplyr::select(-Filenumber, -Samplenumber)
+print(barometer_aero_cult)
+
 ```
 
 Intermediate table is needed
@@ -69,13 +79,14 @@ df_samples <- data.frame(
 ## Data manipulation MYCOPLASMA CULTURE results
 
 ```{r}
+# Data manipulation MYCOPLASMA CULTURE results
 barometer_myco_cult <- barometer_myco_cult_raw %>%
   dplyr::rename(
     Filenumber = Dossiernummer,
     Pathogen_identification = 'KIEMSTAAL IDENTIFICATIE',
     Mycoplasma_result = 'KIEMSTAAL RESULTAAT',
     Samplenumber = 'Staalnummer'
-  )%>%
+  ) %>%
   dplyr::mutate(
     Parameter_code = 'BAC_MYCOPLASMA',
     Result = 'OK'
@@ -86,11 +97,20 @@ barometer_myco_cult <- barometer_myco_cult_raw %>%
     Mycoplasma_result,
     Parameter_code,
     Samplenumber,
-    Result)  %>%
+    Result
+  ) %>%
   dplyr::filter(
     Pathogen_identification %in% c("Mycoplasma bovis")
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct() %>%
+  dplyr::mutate(
+    Filenumber_anon = sha256_hash(as.character(Filenumber)),
+    Samplenumber_anon = sha256_hash(as.character(Samplenumber))
+  ) %>%
+  dplyr::select(-Filenumber, -Samplenumber)
+
+# Print the barometer_myco_cult dataset
+print(barometer_myco_cult)
 ```
 
 ## Data manipulation PCR results
@@ -185,7 +205,15 @@ barometer_dt <- barometer_dt_raw %>%
     Province,
     Farm_ID
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct() %>%
+  dplyr::mutate(
+    Filenumber_anon = sha256_hash(as.character(Filenumber)),
+    Samplenumber_anon = sha256_hash(as.character(Samplenumber))
+  ) %>%
+  dplyr::select(-Filenumber, -Samplenumber)
+
+# Print the barometer_dt dataset
+print(barometer_dt)
 ```
 
 ## Join all three files
@@ -195,10 +223,10 @@ barometer <-
   barometer_dt %>%
   dplyr::left_join(df_samples, by = c('Diagnostic_test','Result', 'Parameter_code')) %>%
   dplyr::left_join(
-      barometer_aero_cult, by = c('Filenumber', 'Samplenumber', 'Result', 'Parameter_code', 'Pathogen_identification')
+      barometer_aero_cult, by = c('Filenumber_anon', 'Samplenumber_anon', 'Result', 'Parameter_code', 'Pathogen_identification')
       ) %>%
   dplyr::left_join(
-      barometer_myco_cult, by = c('Filenumber', 'Samplenumber', 'Result', 'Parameter_code', 'Pathogen_identification')
+      barometer_myco_cult, by = c('Filenumber_anon', 'Samplenumber_anon', 'Result', 'Parameter_code', 'Pathogen_identification')
   ) %>%
   dplyr::mutate(
       Pathogen = case_when(
@@ -235,8 +263,9 @@ barometer <-
 ```
 
 ```{r}
-#write.csv(barometer, "../Data/DGZ/barometer.csv", row.names=TRUE)
-write.to.ontolgoy(barometer)
+write.csv(barometer, "../Data/DGZ/barometer.csv", row.names=TRUE)
+
+print(barometer)
 ```
 
-}
+
