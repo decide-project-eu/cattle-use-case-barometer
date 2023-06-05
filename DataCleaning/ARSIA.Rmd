@@ -1,5 +1,11 @@
 ---
----
+title: "ARSIA Notebook"
+output: 
+  pdf_document:
+    latex_engine: pdflatex
+  github_document:
+    toc: true
+    toc_depth: 2
 ---
 
 # DATACLEANING FOR ARSIA
