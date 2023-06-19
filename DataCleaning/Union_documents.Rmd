@@ -43,10 +43,7 @@ barometer_PathoSense <- read.csv("../Data/CleanedData/barometer_PathoSense.csv")
 ## Combine data to one format and add column with month and year for Tableau 
 
 ```{r message=FALSE, warning=FALSE}
-
-barometer_combined <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, barometer_Ireland, barometer_PathoSense)
-
-barometer_Tableau <- barometer_combined %>% 
+barometer_Tableau <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, barometer_Ireland, barometer_PathoSense) %>% 
   dplyr::mutate(
     Month = month(as.Date(Floored_date)),
     Year = year(as.Date(Floored_date))
@@ -60,11 +57,8 @@ barometer_Tableau <- barometer_combined %>%
 #Generate current date, give basic filename/path, combine, and safe 
 
 current_date <- format(Sys.Date(), "%Y-%m-%d")
-
 base_filename <- "barometer_combined"
-
 folder_path <- "../Data/CleanedData/"
-
 new_filename <- paste0(folder_path, base_filename, "_", current_date, ".csv")
 
 write.csv(barometer_Tableau, file = new_filename, row.names = TRUE) 
