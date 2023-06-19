@@ -36,9 +36,7 @@ sha256_hash <- function(data) {
 ## Data loading
 
 ```{r message=FALSE, warning=FALSE}
-
-barometer_dt_raw <- readxl::read_excel("../Data/GD_opgeschoond/221122_data_RGD_DECIDE_nw.xlsx")
-
+barometer_dt_raw <- readxl::read_excel("../Data/GD/221122_data_RGD_DECIDE_nw.xlsx")
 ```
 
 ## Data manipulation
@@ -164,5 +162,5 @@ write.csv(barometer_long, "../Data/CleanedData/barometer_GD.csv", row.names=TRUE
 
 ```{r message=FALSE, warning=FALSE}
 
-writexl::write_xlsx(barometer_dt, "barometer_long_GD.xlsx")
+writexl::write_xlsx(barometer_dt, "../Data/CleanedData/barometer_long_GD.xlsx")
 ```

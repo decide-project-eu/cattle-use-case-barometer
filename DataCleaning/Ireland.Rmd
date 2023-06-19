@@ -8,12 +8,11 @@ output:
     toc_depth: 2
 ---
 
-
 # DATACLEANING IRELAND
 
 ## Load the libraries
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 
 # lib = where to save the library  (zonder = default)
 
@@ -27,15 +26,9 @@ for (pkg in package_list) {
 }
 ```
 
-##Function to apply SHA-256 hashing
-```{r message=FALSE, warning=FALSE}
-
-sha256_hash <- function(data) {
-  openssl::sha256(data)
-}
-```
 ## Data loading
-```{r message=FALSE, warning=FALSE}
+
+```{r}
 
 barometer_dt_raw_2021 <- readxl::read_excel("../Data/Ireland/Jade_2021_Final_Anonymised_data_Only_2023-04-20.v2.xlsx")
 barometer_dt_raw_2022 <- readxl::read_excel("../Data/Ireland/Jade_2022_Final_Anonymised_data_Only_2023-04-21.xlsx")
@@ -45,38 +38,36 @@ barometer_dt_raw_2022 <- readxl::read_excel("../Data/Ireland/Jade_2022_Final_Ano
 
 ## Add new dataset
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 
 barometer_dt_combined <- rbind(barometer_dt_raw_2021, barometer_dt_raw_2022)
 
 ```
 
-## Filter data
+## Filter data 
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 
 barometer_dt_filter <- barometer_dt_combined %>% 
   dplyr::filter(SYSTEM %in% c('Respiratory', 'NA')
                 )
-
 barometer_dt_filter2 <- barometer_dt_filter %>% 
   dplyr::filter(ALIQUOTMATRIXTYPE %in% c('Pleural Fluid', 'Tissue swab', 'Tonsil',  'Lymph Node - Multiple',  'Trachea',  'Thoracic Fluid', 'Lung', 'Swab', 'Culture',  'Thymus', 'Part Carcass', 'Tissue swab', 'Nasal Swab', 'Nasal Fluid', 'Tissue-Pool', 'Tissue (VTM)', 'Carcass', 'Lymph Node', 'Pooled swab', 'Misc.')
-                )
+                ) 
 barometer_dt_filter3 <- barometer_dt_filter2 %>% 
-  dplyr::filter(TEST %in% c("PI3V PCR", "PCR M. haemolytica - ARVL", "Maldi ToF",
-                            "Mycoplasma bovis (PCR)", "PCR H. somni - ARVL", 
-                            "PCR P. multocida - ARVL", "Miscellaneous Test",
+  dplyr::filter(TEST %in% c("PI3V PCR", "PCR M. haemolytica - ARVL", "Mycoplasma bovis (PCR)", 
+                            "PCR H. somni - ARVL", "PCR P. multocida - ARVL", "Miscellaneous Test",
                             "Routine Culture", "PCR M. bovis - ARVL", "BRSV PCR", 
-                            "Culture Growth", "Next Generation Sequencing", 
-                            "PCR BoCoV", "Mycoplasma bovis (PCR)")
+                            "Culture Growth", "PCR BoCoV", "Mycoplasma bovis (PCR)")
 ) 
 
-
+# Removal of 'Maldi ToF'(filter3) because 'Routine Culture' reports the result to be reported. 
+# Removal of 'Next Generation Sequencing' because so far only reported twice - may be adjusted in future 
 ```
 
 ## Data manipulation
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 
 barometer_dt <- barometer_dt_filter3 %>% 
   dplyr::rename(
@@ -107,18 +98,20 @@ barometer_dt <- barometer_dt_filter3 %>%
                   "PCR M. bovis - ARVL", "BRSV PCR", "PCR BoCoV", 
                   "Mycoplasma bovis (PCR)", "PCR P. multocida - ARVL") ~ 'PCR',
       TEST %in% c("Routine Culture", "Culture Growth") ~ "Culture",
-      TEST == 'Maldi ToF' ~ 'MALDI-TOF',
-      TEST == "Next Generation Sequencing" ~ 'NGS',
-      TEST == "Miscellaneous Test" ~ 'Unknown',
+      #TEST == 'Maldi ToF' ~ 'MALDI-TOF',
+      #TEST == "Next Generation Sequencing" ~ 'NGS',
+      #TEST == "Miscellaneous Test" ~ 'Unknown', 
+      ## Otherwise 'Unknown' without results in final format (could also be removed?)
       TRUE ~ 'Missing'
     ), 
     Breed = case_when(
-      breed == "BEEF" ~ 'Beef',  ## could add 'SUCKLER' here?? 
+      breed == "BEEF" ~ 'Beef',  
       breed == "DAIRY" ~'Dairy',
+      breed == "SUCKLER" ~ 'Suckler', ## not sure to add another production system or 'unknown'/'other? 
       breed %in% c("OTHER") ~ 'Unknown',
       TRUE ~ 'Unknown' 
     ),
-    Province = case_when(     ## data per county or region?? 
+    Province = case_when(     
       Region == "LEINSTER" ~ 'Leinster', 
       Region == "MUNSTER" ~'Munster',
       Region == "ULSTER" ~'Ulster',
@@ -129,7 +122,7 @@ barometer_dt <- barometer_dt_filter3 %>%
     Pathogen = case_when(
       TEST == "PCR P. multocida - ARVL" ~ 'PM',
       TEST == "PCR M. haemolytica - ARVL" ~ 'MH',
-      TEST == "PCR H. somni - ARVL" ~ 'HS',
+      TEST %in% c("PCR H. somni - ARVL", "H. somni PCR") ~ 'HS',
       TEST %in% c("Mycoplasma bovis (PCR)", "PCR M. bovis - ARVL") ~ 'MB',
       TEST == "PI3V PCR" ~ 'PI3',
       TEST == "PCR BoCoV" ~ 'BCV',
@@ -153,16 +146,13 @@ barometer_dt <- barometer_dt_filter3 %>%
     AGENT,
     Farm_ID
   ) %>%
-  dplyr::distinct() %>%
-  dplyr::mutate(
-    Filenumber = sha256_hash(as.character(Filenumber)),
-    Samplenumber = sha256_hash(as.character(Samplenumber))
-    )
+  dplyr::distinct()
+
 ```
 
 ## Toevoegen extra rijen voor cultuur (& MALDI & NGS?)
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 barometer_dt$HS <- ifelse(barometer_dt$Diagnostic_test == "Culture", 0, NA)
 barometer_dt$MH <- ifelse(barometer_dt$Diagnostic_test == "Culture", 0, NA)
 barometer_dt$PM <- ifelse(barometer_dt$Diagnostic_test == "Culture", 0, NA)
@@ -179,88 +169,46 @@ barometer_dt_culture_wide$Pathogen <-
          barometer_dt_culture_wide$Pathogen_culture,
          barometer_dt_culture_wide$Pathogen)
 
-## nu kan result-culture overruled worden door iets van RESULT/AGENT/etc.
+```
 
+## Create binary results PCR & culture
 
-barometer_dt <- barometer_dt_filter3 %>% 
-  dplyr::rename(
-    Filenumber = SDGa,
-    Samplenumber = SAMPLEa,
-    Farm_ID = HERD_NOa,
-    Date = DELIVERY_DATE,
-    breed = Herd.Type
-    ) %>%
+```{r}
+
+barometer_results <- barometer_dt_culture_wide %>% 
   dplyr::mutate(
-    Country ='Ireland',
-    Lab_reference ='5', 
-    Sample_type = case_when(
-      SUBCLASS == 'Carcass' ~ 'Autopsy', 
-      ALIQUOTMATRIXTYPE %in% c('Carcass', 'Lung', 'Thymus', 
-                               'Lymph Node - Multiple', 'Tissue-Pool', 
-                               'Lymph Node', 'Tissue (VTM)', 
-                               'Part Carcass') ~ 'Autopsy',
-      ALIQUOTMATRIXTYPE %in% c('Swab', 'Nasal Swab', 'Pooled swab', 
-                               'Nasal Fluid') ~ 'Swab', 
-      ALIQUOTMATRIXTYPE %in% c('Trachea', 'Thoracic Fluid', 'Culture', 
-                               'Fluid', 'Misc.', 'Pleural Fluid') ~ 'Unknown',
-      TRUE ~ 'Missing' 
-    ),
-    Diagnostic_test = case_when(
-      TEST %in% c("PI3V PCR", "PCR M. haemolytica - ARVL", 
-                  "Mycoplasma bovis (PCR)", "PCR H. somni - ARVL",
-                  "PCR M. bovis - ARVL", "BRSV PCR", "PCR BoCoV", 
-                  "Mycoplasma bovis (PCR)", "PCR P. multocida - ARVL") ~ 'PCR',
-      TEST %in% c("Routine Culture", "Culture Growth") ~ "Culture",
-      TEST == 'Maldi ToF' ~ 'MALDI-TOF',
-      TEST == "Next Generation Sequencing" ~ 'NGS',
-      TEST == "Miscellaneous Test" ~ 'Unknown',
-      TRUE ~ 'Missing'
-    ), 
-    Breed = case_when(
-      breed == "BEEF" ~ 'Beef',  ## could add 'SUCKLER' here?? 
-      breed == "DAIRY" ~'Dairy',
-      breed %in% c("OTHER") ~ 'Unknown',
-      TRUE ~ 'Unknown' 
-    ),
-    Province = case_when(     ## data per county or region?? 
-      Region == "LEINSTER" ~ 'Leinster', 
-      Region == "MUNSTER" ~'Munster',
-      Region == "ULSTER" ~'Ulster',
-      Region == "CONNAUGHT" ~ 'Connaught',
-      Region == "Unavailable/Incomplete" ~ 'Unknown',
-      TRUE ~ 'Missing' 
-    ),
-    Pathogen = case_when(
-      TEST == "PCR P. multocida - ARVL" ~ 'PM',
-      TEST == "PCR M. haemolytica - ARVL" ~ 'MH',
-      TEST == "PCR H. somni - ARVL" ~ 'HS',
-      TEST %in% c("Mycoplasma bovis (PCR)", "PCR M. bovis - ARVL") ~ 'MB',
-      TEST == "PI3V PCR" ~ 'PI3',
-      TEST == "PCR BoCoV" ~ 'BCV',
-      TEST == "BRSV PCR" ~ 'BRSV',
-      TRUE ~ 'Missing'
-    ),
     Result = case_when(
-      RESULT %in% c("Positive", "Weak Positive", "Mycoplasma bovis PCR Positive",
-                    "Strong Positive") ~ 1,
-      RESULT %in% c("No Pathogen detected", "Negative", "sterile", 
-                    "No Significant Growth", "No CT", 
-                    "Mycoplasma bovis PCR Negative", 
-                    "Mixed Non-Significant Bacterial Growth", 
-                    "No Significant Growth @48hrs", "No Growth", 
-                    "No Pathogen detectedn", "No RNA detected", 
-                    "No DNA detected") ~ 0,
-      RESULT %in% c("Inconclusive", "Mixed Bacterial Growth", "Mixed Growth",
+      # Positive tests
+      Diagnostic_test == 'PCR' & 
+        RESULT %in% c("Positive", "Weak Positive", "Mycoplasma bovis PCR Positive",
+                      "Strong Positive") ~ 1,
+      # Negative tests
+      Diagnostic_test == 'PCR' & 
+        RESULT %in% c("No Pathogen detected", "Negative", "Sterile", 
+                      "No Significant Growth", "No CT", 
+                      "Mycoplasma bovis PCR Negative", 
+                      "Mixed Non-Significant Bacterial Growth", 
+                      "No Significant Growth @48hrs", "No Growth", 
+                      "No Pathogen detectedn", "No RNA detected", 
+                      "No DNA detected", "No Virus Detected", "Not Detected") ~ 0,
+      # Inconclusive tests
+      Diagnostic_test == 'PCR' & 
+        RESULT %in% c("Inconclusive", "Mixed Bacterial Growth", "Mixed Growth",
                       "Very Mixed Growth") ~ as.numeric(NA),
-      Diagnostic_test == 'Culture' & is.na(RESULT) ~ 0,
-      Diagnostic_test == 'Culture' & !is.na(RESULT) ~ 1, 
-      Diagnostic_test == 'MALDI-TOF' & is.na(RESULT) ~ 0,
-      Diagnostic_test == 'MALDI-TOF' & (RESULT > 1.7) ~ 1, 
-      Diagnostic_test == 'NGS' & is.na(AGENT) ~ 0,
-      Diagnostic_test == 'NGS' & !is.na(RESULT) ~ 1, 
-      TRUE ~ as.numeric(NA)
+      # Culture tests
+      Diagnostic_test == 'Culture' & Pathogen %in% c('MH', 'PM', 'HS') ~ 
+        case_when(
+          Pathogen == 'MH' & RESULT == "Mannheimia haemolytica" ~ 1,
+          Pathogen == 'PM' & RESULT %in% c("Pasteurella multocida", 
+                                           "P. multocida") ~ 1,
+          Pathogen == 'HS' & RESULT %in% c("Histophilus somni",
+                                           "Histophilus somnus",
+                                           "Histophilus somnii") ~ 1,
+          # Default case
+          TRUE ~ 0
+        ),
     )
-  )%>%
+  ) %>%
   dplyr::select(
     Filenumber,
     Samplenumber,
@@ -270,101 +218,45 @@ barometer_dt <- barometer_dt_filter3 %>%
     Sample_type,
     Breed,
     Pathogen,
-    Result, 
+    Result,
     Date,
     Province,
+    RESULT,
+    RESULTNAME,
+    AGENT,
     Farm_ID
   ) %>%
-  dplyr::distinct()%>%
-
-  dplyr::mutate(
-    Filenumber = sha256_hash(as.character(Filenumber)),
-    Samplenumber = sha256_hash(as.character(Samplenumber)),
-    Farm_ID = sha256_hash(as.character(Farm_ID))
-    )
-
+  dplyr::distinct()
 ```
-
-Stuk van die diagnostic tests moet nog anders worden geschreven..
-
-Diagnostic_test == 'Culture' && RESULT == "Pasteurella multocida" \|\|
-
-"Mannheimia haemolytica" \|\| "Histophilus somnus" \|\| "Histophilus somni" \|\|
-
-"Histophilus somnii",
-
-## multiply row ??
-
-```{r message=FALSE, warning=FALSE}
-
-df <- data.frame(barometer_dt, Diagnostic_test = 'Culture')
-
-new_df <- rbind(rep(df, times = 4))
-
-new_df$Pathogen <- c('PM', 'MH', 'HS', 'MB')
-
-
-```
-
-## Intermediate table for culture/NGS results ??
-
-```{r message=FALSE, warning=FALSE}
-df_samples_culture <- data.frame(
-    Result = c('Missing', 'Missing', 'Missing', 'Missing'),
-    Diagnostic_test = c('Culture','Culture','Culture', 'Culture'),
-    Pathogen = c("PM","MH","HS", "MB")
-)
-
-df_samples_NGS <- data.frame(
-  Result = c('Missing', 'Missing', 'Missing', 'Missing'),
-  Diagnostic_test = c('NGS','NGS','NGS', 'NGS'),
-  Pathogen = c("PM","MH","HS", "MB")
-)
-
-barometer_dt2 <- barometer_dt %>%
-  dplyr::left_join(df_samples_culture, by = c('Diagnostic_test','Pathogen')) %>%
-  dplyr::left_join(df_samples_NGS, by = c('Diagnostic_test', 'Pathogen')
-
-)
-  
-
-```
-
-dplyr::filter(
-
-Pathogen_identification %in% c("Pasteurella multocida","Mannheimia haemolytica","Histophilus somni","Mycoplasma bovis")
-
-RESULT? \## ""Maldi ToF", "","Miscellaneous Test", "Routine Culture"
-
-\## "Culture Growth", "Next Generation Sequencing",
 
 ## Floor date to 1st of month
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 
-barometer_dt$Floored_date <- lubridate::floor_date(barometer_dt$Date, "month")
+barometer_results$Floored_date <- lubridate::floor_date(barometer_results$Date, "month")
 ```
 
 ## Aggregate data based on farm_ID & month
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 
-barometer_groupby <- barometer_dt %>%
+barometer_groupby <- barometer_results %>%
   group_by(Lab_reference, Country, Breed, Floored_date, Province,
            Farm_ID, Diagnostic_test, Sample_type, Pathogen) %>%
-  summarise(across(c(Result), max), .groups = "drop")
+  summarise(across(c(Result), ~ ifelse(all(is.na(.)), NA, max(., na.rm = TRUE))))
+
+# If all are NA, than NA, if not (else): max in group, while ignoring NA 
 ```
 
 ## Save file (long version)
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 write.csv(barometer_groupby, "../Data/CleanedData/barometer_Ireland.csv", row.names=TRUE)
-
 ```
 
 ## Convert to wide version
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 
 barometer_wide <- barometer_groupby %>%
   tidyr::pivot_wider(names_from = c(Pathogen), values_from = Result) 
