@@ -1,14 +1,18 @@
 ---
-title: "Union_docs"
-output: html_document
-date: "2023-05-24"
+title: "Union Document Notebook"
+output: 
+  pdf_document:
+    latex_engine: pdflatex
+  github_document:
+    toc: true
+    toc_depth: 2
 ---
 
 # Union of documents
 
 ## Loading libraries
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 # lib = where to save the library  (zonder = default)
 
@@ -24,13 +28,13 @@ for (pkg in package_list) {
 
 ## Data loading
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
-barometer_DGZ <- read.csv("../DataCleaning/Cleaned_data/barometer_DGZ.csv")
-barometer_ARSIA <- read.csv("../DataCleaning/Cleaned_data/barometer_ARSIA.csv")
-barometer_GD <- read.csv("../DataCleaning/Cleaned_data/barometer_GD.csv")
-barometer_Ireland <- read.csv("../DataCleaning/Cleaned_data/barometer_Ireland.csv")
-barometer_PathoSense <- read.csv("../DataCleaning/Cleaned_data/barometer_PathoSense.csv")
+barometer_DGZ <- read.csv("../Data/CleanedData/barometer_DGZ.csv")
+barometer_ARSIA <- read.csv("../Data/CleanedData/barometer_ARSIA.csv")
+barometer_GD <- read.csv("../Data/CleanedData/barometer_GD.csv")
+barometer_Ireland <- read.csv("../Data/CleanedData/barometer_Ireland.csv")
+barometer_PathoSense <- read.csv("../Data/CleanedData/barometer_PathoSense.csv")
                                 
 
 
@@ -38,7 +42,7 @@ barometer_PathoSense <- read.csv("../DataCleaning/Cleaned_data/barometer_PathoSe
 
 ## Combine data to one format and add column with month and year for Tableau 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_combined <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, barometer_Ireland, barometer_PathoSense)
 
@@ -52,17 +56,17 @@ barometer_Tableau <- barometer_combined %>%
 
 ## Save file (with current date)
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 #Generate current date, give basic filename/path, combine, and safe 
 
 current_date <- format(Sys.Date(), "%Y-%m-%d")
 
 base_filename <- "barometer_combined"
 
-folder_path <- "../DataCleaning/Cleaned_data/"
+folder_path <- "../Data/CleanedData/"
 
 new_filename <- paste0(folder_path, base_filename, "_", current_date, ".csv")
 
-write.csv(barometer_Tableau, file = new_filename) 
+write.csv(barometer_Tableau, file = new_filename, row.names = TRUE) 
 
 ```

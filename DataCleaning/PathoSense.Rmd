@@ -1,14 +1,18 @@
 ---
-title: "PathoSense"
-output: html_document
-date: "2023-05-24"
+title: "PathoSense Notebook"
+output: 
+  pdf_document:
+    latex_engine: pdflatex
+  github_document:
+    toc: true
+    toc_depth: 2
 ---
 
 # DATACLEANING PATHOSENSE
 
 ## Load the libraries
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 # lib = where to save the library  (zonder = default)
 
@@ -21,10 +25,16 @@ for (pkg in package_list) {
 
 }
 ```
+##Function to apply SHA-256 hashing
+```{r message=FALSE, warning=FALSE}
+sha256_hash <- function(data) {
+  openssl::sha256(data)
+}
+```
 
 ## Data loading
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt_raw <- read.csv("../Data/PathoSense/AllBovineRespiratory_NegativesIncluded.csv")
 
@@ -33,7 +43,7 @@ barometer_dt_raw <- read.csv("../Data/PathoSense/AllBovineRespiratory_NegativesI
 
 ## Adding of rows for pathogens
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt <- barometer_dt_raw %>%
   dplyr::mutate(
@@ -50,7 +60,7 @@ barometer_dt <- barometer_dt_raw %>%
 
 ## Data manipulation
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 barometer_dt <- barometer_dt_raw %>% 
   dplyr::rename(
     Filenumber = sample_id,
@@ -100,12 +110,16 @@ barometer_dt <- barometer_dt_raw %>%
     BCV,
     Date
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct()%>%
+dplyr::mutate(
+    Filenumber = sha256_hash(as.character(Filenumber)),
+    Farm_ID = sha256_hash(as.character(Farm_ID))
+    )
 ```
 
 ## Floor date to 1st of month
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt$Date <- lubridate::ymd_hms(barometer_dt$Date)
 barometer_dt$Floored_date <- lubridate::floor_date(barometer_dt$Date, "month")
@@ -113,7 +127,7 @@ barometer_dt$Floored_date <- lubridate::floor_date(barometer_dt$Date, "month")
 
 ## Aggregate data based on farm_ID & month
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_groupby <- barometer_dt %>%
   group_by(Lab_reference, Country, Breed, Floored_date, Province, Farm_ID, Diagnostic_test, Sample_type) %>%
@@ -124,7 +138,7 @@ barometer_groupby <- barometer_dt %>%
 
 ## Convert to long
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_long <- barometer_groupby %>%
   tidyr::pivot_longer(
@@ -136,8 +150,8 @@ barometer_long <- barometer_groupby %>%
 
 ## Save file (long version)
 
-```{r}
-write.csv(barometer_long, "../DataCleaning/Cleaned_data/barometer_PathoSense.csv", row.names=TRUE)
+```{r message=FALSE, warning=FALSE}
+write.csv(barometer_long, "../Data/CleanedData/barometer_PathoSense.csv", row.names=TRUE)
 ```
 
 ## 

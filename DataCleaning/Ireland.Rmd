@@ -1,8 +1,19 @@
+---
+title: "Ireland Notebook"
+output: 
+  pdf_document:
+    latex_engine: pdflatex
+  github_document:
+    toc: true
+    toc_depth: 2
+---
+
+
 # DATACLEANING IRELAND
 
 ## Load the libraries
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 # lib = where to save the library  (zonder = default)
 
@@ -16,9 +27,15 @@ for (pkg in package_list) {
 }
 ```
 
-## Data loading
+##Function to apply SHA-256 hashing
+```{r message=FALSE, warning=FALSE}
 
-```{r}
+sha256_hash <- function(data) {
+  openssl::sha256(data)
+}
+```
+## Data loading
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt_raw_2021 <- readxl::read_excel("../Data/Ireland/Jade_2021_Final_Anonymised_data_Only_2023-04-20.v2.xlsx")
 barometer_dt_raw_2022 <- readxl::read_excel("../Data/Ireland/Jade_2022_Final_Anonymised_data_Only_2023-04-21.xlsx")
@@ -28,7 +45,7 @@ barometer_dt_raw_2022 <- readxl::read_excel("../Data/Ireland/Jade_2022_Final_Ano
 
 ## Add new dataset
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt_combined <- rbind(barometer_dt_raw_2021, barometer_dt_raw_2022)
 
@@ -36,7 +53,7 @@ barometer_dt_combined <- rbind(barometer_dt_raw_2021, barometer_dt_raw_2022)
 
 ## Filter data
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt_filter <- barometer_dt_combined %>% 
   dplyr::filter(SYSTEM %in% c('Respiratory', 'NA')
@@ -59,7 +76,7 @@ barometer_dt_filter3 <- barometer_dt_filter2 %>%
 
 ## Data manipulation
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt <- barometer_dt_filter3 %>% 
   dplyr::rename(
@@ -136,13 +153,16 @@ barometer_dt <- barometer_dt_filter3 %>%
     AGENT,
     Farm_ID
   ) %>%
-  dplyr::distinct()
-
+  dplyr::distinct() %>%
+  dplyr::mutate(
+    Filenumber = sha256_hash(as.character(Filenumber)),
+    Samplenumber = sha256_hash(as.character(Samplenumber))
+    )
 ```
 
 ## Toevoegen extra rijen voor cultuur (& MALDI & NGS?)
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 barometer_dt$HS <- ifelse(barometer_dt$Diagnostic_test == "Culture", 0, NA)
 barometer_dt$MH <- ifelse(barometer_dt$Diagnostic_test == "Culture", 0, NA)
 barometer_dt$PM <- ifelse(barometer_dt$Diagnostic_test == "Culture", 0, NA)
@@ -160,9 +180,7 @@ barometer_dt_culture_wide$Pathogen <-
          barometer_dt_culture_wide$Pathogen)
 
 ## nu kan result-culture overruled worden door iets van RESULT/AGENT/etc.
-```## Data manipulation
 
-```{r}
 
 barometer_dt <- barometer_dt_filter3 %>% 
   dplyr::rename(
@@ -257,8 +275,13 @@ barometer_dt <- barometer_dt_filter3 %>%
     Province,
     Farm_ID
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct()%>%
 
+  dplyr::mutate(
+    Filenumber = sha256_hash(as.character(Filenumber)),
+    Samplenumber = sha256_hash(as.character(Samplenumber)),
+    Farm_ID = sha256_hash(as.character(Farm_ID))
+    )
 
 ```
 
@@ -272,7 +295,7 @@ Diagnostic_test == 'Culture' && RESULT == "Pasteurella multocida" \|\|
 
 ## multiply row ??
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 df <- data.frame(barometer_dt, Diagnostic_test = 'Culture')
 
@@ -285,7 +308,7 @@ new_df$Pathogen <- c('PM', 'MH', 'HS', 'MB')
 
 ## Intermediate table for culture/NGS results ??
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 df_samples_culture <- data.frame(
     Result = c('Missing', 'Missing', 'Missing', 'Missing'),
     Diagnostic_test = c('Culture','Culture','Culture', 'Culture'),
@@ -317,31 +340,31 @@ RESULT? \## ""Maldi ToF", "","Miscellaneous Test", "Routine Culture"
 
 ## Floor date to 1st of month
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt$Floored_date <- lubridate::floor_date(barometer_dt$Date, "month")
 ```
 
 ## Aggregate data based on farm_ID & month
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_groupby <- barometer_dt %>%
   group_by(Lab_reference, Country, Breed, Floored_date, Province,
            Farm_ID, Diagnostic_test, Sample_type, Pathogen) %>%
-  summarise(across(c(Result), max))
+  summarise(across(c(Result), max), .groups = "drop")
 ```
 
 ## Save file (long version)
 
-```{r}
-write.csv(barometer_groupby, "../Data/Ireland/barometer.csv", row.names=TRUE)
-write.to.ontology(barometer)
+```{r message=FALSE, warning=FALSE}
+write.csv(barometer_groupby, "../Data/CleanedData/barometer_Ireland.csv", row.names=TRUE)
+
 ```
 
 ## Convert to wide version
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_wide <- barometer_groupby %>%
   tidyr::pivot_wider(names_from = c(Pathogen), values_from = Result) 
