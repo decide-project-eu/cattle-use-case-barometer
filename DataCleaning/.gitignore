@@ -1,4 +1,6 @@
 *.xlsx
 *.csv
+*.log
+*.tex
 *.pdf
 *.md
