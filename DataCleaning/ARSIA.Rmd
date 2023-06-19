@@ -118,7 +118,8 @@ barometer_dt <- barometer_dt_raw %>%
   dplyr::distinct() %>%
   dplyr::mutate(
     Filenumber = sha256_hash(as.character(Filenumber)),
-    Samplenumber = sha256_hash(as.character(Samplenumber))
+    Samplenumber = sha256_hash(as.character(Samplenumber)),
+    Farm_ID = sha256_hash(as.character(Samplenumber))
   ) 
 ```
 
