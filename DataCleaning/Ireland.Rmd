@@ -12,7 +12,7 @@ output:
 
 ## Load the libraries
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 # lib = where to save the library  (zonder = default)
 
@@ -28,7 +28,7 @@ for (pkg in package_list) {
 
 ## Data loading
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt_raw_2021 <- readxl::read_excel("../Data/Ireland/Jade_2021_Final_Anonymised_data_Only_2023-04-20.v2.xlsx")
 barometer_dt_raw_2022 <- readxl::read_excel("../Data/Ireland/Jade_2022_Final_Anonymised_data_Only_2023-04-21.xlsx")
@@ -38,7 +38,7 @@ barometer_dt_raw_2022 <- readxl::read_excel("../Data/Ireland/Jade_2022_Final_Ano
 
 ## Add new dataset
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt_combined <- rbind(barometer_dt_raw_2021, barometer_dt_raw_2022)
 
@@ -46,7 +46,7 @@ barometer_dt_combined <- rbind(barometer_dt_raw_2021, barometer_dt_raw_2022)
 
 ## Filter data 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt_filter <- barometer_dt_combined %>% 
   dplyr::filter(SYSTEM %in% c('Respiratory', 'NA')
@@ -67,7 +67,7 @@ barometer_dt_filter3 <- barometer_dt_filter2 %>%
 
 ## Data manipulation
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt <- barometer_dt_filter3 %>% 
   dplyr::rename(
@@ -152,7 +152,7 @@ barometer_dt <- barometer_dt_filter3 %>%
 
 ## Toevoegen extra rijen voor cultuur (& MALDI & NGS?)
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 barometer_dt$HS <- ifelse(barometer_dt$Diagnostic_test == "Culture", 0, NA)
 barometer_dt$MH <- ifelse(barometer_dt$Diagnostic_test == "Culture", 0, NA)
 barometer_dt$PM <- ifelse(barometer_dt$Diagnostic_test == "Culture", 0, NA)
@@ -173,7 +173,7 @@ barometer_dt_culture_wide$Pathogen <-
 
 ## Create binary results PCR & culture
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_results <- barometer_dt_culture_wide %>% 
   dplyr::mutate(
@@ -231,14 +231,14 @@ barometer_results <- barometer_dt_culture_wide %>%
 
 ## Floor date to 1st of month
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_results$Floored_date <- lubridate::floor_date(barometer_results$Date, "month")
 ```
 
 ## Aggregate data based on farm_ID & month
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_groupby <- barometer_results %>%
   group_by(Lab_reference, Country, Breed, Floored_date, Province,
@@ -250,13 +250,13 @@ barometer_groupby <- barometer_results %>%
 
 ## Save file (long version)
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 write.csv(barometer_groupby, "../Data/CleanedData/barometer_Ireland.csv", row.names=TRUE)
 ```
 
 ## Convert to wide version
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_wide <- barometer_groupby %>%
   tidyr::pivot_wider(names_from = c(Pathogen), values_from = Result) 
