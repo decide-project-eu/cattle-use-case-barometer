@@ -25,6 +25,13 @@ for (pkg in package_list) {
 
 }
 ```
+# Function to apply SHA-256 hashing
+```{r message=FALSE, warning=FALSE}
+
+sha256_hash <- function(data) {
+  openssl::sha256(data)
+}
+```
 
 ## Data loading
 
@@ -146,7 +153,12 @@ barometer_dt <- barometer_dt_filter3 %>%
     AGENT,
     Farm_ID
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct()%>%
+  dplyr::mutate(
+    Filenumber= sha256_hash(as.character(Filenumber)),
+    Samplenumber= sha256_hash(as.character(Samplenumber)),
+    Farm_ID= sha256_hash(as.character(Samplenumber))
+  ) 
 
 ```
 
@@ -226,7 +238,12 @@ barometer_results <- barometer_dt_culture_wide %>%
     AGENT,
     Farm_ID
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct()%>%
+  dplyr::mutate(
+    Filenumber= sha256_hash(as.character(Filenumber)),
+    Samplenumber= sha256_hash(as.character(Samplenumber)),
+    Farm_ID= sha256_hash(as.character(Samplenumber))
+  )
 ```
 
 ## Floor date to 1st of month

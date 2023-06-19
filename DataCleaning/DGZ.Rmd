@@ -69,10 +69,9 @@ barometer_aero_cult <- barometer_aero_cult_raw %>%
   ) %>%
   dplyr::distinct() %>%
   dplyr::mutate(
-    Filenumber_anon = sha256_hash(as.character(Filenumber)),
-    Samplenumber_anon = sha256_hash(as.character(Samplenumber))
-  ) %>%
-  dplyr::select(-Filenumber, -Samplenumber)
+    Filenumber = sha256_hash(as.character(Filenumber)),
+    Samplenumber= sha256_hash(as.character(Samplenumber))
+  ) 
 ```
 
 Intermediate table is needed
@@ -114,10 +113,10 @@ barometer_myco_cult <- barometer_myco_cult_raw %>%
   ) %>%
   dplyr::distinct() %>%
   dplyr::mutate(
-    Filenumber_anon = sha256_hash(as.character(Filenumber)),
-    Samplenumber_anon = sha256_hash(as.character(Samplenumber))
-  ) %>%
-  dplyr::select(-Filenumber, -Samplenumber)
+    Filenumber= sha256_hash(as.character(Filenumber)),
+    Samplenumber= sha256_hash(as.character(Samplenumber))
+  ) 
+  
 ```
 
 ## Data manipulation PCR results
@@ -212,10 +211,11 @@ barometer_dt <- barometer_dt_raw %>%
   ) %>%
   dplyr::distinct() %>%
   dplyr::mutate(
-    Filenumber_anon = sha256_hash(as.character(Filenumber)),
-    Samplenumber_anon = sha256_hash(as.character(Samplenumber))
-  ) %>%
-  dplyr::select(-Filenumber, -Samplenumber)
+    Filenumber= sha256_hash(as.character(Filenumber)),
+    Samplenumber= sha256_hash(as.character(Samplenumber)),
+    Farm_ID= sha256_hash(as.character(Samplenumber))
+  ) 
+ 
 ```
 
 ## Join all three files
@@ -225,10 +225,10 @@ barometer <-
   barometer_dt %>%
   dplyr::left_join(df_samples, by = c('Diagnostic_test','Result', 'Parameter_code')) %>%
   dplyr::left_join(
-      barometer_aero_cult, by = c('Filenumber_anon', 'Samplenumber_anon', 'Result', 'Parameter_code', 'Pathogen_identification')
+      barometer_aero_cult, by = c('Filenumber', 'Samplenumber', 'Result', 'Parameter_code', 'Pathogen_identification')
       ) %>%
   dplyr::left_join(
-      barometer_myco_cult, by = c('Filenumber_anon', 'Samplenumber_anon', 'Result', 'Parameter_code', 'Pathogen_identification')
+      barometer_myco_cult, by = c('Filenumber', 'Samplenumber', 'Result', 'Parameter_code', 'Pathogen_identification')
   ) %>%
   dplyr::mutate( 
     Floored_date = lubridate::floor_date(Date, "month"),
