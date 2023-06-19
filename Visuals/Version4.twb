@@ -1,0 +1,2511 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<!-- build 20224.23.0312.0353                               -->
+<workbook original-version='18.1' source-build='2022.4.2 (20224.23.0312.0353)' source-platform='win' version='18.1' xml:base='https://eu-west-1a.online.tableau.com' xmlns:user='http://www.tableausoftware.com/xml/user'>
+  <document-format-change-manifest>
+    <_.fcp.AccessibleZoneTabOrder.true...AccessibleZoneTabOrder />
+    <_.fcp.AnimationOnByDefault.true...AnimationOnByDefault />
+    <AutoCreateAndUpdateDSDPhoneLayouts />
+    <MapboxVectorStylesAndLayers />
+    <_.fcp.MarkAnimation.true...MarkAnimation />
+    <_.fcp.ObjectModelEncapsulateLegacy.true...ObjectModelEncapsulateLegacy />
+    <_.fcp.ObjectModelExtractV2.true...ObjectModelExtractV2 />
+    <_.fcp.ObjectModelTableType.true...ObjectModelTableType />
+    <_.fcp.SchemaViewerObjectModel.true...SchemaViewerObjectModel />
+    <SetMembershipControl />
+    <SheetIdentifierTracking />
+    <WindowsPersistSimpleIdentifiers />
+    <ZoneBackgroundTransparency />
+  </document-format-change-manifest>
+  <repository-location id='CattleBarometer' path='/t/bovianalytics/workbooks' revision='1.0' site='bovianalytics' />
+  <preferences>
+    <preference name='ui.encoding.shelf.height' value='24' />
+    <preference name='ui.shelf.height' value='26' />
+  </preferences>
+  <style>
+    <style-rule element='worksheet'>
+      <format attr='font-size' value='12' />
+    </style-rule>
+  </style>
+  <datasources>
+    <datasource hasconnection='false' inline='true' name='Parameters' version='18.1'>
+      <aliases enabled='yes' />
+      <column alias='Percentage' caption='Count or Percentage?' datatype='real' name='[Parameter 1 1]' param-domain-type='list' role='measure' type='quantitative' value='2.0'>
+        <calculation class='tableau' formula='2.0' />
+        <aliases>
+          <alias key='1.0' value='Value' />
+          <alias key='2.0' value='Percentage' />
+        </aliases>
+        <members>
+          <member alias='Value' value='1.0' />
+          <member alias='Percentage' value='2.0' />
+        </members>
+      </column>
+    </datasource>
+    <datasource caption='barometer_combined_2023-06-19' inline='true' name='federated.09u885j0zppgf015n3s0o1e37os9' version='18.1'>
+      <connection class='federated'>
+        <named-connections>
+          <named-connection caption='barometer_combined_2023-06-19' name='textscan.0fp8ya41u0z30318vxkrc13gb6qd'>
+            <connection class='textscan' directory='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Data/CleanedData' filename='barometer_combined_2023-06-19.csv' password='' server='' workgroup-auth-mode='as-is' />
+          </named-connection>
+        </named-connections>
+        <_.fcp.ObjectModelEncapsulateLegacy.false...relation connection='textscan.0fp8ya41u0z30318vxkrc13gb6qd' name='barometer_combined_2023-06-19.csv' table='[barometer_combined_2023-06-19#csv]' type='table'>
+          <columns character-set='UTF-8' header='yes' locale='nl_BE' separator=',' text-qualifier='&quot;'>
+            <column datatype='integer' name='F1' ordinal='0' />
+            <column datatype='integer' name='LabReference' ordinal='1' />
+            <column datatype='string' name='Country' ordinal='2' />
+            <column datatype='string' name='Breed' ordinal='3' />
+            <column datatype='date' name='FlooredDate' ordinal='4' />
+            <column datatype='string' name='Province' ordinal='5' />
+            <column datatype='string' name='FarmIdentifier' ordinal='6' />
+            <column datatype='string' name='DiagnosticTest' ordinal='7' />
+            <column datatype='string' name='SampleType' ordinal='8' />
+            <column datatype='string' name='Pathogen' ordinal='9' />
+            <column datatype='integer' name='Result' ordinal='10' />
+            <column datatype='integer' name='Month' ordinal='11' />
+            <column datatype='integer' name='Year' ordinal='12' />
+          </columns>
+        </_.fcp.ObjectModelEncapsulateLegacy.false...relation>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...relation connection='textscan.0fp8ya41u0z30318vxkrc13gb6qd' name='barometer_combined_2023-06-19.csv' table='[barometer_combined_2023-06-19#csv]' type='table'>
+          <columns character-set='UTF-8' header='yes' locale='nl_BE' separator=',' text-qualifier='&quot;'>
+            <column datatype='integer' name='F1' ordinal='0' />
+            <column datatype='integer' name='LabReference' ordinal='1' />
+            <column datatype='string' name='Country' ordinal='2' />
+            <column datatype='string' name='Breed' ordinal='3' />
+            <column datatype='date' name='FlooredDate' ordinal='4' />
+            <column datatype='string' name='Province' ordinal='5' />
+            <column datatype='string' name='FarmIdentifier' ordinal='6' />
+            <column datatype='string' name='DiagnosticTest' ordinal='7' />
+            <column datatype='string' name='SampleType' ordinal='8' />
+            <column datatype='string' name='Pathogen' ordinal='9' />
+            <column datatype='integer' name='Result' ordinal='10' />
+            <column datatype='integer' name='Month' ordinal='11' />
+            <column datatype='integer' name='Year' ordinal='12' />
+          </columns>
+        </_.fcp.ObjectModelEncapsulateLegacy.true...relation>
+        <metadata-records>
+          <metadata-record class='capability'>
+            <remote-name />
+            <remote-type>0</remote-type>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias />
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype='string' name='character-set'>&quot;UTF-8&quot;</attribute>
+              <attribute datatype='string' name='collation'>&quot;nl_NL&quot;</attribute>
+              <attribute datatype='string' name='currency'>&quot;€&quot;</attribute>
+              <attribute datatype='string' name='decimal-char'>&quot;,&quot;</attribute>
+              <attribute datatype='string' name='field-delimiter'>&quot;,&quot;</attribute>
+              <attribute datatype='string' name='header-row'>&quot;true&quot;</attribute>
+              <attribute datatype='string' name='locale'>&quot;nl_BE&quot;</attribute>
+              <attribute datatype='string' name='quote-char'>&quot;\&quot;&quot;</attribute>
+              <attribute datatype='string' name='single-char'>&quot;&quot;</attribute>
+              <attribute datatype='string' name='thousands-char'>&quot;.&quot;</attribute>
+            </attributes>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>F1</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[F1]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>F1</remote-alias>
+            <ordinal>0</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>LabReference</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[LabReference]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>LabReference</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>Country</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[Country]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>Country</remote-alias>
+            <ordinal>2</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LNL_RNL' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>Breed</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[Breed]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>Breed</remote-alias>
+            <ordinal>3</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LNL_RNL' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>FlooredDate</remote-name>
+            <remote-type>133</remote-type>
+            <local-name>[FlooredDate]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>FlooredDate</remote-alias>
+            <ordinal>4</ordinal>
+            <local-type>date</local-type>
+            <aggregation>Year</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>Province</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[Province]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>Province</remote-alias>
+            <ordinal>5</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LNL_RNL' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>FarmIdentifier</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[FarmIdentifier]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>FarmIdentifier</remote-alias>
+            <ordinal>6</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LNL_RNL' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>DiagnosticTest</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[DiagnosticTest]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>DiagnosticTest</remote-alias>
+            <ordinal>7</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LNL_RNL' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>SampleType</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[SampleType]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>SampleType</remote-alias>
+            <ordinal>8</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LNL_RNL' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>Pathogen</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[Pathogen]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>Pathogen</remote-alias>
+            <ordinal>9</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LNL_RNL' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>Result</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[Result]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>Result</remote-alias>
+            <ordinal>10</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>Month</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[Month]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>Month</remote-alias>
+            <ordinal>11</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>Year</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[Year]</local-name>
+            <parent-name>[barometer_combined_2023-06-19.csv]</parent-name>
+            <remote-alias>Year</remote-alias>
+            <ordinal>12</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+        </metadata-records>
+      </connection>
+      <aliases enabled='yes' />
+      <column datatype='string' name='[Breed]' role='dimension' type='nominal' />
+      <column caption='Positive rate' datatype='real' default-format='p0%' name='[Calculation_1165869355178258436]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END ) / COUNT(if not ISNULL([Result]) THEN  [FlooredDate] END )' />
+      </column>
+      <column caption='Value' datatype='real' name='[Calculation_1165869355182714886]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='CASE [Parameters].[Parameter 1 1] WHEN 1 THEN [Positive rate (copy)_1165869355181670405] ELSE [Calculation_1165869355178258436] END' />
+      </column>
+      <column caption='Value or Percent label' datatype='string' name='[Calculation_487233209891385344]' role='measure' type='nominal'>
+        <calculation class='tableau' formula='IF [Parameters].[Parameter 1 1] = 1 THEN &apos;N=&apos; + STR([Positive rate (copy)_1165869355181670405])&#13;&#10;ELSEIF  [Parameters].[Parameter 1 1] = 2 THEN LEFT(STR(ROUND([Calculation_1165869355178258436],4)*100),4) + &apos;%&apos;&#13;&#10;END' />
+      </column>
+      <column datatype='string' name='[Country]' role='dimension' semantic-role='[Country].[ISO3166_2]' type='nominal' />
+      <column datatype='string' name='[DiagnosticTest]' role='dimension' type='nominal' />
+      <column datatype='integer' hidden='true' name='[F1]' role='measure' type='quantitative' />
+      <column caption='Date' datatype='date' name='[FlooredDate]' role='dimension' type='ordinal' />
+      <column aggregation='Sum' datatype='integer' name='[LabReference]' role='dimension' type='ordinal'>
+        <aliases>
+          <alias key='1' value='DGZ' />
+          <alias key='2' value='GD' />
+          <alias key='3' value='ARSIA' />
+          <alias key='4' value='PathoSense' />
+          <alias key='5' value='Ireland' />
+        </aliases>
+      </column>
+      <column datatype='string' name='[Pathogen]' role='dimension' type='nominal' />
+      <column caption='Positives' datatype='integer' default-format='N' name='[Positive rate (copy)_1165869355181670405]' role='measure' type='quantitative'>
+        <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END )' />
+      </column>
+      <column datatype='string' name='[Province]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+      <column datatype='integer' name='[Result]' role='measure' type='quantitative' />
+      <column datatype='string' name='[SampleType]' role='dimension' type='nominal' />
+      <_.fcp.ObjectModelTableType.true...column caption='barometer_combined_2023-06-19.csv' datatype='table' name='[__tableau_internal_object_id__].[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]' role='measure' type='quantitative' />
+      <column-instance column='[DiagnosticTest]' derivation='None' name='[none:DiagnosticTest:nk]' pivot='key' type='nominal' />
+      <column-instance column='[Result]' derivation='None' name='[none:Result:ok]' pivot='key' type='ordinal' />
+      <column-instance column='[SampleType]' derivation='None' name='[none:SampleType:nk]' pivot='key' type='nominal' />
+      <column-instance column='[FlooredDate]' derivation='Month-Trunc' name='[tmn:FlooredDate:ok]' pivot='key' type='ordinal' />
+      <group caption='Action (Breed)' hidden='true' name='[Action (Breed)]' name-style='unqualified' user:auto-column='sheet_link'>
+        <groupfilter function='crossjoin'>
+          <groupfilter function='level-members' level='[Breed]' />
+        </groupfilter>
+      </group>
+      <group caption='Action (Diagnostic_test)' hidden='true' name='[Action (Diagnostic_test)]' name-style='unqualified' user:auto-column='sheet_link'>
+        <groupfilter function='crossjoin'>
+          <groupfilter function='level-members' level='[none:DiagnosticTest:nk]' />
+        </groupfilter>
+      </group>
+      <group caption='Action (LabReference)' hidden='true' name='[Action (LabReference)]' name-style='unqualified' user:auto-column='sheet_link'>
+        <groupfilter function='crossjoin'>
+          <groupfilter function='level-members' level='[LabReference]' />
+        </groupfilter>
+      </group>
+      <group caption='Action (MONTH(Date))' hidden='true' name='[Action (MONTH(Date))]' name-style='unqualified' user:auto-column='sheet_link'>
+        <groupfilter function='crossjoin'>
+          <groupfilter function='level-members' level='[tmn:FlooredDate:ok]' />
+        </groupfilter>
+      </group>
+      <group caption='Action (Pathogen)' hidden='true' name='[Action (Pathogen)]' name-style='unqualified' user:auto-column='sheet_link'>
+        <groupfilter function='crossjoin'>
+          <groupfilter function='level-members' level='[Pathogen]' />
+        </groupfilter>
+      </group>
+      <group caption='Action (Sample_type)' hidden='true' name='[Action (Sample_type)]' name-style='unqualified' user:auto-column='sheet_link'>
+        <groupfilter function='crossjoin'>
+          <groupfilter function='level-members' level='[none:SampleType:nk]' />
+        </groupfilter>
+      </group>
+      <drill-paths>
+        <drill-path name='Country, Province'>
+          <field>[Country]</field>
+          <field>[Province]</field>
+        </drill-path>
+      </drill-paths>
+      <extract _.fcp.ObjectModelExtractV2.true...object-id='' count='-1' enabled='true' units='records'>
+        <connection access_mode='readonly' authentication='auth-none' author-locale='en_US' class='hyper' dbname='C:/Users/mielh/OneDrive/Documenten/My Tableau Repository/Datasources/barometer_combined_2023-06-19.hyper' default-settings='yes' schema='Extract' sslmode='' tablename='Extract' update-time='06/19/2023 03:43:45 PM' username='tableau_internal_user'>
+          <_.fcp.ObjectModelEncapsulateLegacy.false...relation name='Extract' table='[Extract].[Extract]' type='table' />
+          <_.fcp.ObjectModelEncapsulateLegacy.true...relation name='Extract' table='[Extract].[Extract]' type='table' />
+          <refresh>
+            <refresh-event add-from-file-path='barometer_combined_2023-06-19' increment-value='%null%' refresh-type='create' rows-inserted='70800' timestamp-start='2023-06-19 15:43:44.043' />
+          </refresh>
+          <metadata-records>
+            <metadata-record class='column'>
+              <remote-name>LabReference</remote-name>
+              <remote-type>20</remote-type>
+              <local-name>[LabReference]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>LabReference</remote-alias>
+              <ordinal>0</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>integer</local-type>
+              <aggregation>Sum</aggregation>
+              <approx-count>5</approx-count>
+              <contains-null>true</contains-null>
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+              <remote-name>Country</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[Country]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>Country</remote-alias>
+              <ordinal>1</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>3</approx-count>
+              <contains-null>true</contains-null>
+              <collation flag='0' name='LNL_RNL' />
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+              <remote-name>Breed</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[Breed]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>Breed</remote-alias>
+              <ordinal>2</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>6</approx-count>
+              <contains-null>true</contains-null>
+              <collation flag='0' name='LNL_RNL' />
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+              <remote-name>FlooredDate</remote-name>
+              <remote-type>133</remote-type>
+              <local-name>[FlooredDate]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>FlooredDate</remote-alias>
+              <ordinal>3</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>date</local-type>
+              <aggregation>Year</aggregation>
+              <approx-count>115</approx-count>
+              <contains-null>true</contains-null>
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+              <remote-name>Province</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[Province]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>Province</remote-alias>
+              <ordinal>4</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>77</approx-count>
+              <contains-null>true</contains-null>
+              <collation flag='0' name='LNL_RNL' />
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+              <remote-name>FarmIdentifier</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[FarmIdentifier]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>FarmIdentifier</remote-alias>
+              <ordinal>5</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>9421</approx-count>
+              <contains-null>true</contains-null>
+              <collation flag='0' name='LNL_RNL' />
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+              <remote-name>DiagnosticTest</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[DiagnosticTest]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>DiagnosticTest</remote-alias>
+              <ordinal>6</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>3</approx-count>
+              <contains-null>true</contains-null>
+              <collation flag='0' name='LNL_RNL' />
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+              <remote-name>SampleType</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[SampleType]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>SampleType</remote-alias>
+              <ordinal>7</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>4</approx-count>
+              <contains-null>true</contains-null>
+              <collation flag='0' name='LNL_RNL' />
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+              <remote-name>Pathogen</remote-name>
+              <remote-type>129</remote-type>
+              <local-name>[Pathogen]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>Pathogen</remote-alias>
+              <ordinal>8</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>string</local-type>
+              <aggregation>Count</aggregation>
+              <approx-count>7</approx-count>
+              <contains-null>true</contains-null>
+              <collation flag='0' name='LNL_RNL' />
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+              <remote-name>Result</remote-name>
+              <remote-type>20</remote-type>
+              <local-name>[Result]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>Result</remote-alias>
+              <ordinal>9</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>integer</local-type>
+              <aggregation>Sum</aggregation>
+              <approx-count>3</approx-count>
+              <contains-null>true</contains-null>
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+              <remote-name>Month</remote-name>
+              <remote-type>20</remote-type>
+              <local-name>[Month]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>Month</remote-alias>
+              <ordinal>10</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>integer</local-type>
+              <aggregation>Sum</aggregation>
+              <approx-count>19</approx-count>
+              <contains-null>true</contains-null>
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+            <metadata-record class='column'>
+              <remote-name>Year</remote-name>
+              <remote-type>20</remote-type>
+              <local-name>[Year]</local-name>
+              <parent-name>[Extract]</parent-name>
+              <remote-alias>Year</remote-alias>
+              <ordinal>11</ordinal>
+              <family>barometer_combined_2023-06-19.csv</family>
+              <local-type>integer</local-type>
+              <aggregation>Sum</aggregation>
+              <approx-count>13</approx-count>
+              <contains-null>true</contains-null>
+              <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+            </metadata-record>
+          </metadata-records>
+        </connection>
+      </extract>
+      <layout _.fcp.SchemaViewerObjectModel.false...dim-percentage='0.5' _.fcp.SchemaViewerObjectModel.false...measure-percentage='0.4' dim-ordering='alphabetic' measure-ordering='alphabetic' show-aliased-fields='true' show-structure='true' />
+      <style>
+        <style-rule element='mark'>
+          <encoding attr='color' field='[none:Result:ok]' type='palette'>
+            <map to='#59a14f'>
+              <bucket>0</bucket>
+            </map>
+            <map to='#bab0ac'>
+              <bucket>%null%</bucket>
+            </map>
+            <map to='#f28e2b'>
+              <bucket>1</bucket>
+            </map>
+          </encoding>
+        </style-rule>
+      </style>
+      <semantic-values>
+        <semantic-value key='[Country].[Name]' value='&quot;Belgium&quot;' />
+        <semantic-value key='[State].[Name]' value='%null%' />
+      </semantic-values>
+      <date-options start-of-week='monday' />
+      <datasource-dependencies datasource='Parameters'>
+        <column alias='Percentage' caption='Count or Percentage?' datatype='real' name='[Parameter 1 1]' param-domain-type='list' role='measure' type='quantitative' value='2.0'>
+          <calculation class='tableau' formula='2.0' />
+          <aliases>
+            <alias key='1.0' value='Value' />
+            <alias key='2.0' value='Percentage' />
+          </aliases>
+        </column>
+      </datasource-dependencies>
+      <_.fcp.ObjectModelEncapsulateLegacy.true...object-graph>
+        <objects>
+          <object caption='barometer_combined_2023-06-19.csv' id='barometer_combined_2023-06-19.csv_63FB3BA0CBB9426DB8D0E8C7A4BB533C'>
+            <properties context=''>
+              <relation connection='textscan.0fp8ya41u0z30318vxkrc13gb6qd' name='barometer_combined_2023-06-19.csv' table='[barometer_combined_2023-06-19#csv]' type='table'>
+                <columns character-set='UTF-8' header='yes' locale='nl_BE' separator=',' text-qualifier='&quot;'>
+                  <column datatype='integer' name='F1' ordinal='0' />
+                  <column datatype='integer' name='LabReference' ordinal='1' />
+                  <column datatype='string' name='Country' ordinal='2' />
+                  <column datatype='string' name='Breed' ordinal='3' />
+                  <column datatype='date' name='FlooredDate' ordinal='4' />
+                  <column datatype='string' name='Province' ordinal='5' />
+                  <column datatype='string' name='FarmIdentifier' ordinal='6' />
+                  <column datatype='string' name='DiagnosticTest' ordinal='7' />
+                  <column datatype='string' name='SampleType' ordinal='8' />
+                  <column datatype='string' name='Pathogen' ordinal='9' />
+                  <column datatype='integer' name='Result' ordinal='10' />
+                  <column datatype='integer' name='Month' ordinal='11' />
+                  <column datatype='integer' name='Year' ordinal='12' />
+                </columns>
+              </relation>
+            </properties>
+            <properties context='extract'>
+              <relation name='Extract' table='[Extract].[Extract]' type='table' />
+            </properties>
+          </object>
+        </objects>
+      </_.fcp.ObjectModelEncapsulateLegacy.true...object-graph>
+    </datasource>
+  </datasources>
+  <mapsources>
+    <mapsource name='Tableau' />
+  </mapsources>
+  <shared-views>
+    <shared-view name='federated.09u885j0zppgf015n3s0o1e37os9'>
+      <datasources>
+        <datasource caption='barometer_combined_2023-06-19' name='federated.09u885j0zppgf015n3s0o1e37os9' />
+      </datasources>
+      <datasource-dependencies datasource='federated.09u885j0zppgf015n3s0o1e37os9'>
+        <column caption='Date' datatype='date' name='[FlooredDate]' role='dimension' type='ordinal' />
+        <column-instance column='[FlooredDate]' derivation='None' name='[none:FlooredDate:qk]' pivot='key' type='quantitative' />
+      </datasource-dependencies>
+      <filter class='quantitative' column='[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]' included-values='all'>
+        <target field='[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]' />
+      </filter>
+    </shared-view>
+  </shared-views>
+  <actions>
+    <action caption='Filter 1 (generated)' name='[Action1_99BF0544185D4BB0BD4D01772A753F21]'>
+      <activation auto-clear='true' type='on-select' />
+      <source dashboard='Positive sample rate' type='sheet' worksheet='By pathogen ' />
+      <command command='tsc:tsl-filter'>
+        <param name='special-fields' value='all' />
+        <param name='target' value='Positive sample rate' />
+      </command>
+    </action>
+    <action caption='Filter 2 (generated)' name='[Action2_76972BB830C344618DF7E9B8F24EBD75]'>
+      <activation auto-clear='true' type='on-select' />
+      <source dashboard='Positive sample rate' type='sheet' worksheet='By sample type' />
+      <command command='tsc:tsl-filter'>
+        <param name='special-fields' value='all' />
+        <param name='target' value='Positive sample rate' />
+      </command>
+    </action>
+    <action caption='Filter 3 (generated)' name='[Action3_64915248F23244159AF9B5BACE4DBB9C]'>
+      <activation auto-clear='true' type='on-select' />
+      <source dashboard='Positive sample rate' type='sheet' worksheet='By production type' />
+      <command command='tsc:tsl-filter'>
+        <param name='special-fields' value='all' />
+        <param name='target' value='Positive sample rate' />
+      </command>
+    </action>
+    <action caption='Filter 4 (generated)' name='[Action4_B9FCDD97D11D43A1A091827F2ACA6758]'>
+      <activation auto-clear='true' type='on-select' />
+      <source dashboard='Positive sample rate' type='sheet' worksheet='By diagnostic test' />
+      <command command='tsc:tsl-filter'>
+        <param name='special-fields' value='all' />
+        <param name='target' value='Positive sample rate' />
+      </command>
+    </action>
+    <action caption='Filter 5 (generated)' name='[Action5_2BFF0569C5574F50B85522446A30AE60]'>
+      <activation auto-clear='true' type='on-select' />
+      <source dashboard='Positive sample rate' type='sheet' worksheet='Over time' />
+      <command command='tsc:tsl-filter'>
+        <param name='special-fields' value='all' />
+        <param name='target' value='Positive sample rate' />
+      </command>
+    </action>
+    <action caption='Filter 6 (generated)' name='[Action6_749475BEB4F646799CDC2480027E9823]'>
+      <activation auto-clear='true' type='on-select' />
+      <source dashboard='Positive sample rate' type='sheet' worksheet='By lab' />
+      <command command='tsc:tsl-filter'>
+        <param name='special-fields' value='all' />
+        <param name='target' value='Positive sample rate' />
+      </command>
+    </action>
+  </actions>
+  <worksheets>
+    <worksheet name='By diagnostic test'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='barometer_combined_2023-06-19' name='federated.09u885j0zppgf015n3s0o1e37os9' />
+          </datasources>
+          <datasource-dependencies datasource='federated.09u885j0zppgf015n3s0o1e37os9'>
+            <column datatype='string' name='[Breed]' role='dimension' type='nominal' />
+            <column datatype='string' name='[DiagnosticTest]' role='dimension' type='nominal' />
+            <column caption='Date' datatype='date' name='[FlooredDate]' role='dimension' type='ordinal' />
+            <column aggregation='Sum' datatype='integer' name='[LabReference]' role='dimension' type='ordinal'>
+              <aliases>
+                <alias key='1' value='DGZ' />
+                <alias key='2' value='GD' />
+                <alias key='3' value='ARSIA' />
+                <alias key='4' value='PathoSense' />
+                <alias key='5' value='Ireland' />
+              </aliases>
+            </column>
+            <column datatype='string' name='[Pathogen]' role='dimension' type='nominal' />
+            <column datatype='integer' name='[Result]' role='measure' type='quantitative' />
+            <column datatype='string' name='[SampleType]' role='dimension' type='nominal' />
+            <column-instance column='[DiagnosticTest]' derivation='None' name='[none:DiagnosticTest:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='None' name='[none:FlooredDate:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[SampleType]' derivation='None' name='[none:SampleType:nk]' pivot='key' type='nominal' />
+            <column-instance column='[Result]' derivation='Count' name='[pcto:cnt:Result:qk]' pivot='key' type='quantitative'>
+              <table-calc ordering-type='Columns' type='PctTotal' />
+            </column-instance>
+            <column-instance column='[FlooredDate]' derivation='Month-Trunc' name='[tmn:FlooredDate:ok]' pivot='key' type='ordinal' />
+          </datasource-dependencies>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]'>
+            <groupfilter function='level-members' level='[Breed]' user:ui-action-filter='[Action3_64915248F23244159AF9B5BACE4DBB9C]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]'>
+            <groupfilter function='level-members' level='[LabReference]' user:ui-action-filter='[Action6_749475BEB4F646799CDC2480027E9823]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]'>
+            <groupfilter function='level-members' level='[tmn:FlooredDate:ok]' user:ui-action-filter='[Action5_2BFF0569C5574F50B85522446A30AE60]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]'>
+            <groupfilter function='level-members' level='[Pathogen]' user:ui-action-filter='[Action1_99BF0544185D4BB0BD4D01772A753F21]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]'>
+            <groupfilter function='level-members' level='[none:SampleType:nk]' user:ui-action-filter='[Action2_76972BB830C344618DF7E9B8F24EBD75]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <slices>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]</column>
+          </slices>
+          <aggregation value='true' />
+        </view>
+        <style>
+          <style-rule element='axis'>
+            <format attr='display' class='0' field='[federated.09u885j0zppgf015n3s0o1e37os9].[pcto:cnt:Result:qk]' scope='cols' value='false' />
+          </style-rule>
+          <style-rule element='worksheet'>
+            <format attr='display-field-labels' scope='rows' value='false' />
+          </style-rule>
+        </style>
+        <panes>
+          <pane id='1' selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Bar' />
+            <encodings>
+              <text column='[federated.09u885j0zppgf015n3s0o1e37os9].[pcto:cnt:Result:qk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-show' value='true' />
+                <format attr='mark-labels-cull' value='false' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows onTop='true'>[federated.09u885j0zppgf015n3s0o1e37os9].[none:DiagnosticTest:nk]</rows>
+        <cols onLeft='true' total='true'>[federated.09u885j0zppgf015n3s0o1e37os9].[pcto:cnt:Result:qk]</cols>
+      </table>
+      <simple-id uuid='{2C94BE0B-04BC-4B70-A974-D016FA1AEB1F}' />
+    </worksheet>
+    <worksheet name='By lab'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='barometer_combined_2023-06-19' name='federated.09u885j0zppgf015n3s0o1e37os9' />
+            <datasource name='Parameters' />
+          </datasources>
+          <datasource-dependencies datasource='Parameters'>
+            <column alias='Percentage' caption='Count or Percentage?' datatype='real' name='[Parameter 1 1]' param-domain-type='list' role='measure' type='quantitative' value='2.0'>
+              <calculation class='tableau' formula='2.0' />
+              <aliases>
+                <alias key='1.0' value='Value' />
+                <alias key='2.0' value='Percentage' />
+              </aliases>
+            </column>
+          </datasource-dependencies>
+          <datasource-dependencies datasource='federated.09u885j0zppgf015n3s0o1e37os9'>
+            <column datatype='string' name='[Breed]' role='dimension' type='nominal' />
+            <column caption='Positive rate' datatype='real' default-format='p0%' name='[Calculation_1165869355178258436]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END ) / COUNT(if not ISNULL([Result]) THEN  [FlooredDate] END )' />
+            </column>
+            <column caption='Value or Percent label' datatype='string' name='[Calculation_487233209891385344]' role='measure' type='nominal'>
+              <calculation class='tableau' formula='IF [Parameters].[Parameter 1 1] = 1 THEN &apos;N=&apos; + STR([Positive rate (copy)_1165869355181670405])&#13;&#10;ELSEIF  [Parameters].[Parameter 1 1] = 2 THEN LEFT(STR(ROUND([Calculation_1165869355178258436],4)*100),4) + &apos;%&apos;&#13;&#10;END' />
+            </column>
+            <column datatype='string' name='[DiagnosticTest]' role='dimension' type='nominal' />
+            <column caption='Date' datatype='date' name='[FlooredDate]' role='dimension' type='ordinal' />
+            <column aggregation='Sum' datatype='integer' name='[LabReference]' role='dimension' type='ordinal'>
+              <aliases>
+                <alias key='1' value='DGZ' />
+                <alias key='2' value='GD' />
+                <alias key='3' value='ARSIA' />
+                <alias key='4' value='PathoSense' />
+                <alias key='5' value='Ireland' />
+              </aliases>
+            </column>
+            <column datatype='string' name='[Pathogen]' role='dimension' type='nominal' />
+            <column caption='Positives' datatype='integer' default-format='N' name='[Positive rate (copy)_1165869355181670405]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END )' />
+            </column>
+            <column datatype='integer' name='[Result]' role='measure' type='quantitative' />
+            <column datatype='string' name='[SampleType]' role='dimension' type='nominal' />
+            <column-instance column='[DiagnosticTest]' derivation='None' name='[none:DiagnosticTest:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='None' name='[none:FlooredDate:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[LabReference]' derivation='None' name='[none:LabReference:ok]' pivot='key' type='ordinal' />
+            <column-instance column='[SampleType]' derivation='None' name='[none:SampleType:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='Month-Trunc' name='[tmn:FlooredDate:ok]' pivot='key' type='ordinal' />
+            <column-instance column='[Calculation_487233209891385344]' derivation='User' name='[usr:Calculation_487233209891385344:nk]' pivot='key' type='nominal' />
+            <column-instance column='[Positive rate (copy)_1165869355181670405]' derivation='User' name='[usr:Positive rate (copy)_1165869355181670405:qk]' pivot='key' type='quantitative' />
+          </datasource-dependencies>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]'>
+            <groupfilter function='level-members' level='[Breed]' user:ui-action-filter='[Action3_64915248F23244159AF9B5BACE4DBB9C]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]'>
+            <groupfilter function='level-members' level='[none:DiagnosticTest:nk]' user:ui-action-filter='[Action4_B9FCDD97D11D43A1A091827F2ACA6758]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]'>
+            <groupfilter function='level-members' level='[tmn:FlooredDate:ok]' user:ui-action-filter='[Action5_2BFF0569C5574F50B85522446A30AE60]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]'>
+            <groupfilter function='level-members' level='[Pathogen]' user:ui-action-filter='[Action1_99BF0544185D4BB0BD4D01772A753F21]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]'>
+            <groupfilter function='level-members' level='[none:SampleType:nk]' user:ui-action-filter='[Action2_76972BB830C344618DF7E9B8F24EBD75]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <slices>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]</column>
+          </slices>
+          <aggregation value='true' />
+        </view>
+        <style>
+          <style-rule element='axis'>
+            <format attr='display' class='0' field='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Positive rate (copy)_1165869355181670405:qk]' scope='cols' value='false' />
+          </style-rule>
+          <style-rule element='worksheet'>
+            <format attr='display-field-labels' scope='rows' value='false' />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Bar' />
+            <encodings>
+              <text column='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_487233209891385344:nk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-show' value='true' />
+                <format attr='mark-labels-cull' value='false' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows onTop='true'>[federated.09u885j0zppgf015n3s0o1e37os9].[none:LabReference:ok]</rows>
+        <cols onLeft='true' total='true'>[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Positive rate (copy)_1165869355181670405:qk]</cols>
+      </table>
+      <simple-id uuid='{6EC77F03-4F7F-4AA9-B8DA-39CF9359F1EA}' />
+    </worksheet>
+    <worksheet name='By pathogen '>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='barometer_combined_2023-06-19' name='federated.09u885j0zppgf015n3s0o1e37os9' />
+            <datasource name='Parameters' />
+          </datasources>
+          <datasource-dependencies datasource='Parameters'>
+            <column alias='Percentage' caption='Count or Percentage?' datatype='real' name='[Parameter 1 1]' param-domain-type='list' role='measure' type='quantitative' value='2.0'>
+              <calculation class='tableau' formula='2.0' />
+              <aliases>
+                <alias key='1.0' value='Value' />
+                <alias key='2.0' value='Percentage' />
+              </aliases>
+            </column>
+          </datasource-dependencies>
+          <datasource-dependencies datasource='federated.09u885j0zppgf015n3s0o1e37os9'>
+            <column datatype='string' name='[Breed]' role='dimension' type='nominal' />
+            <column caption='Positive rate' datatype='real' default-format='p0%' name='[Calculation_1165869355178258436]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END ) / COUNT(if not ISNULL([Result]) THEN  [FlooredDate] END )' />
+            </column>
+            <column caption='Value or Percent label' datatype='string' name='[Calculation_487233209891385344]' role='measure' type='nominal'>
+              <calculation class='tableau' formula='IF [Parameters].[Parameter 1 1] = 1 THEN &apos;N=&apos; + STR([Positive rate (copy)_1165869355181670405])&#13;&#10;ELSEIF  [Parameters].[Parameter 1 1] = 2 THEN LEFT(STR(ROUND([Calculation_1165869355178258436],4)*100),4) + &apos;%&apos;&#13;&#10;END' />
+            </column>
+            <column datatype='string' name='[DiagnosticTest]' role='dimension' type='nominal' />
+            <column caption='Date' datatype='date' name='[FlooredDate]' role='dimension' type='ordinal' />
+            <column aggregation='Sum' datatype='integer' name='[LabReference]' role='dimension' type='ordinal'>
+              <aliases>
+                <alias key='1' value='DGZ' />
+                <alias key='2' value='GD' />
+                <alias key='3' value='ARSIA' />
+                <alias key='4' value='PathoSense' />
+                <alias key='5' value='Ireland' />
+              </aliases>
+            </column>
+            <column datatype='string' name='[Pathogen]' role='dimension' type='nominal' />
+            <column caption='Positives' datatype='integer' default-format='N' name='[Positive rate (copy)_1165869355181670405]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END )' />
+            </column>
+            <column datatype='integer' name='[Result]' role='measure' type='quantitative' />
+            <column datatype='string' name='[SampleType]' role='dimension' type='nominal' />
+            <column-instance column='[DiagnosticTest]' derivation='None' name='[none:DiagnosticTest:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='None' name='[none:FlooredDate:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[Pathogen]' derivation='None' name='[none:Pathogen:nk]' pivot='key' type='nominal' />
+            <column-instance column='[SampleType]' derivation='None' name='[none:SampleType:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='Month-Trunc' name='[tmn:FlooredDate:ok]' pivot='key' type='ordinal' />
+            <column-instance column='[Calculation_487233209891385344]' derivation='User' name='[usr:Calculation_487233209891385344:nk]' pivot='key' type='nominal' />
+            <column-instance column='[Positive rate (copy)_1165869355181670405]' derivation='User' name='[usr:Positive rate (copy)_1165869355181670405:qk]' pivot='key' type='quantitative' />
+          </datasource-dependencies>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]'>
+            <groupfilter function='level-members' level='[Breed]' user:ui-action-filter='[Action3_64915248F23244159AF9B5BACE4DBB9C]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]'>
+            <groupfilter function='level-members' level='[none:DiagnosticTest:nk]' user:ui-action-filter='[Action4_B9FCDD97D11D43A1A091827F2ACA6758]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]'>
+            <groupfilter function='level-members' level='[LabReference]' user:ui-action-filter='[Action6_749475BEB4F646799CDC2480027E9823]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]'>
+            <groupfilter function='level-members' level='[tmn:FlooredDate:ok]' user:ui-action-filter='[Action5_2BFF0569C5574F50B85522446A30AE60]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]'>
+            <groupfilter function='level-members' level='[none:SampleType:nk]' user:ui-action-filter='[Action2_76972BB830C344618DF7E9B8F24EBD75]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <slices>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]</column>
+          </slices>
+          <aggregation value='true' />
+        </view>
+        <style>
+          <style-rule element='axis'>
+            <format attr='display' class='0' field='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Positive rate (copy)_1165869355181670405:qk]' scope='cols' value='false' />
+          </style-rule>
+          <style-rule element='header'>
+            <format attr='vertical-align' data-class='total' field='[federated.09u885j0zppgf015n3s0o1e37os9].[none:Pathogen:nk]' value='auto' />
+            <format attr='wrap' data-class='total' field='[federated.09u885j0zppgf015n3s0o1e37os9].[none:Pathogen:nk]' value='auto' />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Bar' />
+            <encodings>
+              <text column='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_487233209891385344:nk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-show' value='true' />
+                <format attr='mark-labels-cull' value='false' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows onTop='true'>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Pathogen:nk]</rows>
+        <cols onLeft='true' total='true'>[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Positive rate (copy)_1165869355181670405:qk]</cols>
+      </table>
+      <simple-id uuid='{CFE264BB-279F-477B-B381-2C94E61B50B6}' />
+    </worksheet>
+    <worksheet name='By production type'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='barometer_combined_2023-06-19' name='federated.09u885j0zppgf015n3s0o1e37os9' />
+          </datasources>
+          <datasource-dependencies datasource='federated.09u885j0zppgf015n3s0o1e37os9'>
+            <column datatype='string' name='[Breed]' role='dimension' type='nominal' />
+            <column datatype='string' name='[DiagnosticTest]' role='dimension' type='nominal' />
+            <column caption='Date' datatype='date' name='[FlooredDate]' role='dimension' type='ordinal' />
+            <column aggregation='Sum' datatype='integer' name='[LabReference]' role='dimension' type='ordinal'>
+              <aliases>
+                <alias key='1' value='DGZ' />
+                <alias key='2' value='GD' />
+                <alias key='3' value='ARSIA' />
+                <alias key='4' value='PathoSense' />
+                <alias key='5' value='Ireland' />
+              </aliases>
+            </column>
+            <column datatype='string' name='[Pathogen]' role='dimension' type='nominal' />
+            <column datatype='integer' name='[Result]' role='measure' type='quantitative' />
+            <column datatype='string' name='[SampleType]' role='dimension' type='nominal' />
+            <column-instance column='[Breed]' derivation='None' name='[none:Breed:nk]' pivot='key' type='nominal' />
+            <column-instance column='[DiagnosticTest]' derivation='None' name='[none:DiagnosticTest:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='None' name='[none:FlooredDate:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[SampleType]' derivation='None' name='[none:SampleType:nk]' pivot='key' type='nominal' />
+            <column-instance column='[Result]' derivation='Count' name='[pcto:cnt:Result:qk]' pivot='key' type='quantitative'>
+              <table-calc ordering-type='Columns' type='PctTotal' />
+            </column-instance>
+            <column-instance column='[FlooredDate]' derivation='Month-Trunc' name='[tmn:FlooredDate:ok]' pivot='key' type='ordinal' />
+          </datasource-dependencies>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]'>
+            <groupfilter function='level-members' level='[none:DiagnosticTest:nk]' user:ui-action-filter='[Action4_B9FCDD97D11D43A1A091827F2ACA6758]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]'>
+            <groupfilter function='level-members' level='[LabReference]' user:ui-action-filter='[Action6_749475BEB4F646799CDC2480027E9823]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]'>
+            <groupfilter function='level-members' level='[tmn:FlooredDate:ok]' user:ui-action-filter='[Action5_2BFF0569C5574F50B85522446A30AE60]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]'>
+            <groupfilter function='level-members' level='[Pathogen]' user:ui-action-filter='[Action1_99BF0544185D4BB0BD4D01772A753F21]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]'>
+            <groupfilter function='level-members' level='[none:SampleType:nk]' user:ui-action-filter='[Action2_76972BB830C344618DF7E9B8F24EBD75]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <slices>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]</column>
+          </slices>
+          <aggregation value='true' />
+        </view>
+        <style>
+          <style-rule element='axis'>
+            <format attr='display' class='0' field='[federated.09u885j0zppgf015n3s0o1e37os9].[pcto:cnt:Result:qk]' scope='cols' value='false' />
+          </style-rule>
+          <style-rule element='worksheet'>
+            <format attr='display-field-labels' scope='rows' value='false' />
+          </style-rule>
+        </style>
+        <panes>
+          <pane id='1' selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Bar' />
+            <encodings>
+              <text column='[federated.09u885j0zppgf015n3s0o1e37os9].[pcto:cnt:Result:qk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-show' value='true' />
+                <format attr='mark-labels-cull' value='false' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows onTop='true'>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Breed:nk]</rows>
+        <cols onLeft='true' total='true'>[federated.09u885j0zppgf015n3s0o1e37os9].[pcto:cnt:Result:qk]</cols>
+      </table>
+      <simple-id uuid='{EDA332CF-4726-4A0C-88C1-94F7AEA44183}' />
+    </worksheet>
+    <worksheet name='By sample type'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='barometer_combined_2023-06-19' name='federated.09u885j0zppgf015n3s0o1e37os9' />
+          </datasources>
+          <datasource-dependencies datasource='federated.09u885j0zppgf015n3s0o1e37os9'>
+            <column datatype='string' name='[Breed]' role='dimension' type='nominal' />
+            <column datatype='string' name='[DiagnosticTest]' role='dimension' type='nominal' />
+            <column caption='Date' datatype='date' name='[FlooredDate]' role='dimension' type='ordinal' />
+            <column aggregation='Sum' datatype='integer' name='[LabReference]' role='dimension' type='ordinal'>
+              <aliases>
+                <alias key='1' value='DGZ' />
+                <alias key='2' value='GD' />
+                <alias key='3' value='ARSIA' />
+                <alias key='4' value='PathoSense' />
+                <alias key='5' value='Ireland' />
+              </aliases>
+            </column>
+            <column datatype='string' name='[Pathogen]' role='dimension' type='nominal' />
+            <column datatype='integer' name='[Result]' role='measure' type='quantitative' />
+            <column datatype='string' name='[SampleType]' role='dimension' type='nominal' />
+            <column-instance column='[DiagnosticTest]' derivation='None' name='[none:DiagnosticTest:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='None' name='[none:FlooredDate:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[SampleType]' derivation='None' name='[none:SampleType:nk]' pivot='key' type='nominal' />
+            <column-instance column='[Result]' derivation='Count' name='[pcto:cnt:Result:qk]' pivot='key' type='quantitative'>
+              <table-calc ordering-type='Columns' type='PctTotal' />
+            </column-instance>
+            <column-instance column='[FlooredDate]' derivation='Month-Trunc' name='[tmn:FlooredDate:ok]' pivot='key' type='ordinal' />
+          </datasource-dependencies>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]'>
+            <groupfilter function='level-members' level='[Breed]' user:ui-action-filter='[Action3_64915248F23244159AF9B5BACE4DBB9C]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]'>
+            <groupfilter function='level-members' level='[none:DiagnosticTest:nk]' user:ui-action-filter='[Action4_B9FCDD97D11D43A1A091827F2ACA6758]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]'>
+            <groupfilter function='level-members' level='[LabReference]' user:ui-action-filter='[Action6_749475BEB4F646799CDC2480027E9823]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]'>
+            <groupfilter function='level-members' level='[tmn:FlooredDate:ok]' user:ui-action-filter='[Action5_2BFF0569C5574F50B85522446A30AE60]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]'>
+            <groupfilter function='level-members' level='[Pathogen]' user:ui-action-filter='[Action1_99BF0544185D4BB0BD4D01772A753F21]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <slices>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]</column>
+          </slices>
+          <aggregation value='true' />
+        </view>
+        <style>
+          <style-rule element='axis'>
+            <format attr='title' class='0' field='[federated.09u885j0zppgf015n3s0o1e37os9].[pcto:cnt:Result:qk]' scope='cols' value='' />
+            <format attr='display' class='0' field='[federated.09u885j0zppgf015n3s0o1e37os9].[pcto:cnt:Result:qk]' scope='cols' value='false' />
+          </style-rule>
+          <style-rule element='worksheet'>
+            <format attr='display-field-labels' scope='rows' value='false' />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Bar' />
+            <encodings>
+              <text column='[federated.09u885j0zppgf015n3s0o1e37os9].[pcto:cnt:Result:qk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-show' value='true' />
+                <format attr='mark-labels-cull' value='false' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[federated.09u885j0zppgf015n3s0o1e37os9].[none:SampleType:nk]</rows>
+        <cols onLeft='true' total='true'>[federated.09u885j0zppgf015n3s0o1e37os9].[pcto:cnt:Result:qk]</cols>
+      </table>
+      <simple-id uuid='{4A4233CE-8751-4031-8E1E-EB3E4C78FF5D}' />
+    </worksheet>
+    <worksheet name='Country'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='barometer_combined_2023-06-19' name='federated.09u885j0zppgf015n3s0o1e37os9' />
+            <datasource name='Parameters' />
+          </datasources>
+          <mapsources>
+            <mapsource name='Tableau' />
+          </mapsources>
+          <datasource-dependencies datasource='Parameters'>
+            <column alias='Percentage' caption='Count or Percentage?' datatype='real' name='[Parameter 1 1]' param-domain-type='list' role='measure' type='quantitative' value='2.0'>
+              <calculation class='tableau' formula='2.0' />
+              <aliases>
+                <alias key='1.0' value='Value' />
+                <alias key='2.0' value='Percentage' />
+              </aliases>
+            </column>
+          </datasource-dependencies>
+          <datasource-dependencies datasource='federated.09u885j0zppgf015n3s0o1e37os9'>
+            <column datatype='string' name='[Breed]' role='dimension' type='nominal' />
+            <column caption='Positive rate' datatype='real' default-format='p0%' name='[Calculation_1165869355178258436]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END ) / COUNT(if not ISNULL([Result]) THEN  [FlooredDate] END )' />
+            </column>
+            <column caption='Value' datatype='real' name='[Calculation_1165869355182714886]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='CASE [Parameters].[Parameter 1 1] WHEN 1 THEN [Positive rate (copy)_1165869355181670405] ELSE [Calculation_1165869355178258436] END' />
+            </column>
+            <column datatype='string' name='[Country]' role='dimension' semantic-role='[Country].[ISO3166_2]' type='nominal' />
+            <column datatype='string' name='[DiagnosticTest]' role='dimension' type='nominal' />
+            <column caption='Date' datatype='date' name='[FlooredDate]' role='dimension' type='ordinal' />
+            <column aggregation='Sum' datatype='integer' name='[LabReference]' role='dimension' type='ordinal'>
+              <aliases>
+                <alias key='1' value='DGZ' />
+                <alias key='2' value='GD' />
+                <alias key='3' value='ARSIA' />
+                <alias key='4' value='PathoSense' />
+                <alias key='5' value='Ireland' />
+              </aliases>
+            </column>
+            <column datatype='string' name='[Pathogen]' role='dimension' type='nominal' />
+            <column caption='Positives' datatype='integer' default-format='N' name='[Positive rate (copy)_1165869355181670405]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END )' />
+            </column>
+            <column datatype='string' name='[Province]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+            <column datatype='integer' name='[Result]' role='measure' type='quantitative' />
+            <column datatype='string' name='[SampleType]' role='dimension' type='nominal' />
+            <column-instance column='[Country]' derivation='None' name='[none:Country:nk]' pivot='key' type='nominal' />
+            <column-instance column='[DiagnosticTest]' derivation='None' name='[none:DiagnosticTest:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='None' name='[none:FlooredDate:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[Province]' derivation='None' name='[none:Province:nk]' pivot='key' type='nominal' />
+            <column-instance column='[SampleType]' derivation='None' name='[none:SampleType:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='Month-Trunc' name='[tmn:FlooredDate:ok]' pivot='key' type='ordinal' />
+            <column-instance column='[Calculation_1165869355182714886]' derivation='User' name='[usr:Calculation_1165869355182714886:qk]' pivot='key' type='quantitative' />
+          </datasource-dependencies>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]'>
+            <groupfilter function='level-members' level='[Breed]' user:ui-action-filter='[Action3_64915248F23244159AF9B5BACE4DBB9C]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]'>
+            <groupfilter function='level-members' level='[none:DiagnosticTest:nk]' user:ui-action-filter='[Action4_B9FCDD97D11D43A1A091827F2ACA6758]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]'>
+            <groupfilter function='level-members' level='[LabReference]' user:ui-action-filter='[Action6_749475BEB4F646799CDC2480027E9823]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]'>
+            <groupfilter function='level-members' level='[tmn:FlooredDate:ok]' user:ui-action-filter='[Action5_2BFF0569C5574F50B85522446A30AE60]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]'>
+            <groupfilter function='level-members' level='[Pathogen]' user:ui-action-filter='[Action1_85984BB5CDDB4EA7ABAC1D3D06F48B85]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]'>
+            <groupfilter function='level-members' level='[none:SampleType:nk]' user:ui-action-filter='[Action2_76972BB830C344618DF7E9B8F24EBD75]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <slices>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]</column>
+          </slices>
+          <aggregation value='true' />
+        </view>
+        <style>
+          <style-rule element='cell'>
+            <format attr='text-format' field='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_1165869355182714886:qk]' value='p0%' />
+          </style-rule>
+          <style-rule element='label'>
+            <format attr='text-format' field='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_1165869355182714886:qk]' value='p0.0%' />
+          </style-rule>
+          <style-rule element='map'>
+            <format attr='washout' value='0.0' />
+          </style-rule>
+        </style>
+        <panes>
+          <pane id='2' selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+            <encodings>
+              <color column='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_1165869355182714886:qk]' />
+              <lod column='[federated.09u885j0zppgf015n3s0o1e37os9].[none:Province:nk]' />
+              <tooltip column='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_1165869355182714886:qk]' />
+              <lod column='[federated.09u885j0zppgf015n3s0o1e37os9].[none:Country:nk]' />
+              <geometry column='[federated.09u885j0zppgf015n3s0o1e37os9].[Geometry (generated)]' />
+            </encodings>
+          </pane>
+        </panes>
+        <rows>[federated.09u885j0zppgf015n3s0o1e37os9].[Latitude (generated)]</rows>
+        <cols>[federated.09u885j0zppgf015n3s0o1e37os9].[Longitude (generated)]</cols>
+      </table>
+      <simple-id uuid='{3F22D351-6F42-409C-8196-FAA71FDD793C}' />
+    </worksheet>
+    <worksheet name='Over time'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='barometer_combined_2023-06-19' name='federated.09u885j0zppgf015n3s0o1e37os9' />
+            <datasource name='Parameters' />
+          </datasources>
+          <datasource-dependencies datasource='Parameters'>
+            <column alias='Percentage' caption='Count or Percentage?' datatype='real' name='[Parameter 1 1]' param-domain-type='list' role='measure' type='quantitative' value='2.0'>
+              <calculation class='tableau' formula='2.0' />
+              <aliases>
+                <alias key='1.0' value='Value' />
+                <alias key='2.0' value='Percentage' />
+              </aliases>
+            </column>
+          </datasource-dependencies>
+          <datasource-dependencies datasource='federated.09u885j0zppgf015n3s0o1e37os9'>
+            <column datatype='string' name='[Breed]' role='dimension' type='nominal' />
+            <column caption='Positive rate' datatype='real' default-format='p0%' name='[Calculation_1165869355178258436]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END ) / COUNT(if not ISNULL([Result]) THEN  [FlooredDate] END )' />
+            </column>
+            <column caption='Value' datatype='real' name='[Calculation_1165869355182714886]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='CASE [Parameters].[Parameter 1 1] WHEN 1 THEN [Positive rate (copy)_1165869355181670405] ELSE [Calculation_1165869355178258436] END' />
+            </column>
+            <column caption='Value or Percent label' datatype='string' name='[Calculation_487233209891385344]' role='measure' type='nominal'>
+              <calculation class='tableau' formula='IF [Parameters].[Parameter 1 1] = 1 THEN &apos;N=&apos; + STR([Positive rate (copy)_1165869355181670405])&#13;&#10;ELSEIF  [Parameters].[Parameter 1 1] = 2 THEN LEFT(STR(ROUND([Calculation_1165869355178258436],4)*100),4) + &apos;%&apos;&#13;&#10;END' />
+            </column>
+            <column datatype='string' name='[DiagnosticTest]' role='dimension' type='nominal' />
+            <column caption='Date' datatype='date' name='[FlooredDate]' role='dimension' type='ordinal' />
+            <column aggregation='Sum' datatype='integer' name='[LabReference]' role='dimension' type='ordinal'>
+              <aliases>
+                <alias key='1' value='DGZ' />
+                <alias key='2' value='GD' />
+                <alias key='3' value='ARSIA' />
+                <alias key='4' value='PathoSense' />
+                <alias key='5' value='Ireland' />
+              </aliases>
+            </column>
+            <column datatype='string' name='[Pathogen]' role='dimension' type='nominal' />
+            <column caption='Positives' datatype='integer' default-format='N' name='[Positive rate (copy)_1165869355181670405]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END )' />
+            </column>
+            <column datatype='integer' name='[Result]' role='measure' type='quantitative' />
+            <column datatype='string' name='[SampleType]' role='dimension' type='nominal' />
+            <column-instance column='[DiagnosticTest]' derivation='None' name='[none:DiagnosticTest:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='None' name='[none:FlooredDate:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[SampleType]' derivation='None' name='[none:SampleType:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='Month-Trunc' name='[tmn:FlooredDate:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[Calculation_1165869355182714886]' derivation='User' name='[usr:Calculation_1165869355182714886:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[Calculation_487233209891385344]' derivation='User' name='[usr:Calculation_487233209891385344:nk]' pivot='key' type='nominal' />
+          </datasource-dependencies>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]'>
+            <groupfilter function='level-members' level='[Breed]' user:ui-action-filter='[Action3_64915248F23244159AF9B5BACE4DBB9C]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]'>
+            <groupfilter function='level-members' level='[none:DiagnosticTest:nk]' user:ui-action-filter='[Action4_B9FCDD97D11D43A1A091827F2ACA6758]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]'>
+            <groupfilter function='level-members' level='[LabReference]' user:ui-action-filter='[Action6_749475BEB4F646799CDC2480027E9823]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]'>
+            <groupfilter function='level-members' level='[Pathogen]' user:ui-action-filter='[Action1_99BF0544185D4BB0BD4D01772A753F21]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]'>
+            <groupfilter function='level-members' level='[none:SampleType:nk]' user:ui-action-filter='[Action2_76972BB830C344618DF7E9B8F24EBD75]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <slices>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]</column>
+          </slices>
+          <aggregation value='true' />
+        </view>
+        <style>
+          <style-rule element='axis'>
+            <format attr='title' class='0' field='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_1165869355182714886:qk]' scope='rows' value='' />
+            <format attr='title' class='0' field='[federated.09u885j0zppgf015n3s0o1e37os9].[tmn:FlooredDate:qk]' scope='cols' value='' />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Bar' />
+            <mark-sizing custom-mark-size-in-axis-units='1.0' mark-alignment='mark-alignment-left' mark-sizing-setting='marks-scaling-on' use-custom-mark-size='false' />
+            <encodings>
+              <text column='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_487233209891385344:nk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-show' value='true' />
+                <format attr='mark-labels-cull' value='true' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_1165869355182714886:qk]</rows>
+        <cols>[federated.09u885j0zppgf015n3s0o1e37os9].[tmn:FlooredDate:qk]</cols>
+      </table>
+      <simple-id uuid='{135E70B8-1AF4-4DD0-A97B-79BFF4F639E7}' />
+    </worksheet>
+    <worksheet name='Total'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='barometer_combined_2023-06-19' name='federated.09u885j0zppgf015n3s0o1e37os9' />
+            <datasource name='Parameters' />
+          </datasources>
+          <datasource-dependencies datasource='Parameters'>
+            <column alias='Percentage' caption='Count or Percentage?' datatype='real' name='[Parameter 1 1]' param-domain-type='list' role='measure' type='quantitative' value='2.0'>
+              <calculation class='tableau' formula='2.0' />
+              <aliases>
+                <alias key='1.0' value='Value' />
+                <alias key='2.0' value='Percentage' />
+              </aliases>
+            </column>
+          </datasource-dependencies>
+          <datasource-dependencies datasource='federated.09u885j0zppgf015n3s0o1e37os9'>
+            <column datatype='string' name='[Breed]' role='dimension' type='nominal' />
+            <column caption='Positive rate' datatype='real' default-format='p0%' name='[Calculation_1165869355178258436]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END ) / COUNT(if not ISNULL([Result]) THEN  [FlooredDate] END )' />
+            </column>
+            <column caption='Value or Percent label' datatype='string' name='[Calculation_487233209891385344]' role='measure' type='nominal'>
+              <calculation class='tableau' formula='IF [Parameters].[Parameter 1 1] = 1 THEN &apos;N=&apos; + STR([Positive rate (copy)_1165869355181670405])&#13;&#10;ELSEIF  [Parameters].[Parameter 1 1] = 2 THEN LEFT(STR(ROUND([Calculation_1165869355178258436],4)*100),4) + &apos;%&apos;&#13;&#10;END' />
+            </column>
+            <column datatype='string' name='[DiagnosticTest]' role='dimension' type='nominal' />
+            <column caption='Date' datatype='date' name='[FlooredDate]' role='dimension' type='ordinal' />
+            <column aggregation='Sum' datatype='integer' name='[LabReference]' role='dimension' type='ordinal'>
+              <aliases>
+                <alias key='1' value='DGZ' />
+                <alias key='2' value='GD' />
+                <alias key='3' value='ARSIA' />
+                <alias key='4' value='PathoSense' />
+                <alias key='5' value='Ireland' />
+              </aliases>
+            </column>
+            <column datatype='string' name='[Pathogen]' role='dimension' type='nominal' />
+            <column caption='Positives' datatype='integer' default-format='N' name='[Positive rate (copy)_1165869355181670405]' role='measure' type='quantitative'>
+              <calculation class='tableau' formula='COUNT(if [Result] = 1 THEN [FlooredDate] END )' />
+            </column>
+            <column datatype='integer' name='[Result]' role='measure' type='quantitative' />
+            <column datatype='string' name='[SampleType]' role='dimension' type='nominal' />
+            <column-instance column='[DiagnosticTest]' derivation='None' name='[none:DiagnosticTest:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='None' name='[none:FlooredDate:qk]' pivot='key' type='quantitative' />
+            <column-instance column='[SampleType]' derivation='None' name='[none:SampleType:nk]' pivot='key' type='nominal' />
+            <column-instance column='[FlooredDate]' derivation='Month-Trunc' name='[tmn:FlooredDate:ok]' pivot='key' type='ordinal' />
+            <column-instance column='[Calculation_487233209891385344]' derivation='User' name='[usr:Calculation_487233209891385344:nk]' pivot='key' type='nominal' />
+          </datasource-dependencies>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]'>
+            <groupfilter function='level-members' level='[Breed]' user:ui-action-filter='[Action3_64915248F23244159AF9B5BACE4DBB9C]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]'>
+            <groupfilter function='level-members' level='[none:DiagnosticTest:nk]' user:ui-action-filter='[Action4_B9FCDD97D11D43A1A091827F2ACA6758]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]'>
+            <groupfilter function='level-members' level='[LabReference]' user:ui-action-filter='[Action6_749475BEB4F646799CDC2480027E9823]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]'>
+            <groupfilter function='level-members' level='[tmn:FlooredDate:ok]' user:ui-action-filter='[Action5_2BFF0569C5574F50B85522446A30AE60]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]'>
+            <groupfilter function='level-members' level='[Pathogen]' user:ui-action-filter='[Action1_99BF0544185D4BB0BD4D01772A753F21]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <filter class='categorical' column='[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]'>
+            <groupfilter function='level-members' level='[none:SampleType:nk]' user:ui-action-filter='[Action2_76972BB830C344618DF7E9B8F24EBD75]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+          </filter>
+          <slices>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Pathogen)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Breed)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Sample_type)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (Diagnostic_test)]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (MONTH(Date))]</column>
+            <column>[federated.09u885j0zppgf015n3s0o1e37os9].[Action (LabReference)]</column>
+          </slices>
+          <aggregation value='true' />
+        </view>
+        <style>
+          <style-rule element='cell'>
+            <format attr='width' value='366' />
+            <format attr='height' value='142' />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+            <mark-sizing mark-sizing-setting='marks-scaling-off' />
+            <encodings>
+              <text column='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_487233209891385344:nk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-show' value='true' />
+                <format attr='size' value='2.7734806537628174' />
+              </style-rule>
+              <style-rule element='pane'>
+                <format attr='minwidth' value='-1' />
+                <format attr='maxwidth' value='-1' />
+                <format attr='minheight' value='-1' />
+                <format attr='maxheight' value='-1' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows />
+        <cols />
+      </table>
+      <simple-id uuid='{90830136-5950-47A7-A417-4A3A48DEEEDA}' />
+    </worksheet>
+  </worksheets>
+  <dashboards>
+    <dashboard _.fcp.AccessibleZoneTabOrder.true...enable-sort-zone-taborder='true' name='Positive sample rate'>
+      <style />
+      <size sizing-mode='automatic' />
+      <datasources>
+        <datasource name='Parameters' />
+        <datasource caption='barometer_combined_2023-06-19' name='federated.09u885j0zppgf015n3s0o1e37os9' />
+      </datasources>
+      <datasource-dependencies datasource='Parameters'>
+        <column alias='Percentage' caption='Count or Percentage?' datatype='real' name='[Parameter 1 1]' param-domain-type='list' role='measure' type='quantitative' value='2.0'>
+          <calculation class='tableau' formula='2.0' />
+          <aliases>
+            <alias key='1.0' value='Value' />
+            <alias key='2.0' value='Percentage' />
+          </aliases>
+          <members>
+            <member alias='Value' value='1.0' />
+            <member alias='Percentage' value='2.0' />
+          </members>
+        </column>
+      </datasource-dependencies>
+      <datasource-dependencies datasource='federated.09u885j0zppgf015n3s0o1e37os9'>
+        <column caption='Date' datatype='date' name='[FlooredDate]' role='dimension' type='ordinal' />
+        <column-instance column='[FlooredDate]' derivation='None' name='[none:FlooredDate:qk]' pivot='key' type='quantitative' />
+      </datasource-dependencies>
+      <zones>
+        <zone h='100000' id='4' type-v2='layout-basic' w='100000' x='0' y='0'>
+          <zone h='98214' id='8' param='horz' type-v2='layout-flow' w='99064' x='468' y='893'>
+            <zone fixed-size='382' h='98214' id='3' is-fixed='true' param='vert' type-v2='layout-flow' w='22352' x='468' y='893'>
+              <zone h='5942' id='26' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/DECIDE.jpg' type-v2='bitmap' w='22352' x='468' y='893'>
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+              <zone fixed-size='124' h='14732' id='5' is-fixed='true' name='Total' w='22352' x='468' y='6835'>
+                <layout-cache cell-count-w='1' type-h='cell' type-w='cell' />
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+              <zone fixed-size='294' h='33706' id='11' is-fixed='true' name='By pathogen ' w='22352' x='468' y='21567'>
+                <layout-cache minwidth='180' type-h='cell' type-w='scalable' />
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+              <zone fixed-size='225' h='26005' id='39' is-fixed='true' name='By lab' w='22352' x='468' y='55273'>
+                <layout-cache minwidth='200' type-h='cell' type-w='scalable' />
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+              <zone h='5942' id='30' param='horz' type-v2='layout-flow' w='22352' x='468' y='81278'>
+                <zone h='5942' id='29' is-centered='0' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/logo ireland.png' type-v2='bitmap' w='11176' x='468' y='81278'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                  </zone-style>
+                </zone>
+                <zone h='5942' id='28' is-centered='0' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/dgz-baseline-rgb.jpg' type-v2='bitmap' w='11176' x='11644' y='81278'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                  </zone-style>
+                </zone>
+              </zone>
+              <zone h='5942' id='33' is-centered='0' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/Logo_pathosense.png' type-v2='bitmap' w='22352' x='468' y='87220'>
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+              <zone h='5942' id='31' param='horz' type-v2='layout-flow' w='22352' x='468' y='93162'>
+                <zone h='5942' id='27' is-centered='0' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/ARSIA-logo.png' type-v2='bitmap' w='11176' x='468' y='93162'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                  </zone-style>
+                </zone>
+                <zone h='5942' id='32' is-centered='0' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/Royal GD.jpg' type-v2='bitmap' w='11176' x='11644' y='93162'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                  </zone-style>
+                </zone>
+              </zone>
+            </zone>
+            <zone h='98214' id='10' param='vert' type-v2='layout-flow' w='52078' x='22820' y='893'>
+              <zone h='6250' id='14' name='Over time' param='[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]' show-domain='false' show-null-ctrls='false' type-v2='filter' w='52078' x='22820' y='893'>
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+              <zone fixed-size='340' h='38839' id='13' is-fixed='true' name='Over time' w='52078' x='22820' y='7143'>
+                <layout-cache minheight='173' minwidth='131' type-h='scalable' type-w='scalable' />
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+              <zone h='53125' id='15' name='Country' w='52078' x='22820' y='45982'>
+                <layout-cache minheight='244' minwidth='202' type-h='scalable' type-w='scalable' />
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+            </zone>
+            <zone fixed-size='421' h='98214' id='7' is-fixed='true' param='vert' type-v2='layout-flow' w='24634' x='74898' y='893'>
+              <zone h='6362' id='17' mode='compact' param='[Parameters].[Parameter 1 1]' type-v2='paramctrl' w='24634' x='74898' y='893'>
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+              <zone fixed-size='249' h='28683' id='12' is-fixed='true' name='By sample type' w='24634' x='74898' y='7255'>
+                <layout-cache minwidth='180' type-h='cell' type-w='scalable' />
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+              <zone fixed-size='314' h='35938' id='6' is-fixed='true' name='By production type' w='24634' x='74898' y='35938'>
+                <layout-cache minwidth='180' type-h='cell' type-w='scalable' />
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+              <zone h='27231' id='16' name='By diagnostic test' w='24634' x='74898' y='71876'>
+                <layout-cache cell-count-h='4' minwidth='180' non-cell-size-h='43' type-h='cell' type-w='scalable' />
+                <zone-style>
+                  <format attr='border-color' value='#000000' />
+                  <format attr='border-style' value='none' />
+                  <format attr='border-width' value='0' />
+                  <format attr='margin' value='4' />
+                </zone-style>
+              </zone>
+            </zone>
+          </zone>
+          <zone-style>
+            <format attr='border-color' value='#000000' />
+            <format attr='border-style' value='none' />
+            <format attr='border-width' value='0' />
+            <format attr='margin' value='8' />
+          </zone-style>
+        </zone>
+      </zones>
+      <devicelayouts>
+        <devicelayout auto-generated='true' name='Phone'>
+          <size maxheight='2350' minheight='2350' sizing-mode='vscroll' />
+          <zones>
+            <zone h='100000' id='49' type-v2='layout-basic' w='100000' x='0' y='0'>
+              <zone h='98214' id='48' param='vert' type-v2='layout-flow' w='99064' x='468' y='893'>
+                <zone fixed-size='40' h='5942' id='26' is-fixed='true' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/DECIDE.jpg' type-v2='bitmap' w='22352' x='468' y='893'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone h='6362' id='17' mode='compact' param='[Parameters].[Parameter 1 1]' type-v2='paramctrl' w='24634' x='74898' y='893'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='110' h='14732' id='5' is-fixed='true' name='Total' w='22352' x='468' y='6835'>
+                  <layout-cache cell-count-w='1' type-h='cell' type-w='cell' />
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone h='6250' id='14' name='Over time' param='[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]' show-domain='false' show-null-ctrls='false' type-v2='filter' w='52078' x='22820' y='893'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='280' h='38839' id='13' is-fixed='true' name='Over time' w='52078' x='22820' y='7143'>
+                  <layout-cache minheight='173' minwidth='131' type-h='scalable' type-w='scalable' />
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='222' h='28683' id='12' is-fixed='true' name='By sample type' w='24634' x='74898' y='7255'>
+                  <layout-cache minwidth='180' type-h='cell' type-w='scalable' />
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='261' h='33706' id='11' is-fixed='true' name='By pathogen ' w='22352' x='468' y='21567'>
+                  <layout-cache minwidth='180' type-h='cell' type-w='scalable' />
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='279' h='35938' id='6' is-fixed='true' name='By production type' w='24634' x='74898' y='35938'>
+                  <layout-cache minwidth='180' type-h='cell' type-w='scalable' />
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='280' h='53125' id='15' is-fixed='true' name='Country' w='52078' x='22820' y='45982'>
+                  <layout-cache minheight='244' minwidth='202' type-h='scalable' type-w='scalable' />
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='200' h='26005' id='39' is-fixed='true' name='By lab' w='22352' x='468' y='55273'>
+                  <layout-cache minwidth='200' type-h='cell' type-w='scalable' />
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='210' h='27231' id='16' is-fixed='true' name='By diagnostic test' w='24634' x='74898' y='71876'>
+                  <layout-cache cell-count-h='4' minwidth='180' non-cell-size-h='43' type-h='cell' type-w='scalable' />
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='40' h='5942' id='29' is-centered='0' is-fixed='true' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/logo ireland.png' type-v2='bitmap' w='11176' x='468' y='81278'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='40' h='5942' id='28' is-centered='0' is-fixed='true' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/dgz-baseline-rgb.jpg' type-v2='bitmap' w='11176' x='11644' y='81278'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='39' h='5942' id='33' is-centered='0' is-fixed='true' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/Logo_pathosense.png' type-v2='bitmap' w='22352' x='468' y='87220'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='40' h='5942' id='27' is-centered='0' is-fixed='true' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/ARSIA-logo.png' type-v2='bitmap' w='11176' x='468' y='93162'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+                <zone fixed-size='40' h='5942' id='32' is-centered='0' is-fixed='true' is-scaled='1' param='C:/Users/mielh/OneDrive - Universiteit Utrecht/Projecten/DECIDE/cattle-use-case-barometer/Figures/Royal GD.jpg' type-v2='bitmap' w='11176' x='11644' y='93162'>
+                  <zone-style>
+                    <format attr='border-color' value='#000000' />
+                    <format attr='border-style' value='none' />
+                    <format attr='border-width' value='0' />
+                    <format attr='margin' value='4' />
+                    <format attr='padding' value='0' />
+                  </zone-style>
+                </zone>
+              </zone>
+              <zone-style>
+                <format attr='border-color' value='#000000' />
+                <format attr='border-style' value='none' />
+                <format attr='border-width' value='0' />
+                <format attr='margin' value='8' />
+              </zone-style>
+            </zone>
+          </zones>
+        </devicelayout>
+      </devicelayouts>
+      <simple-id uuid='{6EAD4FAE-3A9E-4A1C-8360-8629BF12BC27}' />
+    </dashboard>
+  </dashboards>
+  <windows source-height='30'>
+    <window class='dashboard' maximized='true' name='Positive sample rate'>
+      <viewpoints>
+        <viewpoint name='By diagnostic test'>
+          <zoom type='entire-view' />
+        </viewpoint>
+        <viewpoint name='By lab'>
+          <zoom type='entire-view' />
+        </viewpoint>
+        <viewpoint name='By pathogen '>
+          <zoom type='entire-view' />
+        </viewpoint>
+        <viewpoint name='By production type'>
+          <zoom type='entire-view' />
+        </viewpoint>
+        <viewpoint name='By sample type'>
+          <zoom type='entire-view' />
+        </viewpoint>
+        <viewpoint name='Country'>
+          <zoom type='entire-view' />
+        </viewpoint>
+        <viewpoint name='Over time'>
+          <zoom type='entire-view' />
+        </viewpoint>
+        <viewpoint name='Total'>
+          <zoom type='entire-view' />
+        </viewpoint>
+      </viewpoints>
+      <active id='15' />
+      <simple-id uuid='{16E20CBF-E896-4162-899F-7AC6B4D6B16E}' />
+    </window>
+    <window class='worksheet' hidden='true' name='By diagnostic test'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='31'>
+            <card type='title' />
+          </strip>
+        </edge>
+      </cards>
+      <viewpoint>
+        <highlight>
+          <color-one-way>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Calculation_1165869355154268162:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Diagnostic_test:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Filenumber:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Pathogen:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Result:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Sample_type:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_487233209891385344:nk]</field>
+          </color-one-way>
+        </highlight>
+      </viewpoint>
+      <simple-id uuid='{C05FB817-CB58-422D-857D-30456EDA67FB}' />
+    </window>
+    <window class='worksheet' hidden='true' name='By lab'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='31'>
+            <card type='title' />
+          </strip>
+        </edge>
+      </cards>
+      <viewpoint>
+        <highlight>
+          <color-one-way>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Calculation_1165869355154268162:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Filenumber:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:LabReference:ok]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Pathogen:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Sample_type:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_487233209891385344:nk]</field>
+          </color-one-way>
+        </highlight>
+      </viewpoint>
+      <simple-id uuid='{8B0D261C-B5F5-4A62-8357-114F60E5DD57}' />
+    </window>
+    <window class='worksheet' hidden='true' name='By pathogen '>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='31'>
+            <card type='title' />
+          </strip>
+        </edge>
+      </cards>
+      <viewpoint>
+        <highlight>
+          <color-one-way>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Calculation_1165869355154268162:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Filenumber:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Pathogen:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Sample_type:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_487233209891385344:nk]</field>
+          </color-one-way>
+        </highlight>
+      </viewpoint>
+      <simple-id uuid='{6A7375AA-8DDF-4093-84F0-F31B8776A9C4}' />
+    </window>
+    <window class='worksheet' hidden='true' name='By production type'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='31'>
+            <card type='title' />
+          </strip>
+        </edge>
+      </cards>
+      <viewpoint>
+        <highlight>
+          <color-one-way>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Breed:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Calculation_1165869355154268162:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Diagnostic_test:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Filenumber:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Pathogen:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Result:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Sample_type:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_487233209891385344:nk]</field>
+          </color-one-way>
+        </highlight>
+      </viewpoint>
+      <simple-id uuid='{7CBA4B3C-737F-4CD9-B2B0-0894CD5097CA}' />
+    </window>
+    <window class='worksheet' hidden='true' name='By sample type'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='31'>
+            <card type='title' />
+          </strip>
+        </edge>
+      </cards>
+      <viewpoint>
+        <highlight>
+          <color-one-way>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Calculation_1165869355154268162:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Filenumber:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Pathogen:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Result:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Sample_type:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_487233209891385344:nk]</field>
+          </color-one-way>
+        </highlight>
+      </viewpoint>
+      <simple-id uuid='{5CF0023E-CB0B-406E-B7D5-DF95FD27D084}' />
+    </window>
+    <window class='worksheet' hidden='true' name='Country'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='2147483647'>
+            <card param='[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]' show-domain='false' show-null-ctrls='false' type='filter' />
+          </strip>
+          <strip size='31'>
+            <card type='title' />
+          </strip>
+        </edge>
+        <edge name='right'>
+          <strip size='160'>
+            <card pane-specification-id='2' param='[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_1165869355182714886:qk]' type='color' />
+          </strip>
+        </edge>
+      </cards>
+      <viewpoint>
+        <highlight>
+          <color-one-way>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[cnt:Filenumber:qk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Country:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Filenumber:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_1165869355182714886:qk]</field>
+          </color-one-way>
+        </highlight>
+      </viewpoint>
+      <simple-id uuid='{EC515CBE-4F8B-4EDB-B345-E114C7A35B39}' />
+    </window>
+    <window class='worksheet' hidden='true' name='Over time'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='2147483647'>
+            <card param='[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]' show-domain='false' show-null-ctrls='false' type='filter' />
+          </strip>
+          <strip size='31'>
+            <card type='title' />
+          </strip>
+        </edge>
+        <edge name='right'>
+          <strip size='160'>
+            <card mode='compact' param='[Parameters].[Parameter 1 1]' type='parameter' />
+          </strip>
+        </edge>
+      </cards>
+      <viewpoint>
+        <highlight>
+          <color-one-way>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Calculation_1165869355154268162:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Filenumber:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:FlooredDate:qk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Pathogen:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Sample_type:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_487233209891385344:nk]</field>
+          </color-one-way>
+        </highlight>
+      </viewpoint>
+      <simple-id uuid='{227F6E0F-3DE4-49C6-AAB6-3247727CCD6B}' />
+    </window>
+    <window class='worksheet' hidden='true' name='Total'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+        </edge>
+      </cards>
+      <viewpoint>
+        <highlight>
+          <color-one-way>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Calculation_1165869355154268162:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Filenumber:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Pathogen:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Result:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[none:Sample_type:nk]</field>
+            <field>[federated.09u885j0zppgf015n3s0o1e37os9].[usr:Calculation_487233209891385344:nk]</field>
+          </color-one-way>
+        </highlight>
+      </viewpoint>
+      <simple-id uuid='{7C5C0F97-513E-437F-A294-D33FA44C6A5F}' />
+    </window>
+  </windows>
+  <thumbnails>
+    <thumbnail height='192' name='Positive sample rate' width='192'>
+      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
+      TkSuQmCC
+    </thumbnail>
+  </thumbnails>
+</workbook>
