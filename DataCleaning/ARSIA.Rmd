@@ -160,5 +160,5 @@ write.csv(barometer_long, "../Data/CleanedData/barometer_ARSIA.csv", row.names=T
 
 ```{r message=FALSE, warning=FALSE}
 
-writexl::write_xlsx(barometer_dt, "barometer_wide_ARSIA.xlsx")
+writexl::write_xlsx(barometer_dt, "../Data/CleanedData/barometer_wide_ARSIA.xlsx")
 ```
