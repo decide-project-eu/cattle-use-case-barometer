@@ -118,14 +118,7 @@ barometer_dt <- barometer_dt_filter3 %>%
       breed %in% c("OTHER") ~ 'Unknown',
       TRUE ~ 'Unknown' 
     ),
-    Province = case_when(     
-      Region == "LEINSTER" ~ 'Leinster', 
-      Region == "MUNSTER" ~'Munster',
-      Region == "ULSTER" ~'Ulster',
-      Region == "CONNAUGHT" ~ 'Connaught',
-      Region == "Unavailable/Incomplete" ~ 'Unknown',
-      TRUE ~ 'Missing' 
-    ),
+    Province = County,
     Pathogen = case_when(
       TEST == "PCR P. multocida - ARVL" ~ 'PM',
       TEST == "PCR M. haemolytica - ARVL" ~ 'MH',
