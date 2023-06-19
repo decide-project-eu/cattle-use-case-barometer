@@ -16,7 +16,7 @@ output:
 
 # lib = where to save the library  (zonder = default)
 
-package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr"
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr", "rmarkdown"
                   )
 
 for (pkg in package_list) {
@@ -26,7 +26,8 @@ for (pkg in package_list) {
 }
 ```
 
-## Data loading
+## Data creation and loading
+
 
 ```{r message=FALSE, warning=FALSE}
 
@@ -47,7 +48,15 @@ barometer_Tableau <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, baromet
   dplyr::mutate(
     Month = month(as.Date(Floored_date)),
     Year = year(as.Date(Floored_date))
-    )
+    ) %>%
+  dplyr::rename(
+   LabReference = Lab_reference,
+   FlooredDate = Floored_date,
+   FarmIdentifier = Farm_ID, 
+   DiagnosticTest = Diagnostic_test,
+   SampleType = Sample_type
+  ) %>%
+  dplyr::select(-X)
 
 ```
 
