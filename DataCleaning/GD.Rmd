@@ -1,12 +1,18 @@
 ---
----
+title: "GD Notebook"
+output: 
+  pdf_document:
+    latex_engine: pdflatex
+  github_document:
+    toc: true
+    toc_depth: 2
 ---
 
 # DATACLEANING FOR GD
 
 ## Load the libraries
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 # lib = where to save the library  (zonder = default)
 
@@ -20,18 +26,22 @@ for (pkg in package_list) {
 }
 
 ```
+##Function to apply SHA-256 hashing
+```{r message=FALSE, warning=FALSE}
+sha256_hash <- function(data) {
+  openssl::sha256(data)
+}
+```
 
 ## Data loading
 
-```{r}
-
-barometer_dt_raw <- readxl::read_excel("../Data/GD_opgeschoond/221122_data_RGD_DECIDE_nw.xlsx")
-
+```{r message=FALSE, warning=FALSE}
+barometer_dt_raw <- readxl::read_excel("../Data/GD/221122_data_RGD_DECIDE_nw.xlsx")
 ```
 
 ## Data manipulation
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 barometer_dt <- barometer_dt_raw %>% 
   dplyr::rename(
     Filenumber = Dossier_ID,
@@ -100,25 +110,30 @@ barometer_dt <- barometer_dt_raw %>%
     Project,
     Farm_ID
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct() %>%
+dplyr::mutate(
+    Filenumber = sha256_hash(as.character(Filenumber)),
+    Samplenumber = sha256_hash(as.character(Samplenumber)),
+    Farm_ID = sha256_hash(as.character(Farm_ID))
+    )
 ```
 
 ## Filter data for 'monitoring' and 'no projects'
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 barometer_dt_filtered <- filter(barometer_dt, Project == 'monitoring' | Project == 'no project')
 ```
 
 ## Floor date to 1st of the month
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt_filtered$Floored_date <- lubridate::floor_date(barometer_dt_filtered$Date, "month")
 ```
 
 ## Aggregate data based on farm_ID and month (WIDE)
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_groupby <- barometer_dt_filtered %>%
   group_by(Lab_reference, Country, Breed, Floored_date, Province, Farm_ID, Diagnostic_test, Sample_type) %>%
@@ -127,7 +142,7 @@ barometer_groupby <- barometer_dt_filtered %>%
 
 ## Convert to LONG
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_long <- barometer_groupby %>%
   tidyr::pivot_longer(
@@ -139,13 +154,13 @@ barometer_long <- barometer_groupby %>%
 
 ## Save file to csv (long version)
 
-```{r}
-write.csv(barometer_long, "../DataCleaning/Cleaned_data/barometer_GD.csv", row.names=TRUE)
+```{r message=FALSE, warning=FALSE}
+write.csv(barometer_long, "../Data/CleanedData/barometer_GD.csv", row.names=TRUE)
 ```
 
 ## Write to excel
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
-writexl::write_xlsx(barometer_dt, "barometer_long_GD.xlsx")
+writexl::write_xlsx(barometer_dt, "../Data/CleanedData/barometer_long_GD.xlsx")
 ```

@@ -1,12 +1,18 @@
 ---
----
+title: "ARSIA Notebook"
+output: 
+  pdf_document:
+    latex_engine: pdflatex
+  github_document:
+    toc: true
+    toc_depth: 2
 ---
 
 # DATACLEANING FOR ARSIA
 
 ## Load the libraries
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 # lib = where to save the library  (zonder = default)
 
@@ -20,35 +26,30 @@ for (pkg in package_list) {
 }
 
 ```
+##Function to apply SHA-256 hashing
+```{r message=FALSE, warning=FALSE}
+# Function to apply SHA-256 hashing
+sha256_hash <- function(data) {
+  openssl::sha256(data)
+}
+```
 
 ## Data loading
 
-```{r}
-
+```{r message=FALSE, warning=FALSE}
 barometer_dt_raw <- readxl::read_excel("../Data/ARSIA/ARSIA_DECIDE_20221201.xlsx")
 
 ```
 
 ## Data manipulation
 
-```{r}
-colnames(barometer_dt_raw) [1] <- 'Dossier'
-colnames(barometer_dt_raw) [2] <- 'Date'
-colnames(barometer_dt_raw) [6] <- 'Sample_type'
-
-barometer_dt_raw$Dossiernummer = str_sub(barometer_dt_raw$Dossier, 1, 12)
-barometer_dt_raw$Staalnummer = str_sub(barometer_dt_raw$Dossier, -3)
-barometer_dt_raw <- barometer_dt_raw %>% tidyr::separate(ADDRESS, c('Postal_code', 'City'), sep=' ', extra = 'merge')
-
-```
-
-```{r}
+```{r message=FALSE, warning=FALSE}
 barometer_dt <- barometer_dt_raw %>% 
   dplyr::rename(
-    Filenumber = Dossiernummer,
-    Samplenumber = Staalnummer,
+    Dossier = 'N° échantillon',
+    Date = 'Date of Sample',
+    Sample_type= 'Sample Type',
     Diagnostic_test = METH,
-    Sample_type = Sample_type,
     Farm_ID = TRP,
     PM = P_multocida,
     MH = M_haemolytica,
@@ -57,8 +58,12 @@ barometer_dt <- barometer_dt_raw %>%
     BRSV = BRSV,
     PI3 = PI3,
     BCV = Coronavirus
-    ) %>%
+    ) %>% 
+  tidyr::separate(ADDRESS, c('Postal_code', 'City')) %>%
   dplyr::mutate(
+    Postal_code = as.double(Postal_code),
+    Filenumber = str_sub(Dossier, 1, 12),
+    Samplenumber = str_sub(Dossier, -3),
     Country ='Belgium',
     Lab_reference ='3', 
     Sample_type = case_when(
@@ -74,19 +79,19 @@ barometer_dt <- barometer_dt_raw %>%
       TRUE ~ 'Unknown'
     ),
     Province = case_when(
-      between(Postal_code, 1000, 1299) ~ 'Brussels Hoofdstedelijk Gewest',
-      between(Postal_code, 1300, 1499) ~ 'Waals-Brabant',
-      between(Postal_code, 1500, 1999) ~ 'Vlaams-Brabant',
-      between(Postal_code, 3000, 3499) ~ 'Antwerpen',
-      between(Postal_code, 2000, 2999) ~ 'Limburg',
-      between(Postal_code, 3500, 3999) ~ 'Limburg',
-      between(Postal_code, 4000, 4999) ~ 'Luik',
-      between(Postal_code, 5000, 5999) ~ 'Namen',
-      between(Postal_code, 6000, 6599) ~ 'Henegouwen',
-      between(Postal_code, 7000, 7999) ~ 'Henegouwen',
-      between(Postal_code, 6600, 6999) ~ 'Luxemburg',
-      between(Postal_code, 8000, 8999) ~ 'West-Vlaanderen',
-      TRUE ~ 'Oost-Vlaanderen'
+        between(as.numeric(Postal_code), 1000, 1299) ~ 'Brussels',
+        between(as.numeric(Postal_code), 1300, 1499) ~ 'Walloon Brabant',
+        between(as.numeric(Postal_code), 1500, 1999) ~ 'Flemish Brabant',
+        between(as.numeric(Postal_code), 3000, 3499) ~ 'Antwerp',
+        between(as.numeric(Postal_code), 2000, 2999) ~ 'Limburg',
+        between(as.numeric(Postal_code), 3500, 3999) ~ 'Limburg',
+        between(as.numeric(Postal_code), 4000, 4999) ~ 'Liège',
+        between(as.numeric(Postal_code), 5000, 5999) ~ 'Namur',
+        between(as.numeric(Postal_code), 6000, 6599) ~ 'Hainaut',
+        between(as.numeric(Postal_code), 7000, 7999) ~ 'Hainaut',
+        between(as.numeric(Postal_code), 6600, 6999) ~ 'Luxembourg',
+        between(as.numeric(Postal_code), 8000, 8999) ~ 'West Flanders',
+        TRUE ~ 'East Flanders'
     )
   
   )%>%
@@ -110,19 +115,24 @@ barometer_dt <- barometer_dt_raw %>%
     Province,
     Farm_ID
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct() %>%
+  dplyr::mutate(
+    Filenumber = sha256_hash(as.character(Filenumber)),
+    Samplenumber = sha256_hash(as.character(Samplenumber)),
+    Farm_ID = sha256_hash(as.character(Samplenumber))
+  ) 
 ```
 
 ## Floor date to 1st of month
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_dt$Floored_date <- lubridate::floor_date(barometer_dt$Date, "month")
 ```
 
 ## Aggregate data based on farm_ID and month (WIDE)
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 barometer_groupby <- barometer_dt %>%
   group_by(Lab_reference, Country, Breed, Floored_date, Province, Farm_ID, Diagnostic_test, Sample_type) %>%
   summarise(across(c(PM, MH, HS, MB, BRSV, PI3, BCV), max))
@@ -130,7 +140,7 @@ barometer_groupby <- barometer_dt %>%
 
 ## Convert to LONG
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 barometer_long <- barometer_groupby %>%
   tidyr::pivot_longer(
@@ -143,13 +153,13 @@ barometer_long <- barometer_groupby %>%
 
 ## Save file to csv (long version)
 
-```{r}
-write.csv(barometer_long, "../DataCleaning/Cleaned_data/barometer_ARSIA.csv", row.names=TRUE)
+```{r message=FALSE, warning=FALSE}
+write.csv(barometer_long, "../Data/CleanedData/barometer_ARSIA.csv", row.names=TRUE)
 ```
 
 ## Write to excel
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
-writexl::write_xlsx(barometer_dt, "barometer_wide_ARSIA.xlsx")
+writexl::write_xlsx(barometer_dt, "../Data/CleanedData/barometer_wide_ARSIA.xlsx")
 ```

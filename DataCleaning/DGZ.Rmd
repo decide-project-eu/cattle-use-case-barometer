@@ -1,67 +1,82 @@
 ---
----
+title: "DGZ Notebook"
+output: 
+  pdf_document:
+    latex_engine: pdflatex
+  github_document:
+    toc: true
+    toc_depth: 2
 ---
 
-# DATACLEANING FOR DGZ
+# Data cleaning for DGZ
 
 ## Load the libraries
 
-```{r}
+lib = where to save the library  (zonder = default)
 
-# lib = where to save the library  (zonder = default)
+```{r message=FALSE, warning=FALSE}
 
-package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr"
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr", "openssl"
                   )
-
 for (pkg in package_list) {
   if (pkg %in% rownames(.packages()) == FALSE)
   {library(pkg, character.only = TRUE)}
 
 }
+```
 
+## Function to apply SHA-256 hashing
+
+```{r message=FALSE, warning=FALSE}
+# Function to apply SHA-256 hashing
+sha256_hash <- function(data) {
+  openssl::sha256(data)
+}
 ```
 
 ## Data loading
 
-```{r}
-
+```{r message=FALSE, warning=FALSE}
 barometer_dt_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_14nov2022.xlsx")
 barometer_aero_cult_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_BAC_AERO_14nov2022.xlsx")
 barometer_myco_cult_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENTBAC_MYCO_14nov2022.xlsx")
-
 ```
 
-## Data manipulation AEROBIC CULTURE results
+# Data manipulation AEROBIC CULTURE results
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 barometer_aero_cult <- barometer_aero_cult_raw %>%
   dplyr::rename(
     Filenumber = Dossiernummer,
     Pathogen_identification = 'KIEMSTAAL IDENTIFICATIE',
     Pathogen_result = 'KIEMSTAAL RESULTAAT',
-    Samplenumber = 'Staalnummer', 
-  )%>%
-  
+    Samplenumber = 'Staalnummer'
+  ) %>%
   dplyr::mutate(
     Parameter_code = 'BAC_AERO',
     Result = 'OK'
-  )%>%
+  ) %>%
   dplyr::select(
     Filenumber,
     Pathogen_identification,
     Pathogen_result,
     Parameter_code,
     Samplenumber,
-    Result)  %>%
+    Result
+  ) %>%
   dplyr::filter(
     Pathogen_identification %in% c("Pasteurella multocida","Mannheimia haemolytica","Histophilus somni","Mycoplasma bovis")
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct() %>%
+  dplyr::mutate(
+    Filenumber = sha256_hash(as.character(Filenumber)),
+    Samplenumber= sha256_hash(as.character(Samplenumber))
+  ) 
 ```
 
 Intermediate table is needed
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 df_samples <- data.frame(
   Result = c('OK', 'OK', 'OK', 'OK'),
   Parameter_code = c('BAC_AERO','BAC_AERO','BAC_AERO', 'BAC_MYCOPLASMA'),
@@ -72,14 +87,15 @@ df_samples <- data.frame(
 
 ## Data manipulation MYCOPLASMA CULTURE results
 
-```{r}
+```{r message=FALSE, warning=FALSE}
+# Data manipulation MYCOPLASMA CULTURE results
 barometer_myco_cult <- barometer_myco_cult_raw %>%
   dplyr::rename(
     Filenumber = Dossiernummer,
     Pathogen_identification = 'KIEMSTAAL IDENTIFICATIE',
     Mycoplasma_result = 'KIEMSTAAL RESULTAAT',
     Samplenumber = 'Staalnummer'
-  )%>%
+  ) %>%
   dplyr::mutate(
     Parameter_code = 'BAC_MYCOPLASMA',
     Result = 'OK'
@@ -90,16 +106,22 @@ barometer_myco_cult <- barometer_myco_cult_raw %>%
     Mycoplasma_result,
     Parameter_code,
     Samplenumber,
-    Result)  %>%
+    Result
+  ) %>%
   dplyr::filter(
     Pathogen_identification %in% c("Mycoplasma bovis")
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct() %>%
+  dplyr::mutate(
+    Filenumber= sha256_hash(as.character(Filenumber)),
+    Samplenumber= sha256_hash(as.character(Samplenumber))
+  ) 
+  
 ```
 
 ## Data manipulation PCR results
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 barometer_dt <- barometer_dt_raw %>% 
   dplyr::rename(
     Filenumber=Dossiernummer, 
@@ -171,8 +193,7 @@ barometer_dt <- barometer_dt_raw %>%
         between(as.numeric(Postal_code), 8000, 8999) ~ 'West Flanders',
         TRUE ~ 'East Flanders'
             )
-  
-  )%>%
+  ) %>%
   dplyr::select(
     Filenumber,
     Diagnostic_test,
@@ -188,12 +209,18 @@ barometer_dt <- barometer_dt_raw %>%
     Province,
     Farm_ID
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct() %>%
+  dplyr::mutate(
+    Filenumber= sha256_hash(as.character(Filenumber)),
+    Samplenumber= sha256_hash(as.character(Samplenumber)),
+    Farm_ID= sha256_hash(as.character(Samplenumber))
+  ) 
+ 
 ```
 
 ## Join all three files
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 barometer <-
   barometer_dt %>%
   dplyr::left_join(df_samples, by = c('Diagnostic_test','Result', 'Parameter_code')) %>%
@@ -203,8 +230,10 @@ barometer <-
   dplyr::left_join(
       barometer_myco_cult, by = c('Filenumber', 'Samplenumber', 'Result', 'Parameter_code', 'Pathogen_identification')
   ) %>%
-  dplyr::mutate(
+  dplyr::mutate( 
+    Floored_date = lubridate::floor_date(Date, "month"),
       Pathogen = case_when(
+      
       (Pathogen == 'Pasteurella multocida') ~ 'PM',
       (Pathogen == 'Histophilus somni') ~ 'HS',
       (Pathogen == 'Mannheimia haemolytica') ~ 'MH',
@@ -230,44 +259,22 @@ barometer <-
       Parameter_code == 'BAC_MYCOPLASMA' & sjmisc::str_contains(Mycoplasma_result, 'POS') ~ 1,
       TRUE ~ as.numeric(NA)
     )
-
-  )
-
-
-    
-```
-
-## Floor date to 1st of month
-
-```{r}
-
-barometer$Floored_date <- lubridate::floor_date(barometer$Date, "month")
-```
-
-## Aggregate data based on farm_ID & month
-
-```{r}
-barometer_groupby <- barometer %>%
-  group_by(Lab_reference, Country, Breed, Floored_date, Province,
-           Farm_ID, Diagnostic_test, Sample_type, Pathogen) %>%
+  ) %>%
+  group_by(
+    Lab_reference, 
+    Country, 
+    Breed, 
+    Floored_date, 
+    Province,
+    Farm_ID, 
+    Diagnostic_test, 
+    Sample_type, 
+    Pathogen
+    ) %>%
   summarise(across(c(Result), max))
 ```
-
 ## Save file (long version)
 
-```{r}
-write.csv(barometer_groupby, "../DataCleaning/Cleaned_data/barometer_DGZ.csv", row.names=TRUE)
-#write.to.ontology(barometer)
-
-
+```{r message=FALSE, warning=FALSE}
+write.csv(barometer, "../Data/CleanedData/barometer_DGZ.csv", row.names=TRUE)
 ```
-
-## Convert to wide version
-
-```{r}
-
-barometer_wide <- barometer_groupby %>%
-  tidyr::pivot_wider(names_from = c(Pathogen), values_from = Result) 
-```
-
-}
