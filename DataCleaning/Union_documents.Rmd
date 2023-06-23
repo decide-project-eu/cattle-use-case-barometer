@@ -1,7 +1,5 @@
 ---
-title: "Union_docs"
-output: html_document
-date: "2023-05-24"
+---
 ---
 
 # Union of documents
@@ -36,7 +34,7 @@ barometer_PathoSense <- read.csv("../DataCleaning/Cleaned_data/barometer_PathoSe
 
 ```
 
-## Combine data to one format and add column with month and year for Tableau 
+## Combine data to one format and add column with month and year for Tableau
 
 ```{r}
 

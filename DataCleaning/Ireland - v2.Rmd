@@ -1,3 +1,7 @@
+---
+---
+---
+
 # DATACLEANING IRELAND
 
 ## Load the libraries
@@ -34,7 +38,7 @@ barometer_dt_combined <- rbind(barometer_dt_raw_2021, barometer_dt_raw_2022)
 
 ```
 
-## Filter data 
+## Filter data
 
 ```{r}
 
@@ -140,7 +144,7 @@ barometer_dt <- barometer_dt_filter3 %>%
 
 ```
 
-## Toevoegen extra rijen voor cultuur (& MALDI & NGS?)
+## Add extra rows for culture (HS, MH, PM)
 
 ```{r}
 barometer_dt$HS <- ifelse(barometer_dt$Diagnostic_test == "Culture", 0, NA)
