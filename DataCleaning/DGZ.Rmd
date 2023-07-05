@@ -12,7 +12,7 @@ output:
 
 ## Load the libraries
 
-lib = where to save the library  (zonder = default)
+lib = where to save the library (zonder = default)
 
 ```{r message=FALSE, warning=FALSE}
 
@@ -273,6 +273,7 @@ barometer <-
     ) %>%
   summarise(across(c(Result), max))
 ```
+
 ## Save file (long version)
 
 ```{r message=FALSE, warning=FALSE}

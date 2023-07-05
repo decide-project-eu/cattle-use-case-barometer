@@ -26,7 +26,9 @@ for (pkg in package_list) {
 }
 
 ```
-##Function to apply SHA-256 hashing
+
+##Function to apply SHA-256 hashing (for anonymisation)
+
 ```{r message=FALSE, warning=FALSE}
 # Function to apply SHA-256 hashing
 sha256_hash <- function(data) {
@@ -42,6 +44,44 @@ barometer_dt_raw <- readxl::read_excel("../Data/ARSIA/ARSIA_DECIDE_20221201.xlsx
 ```
 
 ## Data manipulation
+
+Here we first make sure that all column names are the same as the [**final format**]{.underline} (or translated to English) for better understanding: Filenumber, Samplenumber, Date, Sample_type, Diagnostic_test, Farm_ID, Postal_code, Breed, Province.
+
+-   Samplenumber: in case more than one sample is submitted to the lab under one filenumber (*e.g.* 001, 002 or 1, 2, ..)
+
+-   Date (DD-MM-YYYY): either date of sampling or creation date in lab. The date of sampling is preferred, however, when this date is (often) lacking, it may be easier to take the creation date of the lab. This is only recommended when time between taking samples and creation date remains short (1-2 days).
+
+```{=html}
+<!-- -->
+```
+-   The following abbreviations for the 7 most important pathogens involved in bovine respiratory disease are used: [PM]{.underline} (*Pasteurella multocida*), [MB]{.underline} (*Mycoplasmopsis bovis*, previously *Mycoplasma bovis*), [MH]{.underline} (*Mannheimia haemolytica*), [HS]{.underline} (*Histophilus somni*), [BRSV]{.underline} (bovine respiratory syncytial virus), [PI3]{.underline} (parainfluenza-type 3), and [BCV]{.underline} (bovine coronavirus).
+
+```{=html}
+<!-- -->
+```
+-   Geolocation is for now at the province level. Therefore, in this case we needed to separate the postal code (*e.g.* 2388) from the municipality/city to extract the [province]{.underline} (*e.g.* Brussels). Also the [country]{.underline} (*e.g.* Belgium) should be mentioned in a separate column.
+
+Subsequently we mutate and add data to final format:
+
+-   A [Lab_reference]{.underline} in the way of a number (*e.g.* 3) is added
+
+-   [Diagnostic_test]{.underline} could either '*Culture*', '*PCR*' or '*NPS*' (nanopore sequencing). However, '*Paired serum*' may be added as well.
+
+-   [Sample_type]{.underline} can be '*BAL*' (bronchoalveolar lavage), '*Swab*' (nasal swab, eye swab, deep nasopharyngeal swab, from a living animal), '*TTA*' (transtracheal aspirate/wash), '*Autopsy*' (all samples from carcasses) or '*Unknown*'
+
+-   [Breed (or better: production type)]{.underline}: '*Dairy*', '*Beef*', '*Mixed'*,'*Veal*', '*Fattening* *calves*', '*Unknown*'
+
+**How to handle results?**
+
+The result can be either 'negative' (0), 'positive' (1) or 'not tested' (NA):
+
+-   PCR: when to consider a test results positive or negative will be at the discretion of the laboratory (cutoff values may differ per lab). Dubious test results such as 'not conclusive', 'no test results due to inhibition', are recommended to file as not tested (NA).
+
+-   Culture (*Pasteurellaceae*): it is expected that culture results are either positive (1) or negative (0). For example, when a swab has been cultured on blood agar plates, we assume that *P. multocida, M. haemolytica,* and *Histophilus somni* are tested. For example, when only *P. multocida* is present, the result for that specific sample should be reported as: PM (1), MH (0), HS (0). Dubious test results due to overgrowth by for example *Proteus species* could be filed as not tested (NA) for all *Pasteurellaceae*.
+
+-   Culture (*M. bovis*): for *M. bovis* specific culture media are necessary, however, when tested, result can be positive (1) or negative (0). Dubious test results due to overgrowth by fungi could be filed as not tested (NA).
+
+## 
 
 ```{r message=FALSE, warning=FALSE}
 barometer_dt <- barometer_dt_raw %>% 
@@ -118,7 +158,7 @@ barometer_dt <- barometer_dt_raw %>%
   dplyr::distinct() %>%
   dplyr::mutate(
     Filenumber = sha256_hash(as.character(Filenumber)),
-    Samplenumber = sha256_hash(as.character(Samplenumber)),
+    #Samplenumber = sha256_hash(as.character(Samplenumber)),
     Farm_ID = sha256_hash(as.character(Samplenumber))
   ) 
 ```
