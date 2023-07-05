@@ -1,11 +1,15 @@
 ---
 title: "DGZ Notebook"
-output: 
+output:
+  html_document:
+    toc: yes
+    toc_depth: '2'
+    df_print: paged
+  github_document:
+    toc: yes
+    toc_depth: 2
   pdf_document:
     latex_engine: pdflatex
-  github_document:
-    toc: true
-    toc_depth: 2
 ---
 
 # Data cleaning for DGZ
@@ -44,7 +48,7 @@ barometer_aero_cult_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_BAC_
 barometer_myco_cult_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENTBAC_MYCO_14nov2022.xlsx")
 ```
 
-# Data manipulation AEROBIC CULTURE results
+## Data manipulation AEROBIC CULTURE results
 
 In this file there is a column for Pathogen_result (POS, POS+, POS++, pure culture, ..), but another column for the identified pathogen (Pathogen_identification). The identified pathogen could be all kinds of bacteria. Therefore, we first filtered for the pathogens of interest (*Pasteurella multocida, Mannheimia haemolytica*, and *Histophilus somni - M. bovis* was not present in this file).
 
@@ -262,6 +266,8 @@ Here
     -   Culture (*Pasteurellaceae*): it is expected that culture results are either positive (1) or negative (0). For example, when a swab has been cultured on blood agar plates, we assume that *P. multocida, M. haemolytica,* and *Histophilus somni* are tested. For example, when only *P. multocida* is present, the result for that specific sample should be reported as: PM (1), MH (0), HS (0). Dubious test results due to overgrowth by for example *Proteus species* could be filed as not tested (NA) for all *Pasteurellaceae*.
 
     -   Culture (*M. bovis*): for *M. bovis* specific culture media are necessary, however, when tested, result can be positive (1) or negative (0). Dubious test results due to overgrowth by fungi could be filed as not tested (NA).
+
+-   Sha256 function added to anonymize Farm_ID
 
 ```{r message=FALSE, warning=FALSE}
 barometer <-
