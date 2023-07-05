@@ -36,6 +36,8 @@ sha256_hash <- function(data) {
 
 ## Data loading
 
+In this case, more datasets (one for PCR, one for *Pasteurellaceae* culture, one for *Mycoplasma bovis* culture).
+
 ```{r message=FALSE, warning=FALSE}
 barometer_dt_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_14nov2022.xlsx")
 barometer_aero_cult_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_BAC_AERO_14nov2022.xlsx")
@@ -43,6 +45,8 @@ barometer_myco_cult_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENTBAC_M
 ```
 
 # Data manipulation AEROBIC CULTURE results
+
+In this file there is a column for Pathogen_result (POS, POS+, POS++, pure culture, ..), but another column for the identified pathogen (Pathogen_identification). The identified pathogen could be all kinds of bacteria. Therefore, we first filtered for the pathogens of interest (*Pasteurella multocida, Mannheimia haemolytica*, and *Histophilus somni - M. bovis* was not present in this file).
 
 ```{r message=FALSE, warning=FALSE}
 barometer_aero_cult <- barometer_aero_cult_raw %>%
@@ -69,12 +73,15 @@ barometer_aero_cult <- barometer_aero_cult_raw %>%
   ) %>%
   dplyr::distinct() %>%
   dplyr::mutate(
-    Filenumber = sha256_hash(as.character(Filenumber)),
-    Samplenumber= sha256_hash(as.character(Samplenumber))
+    #Filenumber = sha256_hash(as.character(Filenumber)),
+    #Samplenumber= sha256_hash(as.character(Samplenumber))
+    ## J: We first need to merge files based on filenumbers, anonymisation shouldn't be applied yet 
   ) 
 ```
 
-Intermediate table is needed
+### Intermediate table is needed
+
+[Diagnostic_test]{.underline} could either '*Culture*', '*PCR*' or '*NPS*' (nanopore sequencing), though '*Paired serum*' may be added as well.
 
 ```{r message=FALSE, warning=FALSE}
 df_samples <- data.frame(
@@ -86,6 +93,8 @@ df_samples <- data.frame(
 ```
 
 ## Data manipulation MYCOPLASMA CULTURE results
+
+In this file there is again a column for Pathogen_result (POS, POS+, POS++, pure culture, ..), but another column for the identified pathogen (Pathogen_identification). The result could only be *M. bovis* positive or negative (Mycoplasma_result). Therefore, we only filtered for *Mycoplasma bovis.*
 
 ```{r message=FALSE, warning=FALSE}
 # Data manipulation MYCOPLASMA CULTURE results
@@ -113,18 +122,39 @@ barometer_myco_cult <- barometer_myco_cult_raw %>%
   ) %>%
   dplyr::distinct() %>%
   dplyr::mutate(
-    Filenumber= sha256_hash(as.character(Filenumber)),
-    Samplenumber= sha256_hash(as.character(Samplenumber))
+    #Filenumber= sha256_hash(as.character(Filenumber)),
+    #Samplenumber= sha256_hash(as.character(Samplenumber))
+    ## J: We first need to merge files based on filenumbers, anonymisation shouldn't be applied yet 
   ) 
   
 ```
 
 ## Data manipulation PCR results
 
+Here we first make sure that all column names are the same as the [**final format**]{.underline}: Filenumber, Samplenumber, Date, Sample_type, Diagnostic_test, Farm_ID, Postal_code, Breed, Province. And some additional ones that were necessary to get to the final format.
+
+-   Samplenumber: in case more than one sample is submitted to the lab under one filenumber (*e.g.* 001, 002 or 1, 2, ..)
+
+-   Date (DD-MM-YYYY): either date of sampling or creation date in lab. The date of sampling is preferred, however, when this date is (often) lacking, it may be easier to take the creation date of the lab. This is only recommended when time between taking samples and creation date remains short (1-2 days).
+
+-   [Diagnostic_test]{.underline} could either '*Culture*', '*PCR*' or '*NPS*' (nanopore sequencing), though '*Paired serum*' may be added as well.
+
+Subsequently we mutate and add data to final format:
+
+-   Geolocation is for now at the province level. Therefore, in this case we needed to translate the postal code (*e.g.* 2388) from the municipality/city to extract the [province]{.underline} (*e.g.* Brussels). Also the [country]{.underline} (*e.g.* Belgium) should be mentioned in a separate column.
+
+-   A [Lab_reference]{.underline} in the way of a number (*e.g.* 1) is added
+
+-   [Breed (or better: production type)]{.underline}: '*Dairy*', '*Beef*', '*Mixed'*,'*Veal*', '*Fattening* *calves*', '*Unknown*'. Here the production type of the animal is not immediately clear, but data on the number of animals per herd and the number of animals per production type were available. Therefore, it was decided that when a herd contained \> 90% of one production type, we considered this herd to be that particular production type.
+
+-   Many different names for the tested [pathogens]{.underline} together with the test (PCR) were included. They were translated to the 7 most important pathogens involved in bovine respiratory disease. Either the abbreviation or the complete name were used: [PM]{.underline} (*Pasteurella multocida*), [MB]{.underline} (*Mycoplasmopsis bovis*, previously *Mycoplasma bovis*), [MH]{.underline} (*Mannheimia haemolytica*), [HS]{.underline} (*Histophilus somni*), [BRSV]{.underline} (bovine respiratory syncytial virus), [PI3]{.underline} (parainfluenza-type 3), and [BCV]{.underline} (bovine coronavirus).
+
+-   [Sample_type]{.underline} can be '*BAL*' (bronchoalveolar lavage), '*Swab*' (nasal swab, eye swab, deep nasopharyngeal swab, from a living animal), '*TTA*' (transtracheal aspirate/wash), '*Autopsy*' (all samples from carcasses) or '*Unknown*' (which could also contain 'others')
+
 ```{r message=FALSE, warning=FALSE}
 barometer_dt <- barometer_dt_raw %>% 
   dplyr::rename(
-    Filenumber=Dossiernummer, 
+    Filenumber= Dossiernummer, 
     Samplenumber = Staalnummer,
     Sample_type = Staaltype,
     Parameter_code = PARAMETER_CODE,
@@ -211,14 +241,27 @@ barometer_dt <- barometer_dt_raw %>%
   ) %>%
   dplyr::distinct() %>%
   dplyr::mutate(
-    Filenumber= sha256_hash(as.character(Filenumber)),
-    Samplenumber= sha256_hash(as.character(Samplenumber)),
-    Farm_ID= sha256_hash(as.character(Samplenumber))
+    #Filenumber= sha256_hash(as.character(Filenumber)),
+    #Farm_ID= sha256_hash(as.character(Samplenumber))
   ) 
  
 ```
 
 ## Join all three files
+
+Here
+
+-   Files with culture results were joined based on Filenumber, Samplenumber, Result, Parameter_code (this defined the diagnostic test) and pathogen_identification to the file with PCR results (and metadata).
+
+-   Date was floored to the month
+
+-   Results were translated to either 'negative' (0), 'positive' (1) or 'not tested' (NA):
+
+    -   PCR: when to consider a test results positive or negative will be at the discretion of the laboratory (cutoff values may differ per lab). Dubious test results such as 'not conclusive', 'no test results due to inhibition', are recommended to file as not tested (NA).
+
+    -   Culture (*Pasteurellaceae*): it is expected that culture results are either positive (1) or negative (0). For example, when a swab has been cultured on blood agar plates, we assume that *P. multocida, M. haemolytica,* and *Histophilus somni* are tested. For example, when only *P. multocida* is present, the result for that specific sample should be reported as: PM (1), MH (0), HS (0). Dubious test results due to overgrowth by for example *Proteus species* could be filed as not tested (NA) for all *Pasteurellaceae*.
+
+    -   Culture (*M. bovis*): for *M. bovis* specific culture media are necessary, however, when tested, result can be positive (1) or negative (0). Dubious test results due to overgrowth by fungi could be filed as not tested (NA).
 
 ```{r message=FALSE, warning=FALSE}
 barometer <-
@@ -260,6 +303,10 @@ barometer <-
       TRUE ~ as.numeric(NA)
     )
   ) %>%
+    dplyr::mutate(
+    Filenumber= sha256_hash(as.character(Filenumber)),
+    Farm_ID= sha256_hash(as.character(Samplenumber))
+  ) %>%
   group_by(
     Lab_reference, 
     Country, 
@@ -272,6 +319,7 @@ barometer <-
     Pathogen
     ) %>%
   summarise(across(c(Result), max))
+
 ```
 
 ## Save file (long version)
