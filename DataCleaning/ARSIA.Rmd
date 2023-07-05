@@ -1,11 +1,15 @@
 ---
 title: "ARSIA Notebook"
-output: 
+output:
+  html_document:
+    toc: yes
+    toc_depth: '2'
+    df_print: paged
+  github_document:
+    toc: yes
+    toc_depth: 2
   pdf_document:
     latex_engine: pdflatex
-  github_document:
-    toc: true
-    toc_depth: 2
 ---
 
 # DATACLEANING FOR ARSIA
@@ -51,14 +55,8 @@ Here we first make sure that all column names are the same as the [**final forma
 
 -   Date (DD-MM-YYYY): either date of sampling or creation date in lab. The date of sampling is preferred, however, when this date is (often) lacking, it may be easier to take the creation date of the lab. This is only recommended when time between taking samples and creation date remains short (1-2 days).
 
-```{=html}
-<!-- -->
-```
 -   The following abbreviations for the 7 most important pathogens involved in bovine respiratory disease are used: [PM]{.underline} (*Pasteurella multocida*), [MB]{.underline} (*Mycoplasmopsis bovis*, previously *Mycoplasma bovis*), [MH]{.underline} (*Mannheimia haemolytica*), [HS]{.underline} (*Histophilus somni*), [BRSV]{.underline} (bovine respiratory syncytial virus), [PI3]{.underline} (parainfluenza-type 3), and [BCV]{.underline} (bovine coronavirus).
 
-```{=html}
-<!-- -->
-```
 -   Geolocation is for now at the province level. Therefore, in this case we needed to separate the postal code (*e.g.* 2388) from the municipality/city to extract the [province]{.underline} (*e.g.* Brussels). Also the [country]{.underline} (*e.g.* Belgium) should be mentioned in a separate column.
 
 Subsequently we mutate and add data to final format:
@@ -71,7 +69,7 @@ Subsequently we mutate and add data to final format:
 
 -   [Breed (or better: production type)]{.underline}: '*Dairy*', '*Beef*', '*Mixed'*,'*Veal*', '*Fattening* *calves*', '*Unknown*'
 
-**How to handle results?**
+### How to handle results? 
 
 The result can be either 'negative' (0), 'positive' (1) or 'not tested' (NA):
 
@@ -80,8 +78,6 @@ The result can be either 'negative' (0), 'positive' (1) or 'not tested' (NA):
 -   Culture (*Pasteurellaceae*): it is expected that culture results are either positive (1) or negative (0). For example, when a swab has been cultured on blood agar plates, we assume that *P. multocida, M. haemolytica,* and *Histophilus somni* are tested. For example, when only *P. multocida* is present, the result for that specific sample should be reported as: PM (1), MH (0), HS (0). Dubious test results due to overgrowth by for example *Proteus species* could be filed as not tested (NA) for all *Pasteurellaceae*.
 
 -   Culture (*M. bovis*): for *M. bovis* specific culture media are necessary, however, when tested, result can be positive (1) or negative (0). Dubious test results due to overgrowth by fungi could be filed as not tested (NA).
-
-## 
 
 ```{r message=FALSE, warning=FALSE}
 barometer_dt <- barometer_dt_raw %>% 
@@ -163,7 +159,7 @@ barometer_dt <- barometer_dt_raw %>%
   ) 
 ```
 
-## Floor date to 1st of month
+## Floor date to 1st of month 
 
 ```{r message=FALSE, warning=FALSE}
 

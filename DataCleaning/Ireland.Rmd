@@ -25,7 +25,9 @@ for (pkg in package_list) {
 
 }
 ```
+
 # Function to apply SHA-256 hashing
+
 ```{r message=FALSE, warning=FALSE}
 
 sha256_hash <- function(data) {
@@ -51,7 +53,7 @@ barometer_dt_combined <- rbind(barometer_dt_raw_2021, barometer_dt_raw_2022)
 
 ```
 
-## Filter data 
+## Filter data
 
 ```{r message=FALSE, warning=FALSE}
 
