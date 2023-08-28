@@ -77,9 +77,8 @@ barometer_aero_cult <- barometer_aero_cult_raw %>%
   ) %>%
   dplyr::distinct() %>%
   dplyr::mutate(
-    #Filenumber = sha256_hash(as.character(Filenumber)),
-    #Samplenumber= sha256_hash(as.character(Samplenumber))
-    ## J: We first need to merge files based on filenumbers, anonymisation shouldn't be applied yet 
+    Filenumber = sha256_hash(as.character(Filenumber)),
+    Samplenumber= sha256_hash(as.character(Samplenumber)) 
   ) 
 ```
 
@@ -126,9 +125,8 @@ barometer_myco_cult <- barometer_myco_cult_raw %>%
   ) %>%
   dplyr::distinct() %>%
   dplyr::mutate(
-    #Filenumber= sha256_hash(as.character(Filenumber)),
-    #Samplenumber= sha256_hash(as.character(Samplenumber))
-    ## J: We first need to merge files based on filenumbers, anonymisation shouldn't be applied yet 
+    Filenumber= sha256_hash(as.character(Filenumber)),
+    Samplenumber= sha256_hash(as.character(Samplenumber))
   ) 
   
 ```
@@ -245,8 +243,9 @@ barometer_dt <- barometer_dt_raw %>%
   ) %>%
   dplyr::distinct() %>%
   dplyr::mutate(
-    #Filenumber= sha256_hash(as.character(Filenumber)),
-    #Farm_ID= sha256_hash(as.character(Samplenumber))
+    Filenumber= sha256_hash(as.character(Filenumber)),
+    Samplenumber= sha256_hash(as.character(Samplenumber)),
+    Farm_ID= sha256_hash(as.character(Farm_ID))
   ) 
  
 ```
@@ -308,10 +307,6 @@ barometer <-
       Parameter_code == 'BAC_MYCOPLASMA' & sjmisc::str_contains(Mycoplasma_result, 'POS') ~ 1,
       TRUE ~ as.numeric(NA)
     )
-  ) %>%
-    dplyr::mutate(
-    Filenumber= sha256_hash(as.character(Filenumber)),
-    Farm_ID= sha256_hash(as.character(Samplenumber))
   ) %>%
   group_by(
     Lab_reference, 
