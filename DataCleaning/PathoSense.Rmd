@@ -155,5 +155,3 @@ barometer_long <- barometer_groupby %>%
 ```{r message=FALSE, warning=FALSE}
 write.csv(barometer_long, "../Data/CleanedData/barometer_PathoSense.csv", row.names=TRUE)
 ```
-
-## 

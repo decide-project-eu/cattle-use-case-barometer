@@ -29,15 +29,11 @@ for (pkg in package_list) {
 ## Data creation and loading
 
 ```{r message=FALSE, warning=FALSE}
-
 barometer_DGZ <- read.csv("../Data/CleanedData/barometer_DGZ.csv")
 barometer_ARSIA <- read.csv("../Data/CleanedData/barometer_ARSIA.csv")
 barometer_GD <- read.csv("../Data/CleanedData/barometer_GD.csv")
 barometer_Ireland <- read.csv("../Data/CleanedData/barometer_Ireland.csv")
 barometer_PathoSense <- read.csv("../Data/CleanedData/barometer_PathoSense.csv")
-                                
-
-
 ```
 
 ## Combine data to one format and add column with month and year for Tableau

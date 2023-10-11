@@ -152,7 +152,7 @@ barometer_dt <- barometer_dt_filter3 %>%
   dplyr::mutate(
     Filenumber= sha256_hash(as.character(Filenumber)),
     Samplenumber= sha256_hash(as.character(Samplenumber)),
-    Farm_ID= sha256_hash(as.character(Samplenumber))
+    Farm_ID= sha256_hash(as.character(Farm_ID))
   ) 
 
 ```
@@ -233,12 +233,7 @@ barometer_results <- barometer_dt_culture_wide %>%
     AGENT,
     Farm_ID
   ) %>%
-  dplyr::distinct()%>%
-  dplyr::mutate(
-    Filenumber= sha256_hash(as.character(Filenumber)),
-    Samplenumber= sha256_hash(as.character(Samplenumber)),
-    Farm_ID= sha256_hash(as.character(Samplenumber))
-  )
+  dplyr::distinct()
 ```
 
 ## Floor date to 1st of month
@@ -269,7 +264,6 @@ write.csv(barometer_groupby, "../Data/CleanedData/barometer_Ireland.csv", row.na
 ## Convert to wide version
 
 ```{r message=FALSE, warning=FALSE}
-
 barometer_wide <- barometer_groupby %>%
   tidyr::pivot_wider(names_from = c(Pathogen), values_from = Result) 
 ```
