@@ -1,15 +1,15 @@
 ---
 title: "ARSIA Notebook"
 output:
+  pdf_document:
+    latex_engine: pdflatex
+  github_document:
+    toc: yes
+    toc_depth: 2
   html_document:
     toc: yes
     toc_depth: '2'
     df_print: paged
-  github_document:
-    toc: yes
-    toc_depth: 2
-  pdf_document:
-    latex_engine: pdflatex
 ---
 
 # DATACLEANING FOR ARSIA
@@ -69,7 +69,7 @@ Subsequently we mutate and add data to final format:
 
 -   [Breed (or better: production type)]{.underline}: '*Dairy*', '*Beef*', '*Mixed'*,'*Veal*', '*Fattening* *calves*', '*Unknown*'
 
-### How to handle results? 
+### How to handle results?
 
 The result can be either 'negative' (0), 'positive' (1) or 'not tested' (NA):
 
@@ -159,7 +159,7 @@ barometer_dt <- barometer_dt_raw %>%
   ) 
 ```
 
-## Floor date to 1st of month 
+## Floor date to 1st of month
 
 ```{r message=FALSE, warning=FALSE}
 
