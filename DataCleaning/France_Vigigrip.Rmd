@@ -75,7 +75,7 @@ barometer_dt <- barometer_dt_raw %>%
       Region == "Auvergne Rhône Alpes" ~'Auvergne-Rhône-Alpes',
       Region == "Bourgogne Franche Comté" ~'Bourgogne-Franche-Comté',
       Region == "Centre Val de Loire" ~'Centre-Val de Loire',
-      #Region == "DROM" ~ 'Other',
+      Region == "DROM" ~ 'DROM',
       Region == "Grand Est" ~'Grand Est',
       Region == "Hauts de France" ~'Hauts-de-France',
       Region == "Ile de France" ~'Ile de France',
@@ -107,17 +107,19 @@ barometer_dt <- barometer_dt_raw %>%
     Farm_ID
   ) %>%
   dplyr::distinct() %>%
-dplyr::mutate(
+  dplyr::mutate(
     Filenumber = sha256_hash(as.character(Filenumber)),
     Samplenumber = sha256_hash(as.character(Samplenumber)),
     Farm_ID = sha256_hash(as.character(Farm_ID))
     )
+  barometer_dt_f <- barometer_dt %>% 
+  dplyr::filter(Province != "DROM")
 ```
 
 ## Filter data for 'Respiratory disease'
 
 ```{r message=FALSE, warning=FALSE}
-barometer_dt_filtered <- filter(barometer_dt, Project == 'Respiratory disease')
+barometer_dt_filtered <- filter(barometer_dt_f, Project == 'Respiratory disease')
 ```
 
 ## Floor date to 1st of the month
