@@ -43,7 +43,10 @@ sha256_hash <- function(data) {
 ## Data loading
 
 ```{r message=FALSE, warning=FALSE}
-barometer_dt_raw <- readxl::read_excel("../Data/ARSIA/ARSIA_DECIDE_20221201.xlsx")
+
+# Data up to 2022
+
+barometer_dt_raw_1 <- readxl::read_excel("../Data/ARSIA/ARSIA_DECIDE_20221201.xlsx")
 
 ```
 

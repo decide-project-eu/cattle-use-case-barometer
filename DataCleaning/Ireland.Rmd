@@ -16,7 +16,8 @@ output:
 
 # lib = where to save the library  (zonder = default)
 
-package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr"
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  
+                  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr"
                   )
 
 for (pkg in package_list) {
@@ -61,17 +62,29 @@ barometer_dt_filter <- barometer_dt_combined %>%
   dplyr::filter(SYSTEM %in% c('Respiratory', 'NA')
                 )
 barometer_dt_filter2 <- barometer_dt_filter %>% 
-  dplyr::filter(ALIQUOTMATRIXTYPE %in% c('Pleural Fluid', 'Tissue swab', 'Tonsil',  'Lymph Node - Multiple',  'Trachea',  'Thoracic Fluid', 'Lung', 'Swab', 'Culture',  'Thymus', 'Part Carcass', 'Tissue swab', 'Nasal Swab', 'Nasal Fluid', 'Tissue-Pool', 'Tissue (VTM)', 'Carcass', 'Lymph Node', 'Pooled swab', 'Misc.')
+  dplyr::filter(ALIQUOTMATRIXTYPE %in% c('Pleural Fluid', 'Tissue swab', 
+                                         'Tonsil',  'Lymph Node - Multiple',  
+                                         'Trachea',  'Thoracic Fluid', 'Lung', 
+                                         'Swab', 'Culture',  'Thymus', 
+                                         'Part Carcass', 'Tissue swab', 
+                                         'Nasal Swab', 'Nasal Fluid', 
+                                         'Tissue-Pool', 'Tissue (VTM)', 
+                                         'Carcass', 'Lymph Node', 
+                                         'Pooled swab', 'Misc.')
                 ) 
 barometer_dt_filter3 <- barometer_dt_filter2 %>% 
-  dplyr::filter(TEST %in% c("PI3V PCR", "PCR M. haemolytica - ARVL", "Mycoplasma bovis (PCR)", 
-                            "PCR H. somni - ARVL", "PCR P. multocida - ARVL", "Miscellaneous Test",
-                            "Routine Culture", "PCR M. bovis - ARVL", "BRSV PCR", 
-                            "Culture Growth", "PCR BoCoV", "Mycoplasma bovis (PCR)")
+  dplyr::filter(TEST %in% c("PI3V PCR", "PCR M. haemolytica - ARVL", 
+                            "Mycoplasma bovis (PCR)", "PCR H. somni - ARVL", 
+                            "PCR P. multocida - ARVL", "Miscellaneous Test",
+                            "Routine Culture", "PCR M. bovis - ARVL", 
+                            "BRSV PCR", "Culture Growth", "PCR BoCoV", 
+                            "Mycoplasma bovis (PCR)")
 ) 
 
-# Removal of 'Maldi ToF'(filter3) because 'Routine Culture' reports the result to be reported. 
-# Removal of 'Next Generation Sequencing' because so far only reported twice - may be adjusted in future 
+# Removal of 'Maldi ToF'(filter3) because 'Routine Culture' reports the 
+# result to be reported. 
+# Removal of 'Next Generation Sequencing' because so far only reported twice - 
+# may be adjusted in future 
 ```
 
 ## Data manipulation
@@ -110,7 +123,7 @@ barometer_dt <- barometer_dt_filter3 %>%
       #TEST == 'Maldi ToF' ~ 'MALDI-TOF',
       #TEST == "Next Generation Sequencing" ~ 'NGS',
       #TEST == "Miscellaneous Test" ~ 'Unknown', 
-      ## Otherwise 'Unknown' without results in final format (could also be removed?)
+      ## Otherwise 'Unknown' without results in final format (could be removed?)
       TRUE ~ 'Missing'
     ), 
     Breed = case_when(
@@ -240,7 +253,8 @@ barometer_results <- barometer_dt_culture_wide %>%
 
 ```{r message=FALSE, warning=FALSE}
 
-barometer_results$Floored_date <- lubridate::floor_date(barometer_results$Date, "month")
+barometer_results$Floored_date <- lubridate::floor_date(barometer_results$Date, 
+                                                        "month")
 ```
 
 ## Aggregate data based on farm_ID & month
@@ -258,7 +272,8 @@ barometer_groupby <- barometer_results %>%
 ## Save file (long version)
 
 ```{r message=FALSE, warning=FALSE}
-write.csv(barometer_groupby, "../Data/CleanedData/barometer_Ireland.csv", row.names=TRUE)
+write.csv(barometer_groupby, "../Data/CleanedData/barometer_Ireland.csv", 
+          row.names=TRUE)
 ```
 
 ## Convert to wide version

@@ -112,6 +112,7 @@ barometer_dt <- barometer_dt_raw %>%
     Samplenumber = sha256_hash(as.character(Samplenumber)),
     Farm_ID = sha256_hash(as.character(Farm_ID))
     )
+
   barometer_dt_f <- barometer_dt %>% 
   dplyr::filter(Province != "DROM")
 ```
