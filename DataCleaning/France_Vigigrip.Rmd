@@ -1,0 +1,162 @@
+---
+title: "Vigigrip Notebook"
+output: 
+  pdf_document:
+    latex_engine: pdflatex
+  github_document:
+    toc: true
+    toc_depth: 2
+---
+
+# DATACLEANING FOR Vigigrip
+
+## Load the libraries
+
+```{r message=FALSE, warning=FALSE}
+
+# lib = where to save the library  (zonder = default)
+
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr"
+                  )
+
+for (pkg in package_list) {
+  if (pkg %in% rownames(.packages()) == FALSE)
+  {library(pkg, character.only = TRUE)}
+
+}
+
+```
+
+##Function to apply SHA-256 hashing
+
+```{r message=FALSE, warning=FALSE}
+sha256_hash <- function(data) {
+  openssl::sha256(data)
+}
+```
+
+## Data loading
+
+```{r message=FALSE, warning=FALSE}
+barometer_dt_raw <- readxl::read_excel("../Data/France/DECIDE_final_version.xlsx")
+```
+
+## Data manipulation
+
+```{r message=FALSE, warning=FALSE}
+barometer_dt <- barometer_dt_raw %>% 
+  dplyr::rename(
+    Filenumber = Dossier.ID,
+    Samplenumber = Sample.ID,
+    Farm_ID = Herd.ID,
+    Project = Reason.of.sampling,
+    ) %>%
+  dplyr::mutate(
+    Country ='France',
+    Lab_reference ='6', 
+    Sample_type = case_when(
+      Sample_type == 'Lung' ~ 'Autopsy',
+      Sample_type == 'BAL' ~ 'BAL',
+      Sample_type == 'Swab' ~ 'Swab',
+      Sample_type == 'TTA' ~ 'TTA',
+      #Sample_type == 'OTHER' ~ 'Unknown',
+      TRUE ~ 'Missing' 
+    ),
+    Breed = case_when(
+      Breed == "Beef" ~ 'Beef', 
+      Breed == "Dairy" ~'Dairy',
+      Breed == "Mixed" ~ 'Mixed',
+      Breed == "Veal Calf" ~ 'Veal',
+      TRUE ~ 'Unknown'
+    ),
+    Province = case_when(
+      Region == "Bretagne" ~ 'Brittany', 
+      Region == "Nouvelle Aquitaine" ~'New Aquitaine',
+      Region == "Auvergne Rhône Alpes" ~'Auvergne-Rhône-Alpes',
+      Region == "Bourgogne Franche Comté" ~'Bourgogne-Franche-Comté',
+      Region == "Centre Val de Loire" ~'Centre-Val de Loire',
+      #Region == "DROM" ~ 'Other',
+      Region == "Grand Est" ~'Grand Est',
+      Region == "Hauts de France" ~'Hauts-de-France',
+      Region == "Ile de France" ~'Ile de France',
+      Region == "Normandie" ~'Normandy',
+      Region == "Occitanie" ~'Occitanie',
+      Region == "Pays de Loire" ~'Pays de la Loire',
+      Region == "Provence Alpes Côtes d'Azur" ~ "Provence-Alpes-Côte d'Azur",
+      TRUE ~ 'Missing'
+    )
+  )%>%
+  dplyr::select(
+    Filenumber,
+    Diagnostic_test,
+    Samplenumber,
+    Country,
+    Lab_reference,
+    Sample_type,
+    Breed,
+    PM,
+    MH,
+    HS,
+    MB,
+    BRSV,
+    PI3,
+    BCV,
+    Date,
+    Province,
+    Project,
+    Farm_ID
+  ) %>%
+  dplyr::distinct() %>%
+dplyr::mutate(
+    Filenumber = sha256_hash(as.character(Filenumber)),
+    Samplenumber = sha256_hash(as.character(Samplenumber)),
+    Farm_ID = sha256_hash(as.character(Farm_ID))
+    )
+```
+
+## Filter data for 'Respiratory disease'
+
+```{r message=FALSE, warning=FALSE}
+barometer_dt_filtered <- filter(barometer_dt, Project == 'Respiratory disease')
+```
+
+## Floor date to 1st of the month
+
+```{r message=FALSE, warning=FALSE}
+
+barometer_dt_filtered$Floored_date <- lubridate::floor_date(barometer_dt_filtered$Date, "month")
+```
+
+## Aggregate data based on farm_ID and month (WIDE)
+
+```{r message=FALSE, warning=FALSE}
+
+barometer_groupby <- barometer_dt_filtered %>%
+  group_by(Lab_reference, Country, Breed, Floored_date, Province, Farm_ID, Diagnostic_test, Sample_type) %>%
+  summarise(across(c(PM, MH, HS, MB, BRSV, PI3, BCV), max))
+```
+
+## Convert to LONG
+
+```{r message=FALSE, warning=FALSE}
+
+barometer_long <- barometer_groupby %>%
+  tidyr::pivot_longer(
+    cols = c('PM', 'MH', 'HS', 'MB', 'BRSV', 'PI3', 'BCV'),
+    names_to = 'Pathogen',
+    values_to = 'Result',
+  )
+```
+
+## Save file to csv (long version)
+
+```{r message=FALSE, warning=FALSE}
+write.csv(barometer_long, "../Data/CleanedData/barometer_Vigigrip.csv", row.names=TRUE)
+```
+
+## Write to excel
+
+```{r message=FALSE, warning=FALSE}
+
+writexl::write_xlsx(barometer_dt, "../Data/CleanedData/barometer_long_Vigigrip.xlsx")
+```
