@@ -34,6 +34,8 @@ barometer_ARSIA <- read.csv("../Data/CleanedData/barometer_ARSIA.csv")
 barometer_GD <- read.csv("../Data/CleanedData/barometer_GD.csv")
 barometer_Ireland <- read.csv("../Data/CleanedData/barometer_Ireland.csv")
 barometer_PathoSense <- read.csv("../Data/CleanedData/barometer_PathoSense.csv")
+barometer_Vigigrip <- read.csv("../Data/CleanedData/barometer_Vigigrip.csv")
+
 ```
 
 ## Combine data to one format and add column with month and year for Tableau
