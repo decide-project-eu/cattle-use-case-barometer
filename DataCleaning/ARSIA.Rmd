@@ -48,6 +48,47 @@ sha256_hash <- function(data) {
 
 barometer_dt_raw_1 <- readxl::read_excel("../Data/ARSIA/ARSIA_DECIDE_20221201.xlsx")
 
+barometer_dt_raw_2 <- readxl::read_excel("../Data/ARSIA/ARSIA_DECIDE_20240408_adjtitle.xlsx")
+
+```
+
+## Data manipulation raw_2
+
+```{r}
+
+barometer_dt_raw_2$SAMPLE_NUM <- paste("CI", barometer_dt_raw_2$SAMPLE_NUM, sep = "-")
+barometer_dt_raw_2$SAMPLE_NUM <- substr(barometer_dt_raw_2$SAMPLE_NUM, start = 1, stop = 16)
+
+barometer_dt_raw_2 <- barometer_dt_raw_2 %>% 
+  dplyr::rename(
+    clean = 'N° échantillon',
+    'N° échantillon' = 'SAMPLE_NUM'
+    ) %>%
+  dplyr::select(
+    'N° échantillon',
+    'Date of Sample',
+    TRP,
+    ADDRESS,
+    SPECUL,
+    'Sample Type',
+    METH,
+    M_haemolytica,
+    P_multocida,
+    H_somnus,
+    M_bovis,
+    BRSV,
+    PI3,
+    Coronavirus
+  )
+    
+
+```
+
+## Join two files
+
+```{r}
+
+barometer_dt_raw <- rbind(barometer_dt_raw_1, barometer_dt_raw_2)
 ```
 
 ## Data manipulation
