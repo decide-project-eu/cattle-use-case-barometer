@@ -41,7 +41,7 @@ barometer_Vigigrip <- read.csv("../Data/CleanedData/barometer_Vigigrip.csv")
 ## Combine data to one format and add column with month and year for Tableau
 
 ```{r message=FALSE, warning=FALSE}
-barometer_Tableau <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, barometer_Ireland, barometer_PathoSense) %>% 
+barometer_Tableau <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, barometer_Ireland, barometer_PathoSense, barometer_Vigigrip) %>% 
   dplyr::mutate(
     Month = month(as.Date(Floored_date)),
     Year = year(as.Date(Floored_date))
