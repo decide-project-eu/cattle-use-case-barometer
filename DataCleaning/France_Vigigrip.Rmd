@@ -71,7 +71,7 @@ barometer_dt <- barometer_dt_raw %>%
     ),
     Province = case_when(
       Region == "Bretagne" ~ 'Brittany', 
-      Region == "Nouvelle Aquitaine" ~'New Aquitaine',
+      Region == "Nouvelle Aquitaine" ~'Nouvelle Aquitaine',
       Region == "Auvergne Rhône Alpes" ~'Auvergne-Rhône-Alpes',
       Region == "Bourgogne Franche Comté" ~'Bourgogne-Franche-Comté',
       Region == "Centre Val de Loire" ~'Centre-Val de Loire',
