@@ -44,7 +44,8 @@ path = "src/barometer/__about__.py"
 [tool.hatch.envs.default]
 dependencies = [
   "coverage[toml]>=6.5",
-  "pytest"
+  "pytest",
+  "pre-commit"
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -76,6 +77,7 @@ dependencies = [
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/barometer tests}"
 
+
 [tool.coverage.run]
 source_pkgs = ["barometer", "tests"]
 branch = true
@@ -94,3 +96,7 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+
+[tool.black]
+line-length = 79
