@@ -19,10 +19,13 @@ def process_file(files) -> str:
 
     barometer_dt_raw = dfs[0]
 
-
     # Rename columns
     barometer_dt_raw.rename(
-        columns={"sample_id": "FileNumber", "farm_id": "FarmID", "created": "Date"},
+        columns={
+            "sample_id": "FileNumber",
+            "farm_id": "FarmID",
+            "created": "Date",
+        },
         inplace=True,
     )
 
@@ -34,7 +37,9 @@ def process_file(files) -> str:
 
     # Map values for Country column
     country_mapping = {"BE": "Belgium", "NL": "The Netherlands"}
-    barometer_dt_raw["Country"] = barometer_dt_raw["country"].map(country_mapping)
+    barometer_dt_raw["Country"] = barometer_dt_raw["country"].map(
+        country_mapping
+    )
 
     # Map values for Sample_type column
     sample_type_mapping = {"balFluid": "BAL", "noseSwab": "Swab"}
@@ -48,25 +53,39 @@ def process_file(files) -> str:
 
     # Create new columns for pathogens
     barometer_dt_raw["HS"] = (
-        barometer_dt_raw["pathogens"].str.contains("Histophilus somni").astype(int)
+        barometer_dt_raw["pathogens"]
+        .str.contains("Histophilus somni")
+        .astype(int)
     )
     barometer_dt_raw["MH"] = (
-        barometer_dt_raw["pathogens"].str.contains("Mannheimia haemolytica").astype(int)
+        barometer_dt_raw["pathogens"]
+        .str.contains("Mannheimia haemolytica")
+        .astype(int)
     )
     barometer_dt_raw["PM"] = (
-        barometer_dt_raw["pathogens"].str.contains("Pasteurella multocida").astype(int)
+        barometer_dt_raw["pathogens"]
+        .str.contains("Pasteurella multocida")
+        .astype(int)
     )
     barometer_dt_raw["BCV"] = (
-        barometer_dt_raw["pathogens"].str.contains("Bovine coronavirus").astype(int)
+        barometer_dt_raw["pathogens"]
+        .str.contains("Bovine coronavirus")
+        .astype(int)
     )
     barometer_dt_raw["MB"] = (
-        barometer_dt_raw["pathogens"].str.contains("Mycoplasmopsis bovis").astype(int)
+        barometer_dt_raw["pathogens"]
+        .str.contains("Mycoplasmopsis bovis")
+        .astype(int)
     )
     barometer_dt_raw["PI3"] = (
-        barometer_dt_raw["pathogens"].str.contains("Bovine respirovirus 3").astype(int)
+        barometer_dt_raw["pathogens"]
+        .str.contains("Bovine respirovirus 3")
+        .astype(int)
     )
     barometer_dt_raw["BRSV"] = (
-        barometer_dt_raw["pathogens"].str.contains("Bovine orthopneumovirus").astype(int)
+        barometer_dt_raw["pathogens"]
+        .str.contains("Bovine orthopneumovirus")
+        .astype(int)
     )
 
     # Select desired columns
@@ -102,12 +121,13 @@ def process_file(files) -> str:
         lambda x: hashlib.sha256(str(x).encode()).hexdigest()
     )
 
-
     # Convert Date column to datetime
     barometer_dt["Date"] = pd.to_datetime(barometer_dt["Date"])
 
     # Floor date to 1st of month
-    barometer_dt["Floored_date"] = barometer_dt["Date"].dt.to_period("M").dt.to_timestamp()
+    barometer_dt["Floored_date"] = (
+        barometer_dt["Date"].dt.to_period("M").dt.to_timestamp()
+    )
 
     # Aggregate data based on farm_ID & month
     barometer_groupby = barometer_dt.groupby(
@@ -140,15 +160,15 @@ def process_file(files) -> str:
     )
 
     # Convert Floored_date back to datetime (for consistency)
-    barometer_long["Floored_date"] = pd.to_datetime(barometer_long["Floored_date"])
-
+    barometer_long["Floored_date"] = pd.to_datetime(
+        barometer_long["Floored_date"]
+    )
 
     g = rdflib.Graph()
     onto = Namespace("http://www.purl.org/decide/LivestockHealthOnto")
     g.bind("onto", onto)
     xsd = Namespace("http://www.w3.org/2001/XMLSchema#")
     g.bind("xsd", xsd)
-
 
     # Iterate through the rows of the barometer_long dataframe and create RDF triples
     for index, row in barometer_long.iterrows():
@@ -163,13 +183,33 @@ def process_file(files) -> str:
                 Literal(row["DiagnosticTest"], datatype=XSD.string),
             )
         )
-        g.add((CattleSample, onto.hasCountry, Literal(row["Country"], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasBreed, Literal(row["Breed"], datatype=XSD.string)))
         g.add(
-            (CattleSample, onto.hasDate, Literal(row["Floored_date"], datatype=XSD.string))
+            (
+                CattleSample,
+                onto.hasCountry,
+                Literal(row["Country"], datatype=XSD.string),
+            )
         )
         g.add(
-            (CattleSample, onto.hasProvince, Literal(row["Province"], datatype=XSD.string))
+            (
+                CattleSample,
+                onto.hasBreed,
+                Literal(row["Breed"], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasDate,
+                Literal(row["Floored_date"], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasProvince,
+                Literal(row["Province"], datatype=XSD.string),
+            )
         )
         g.add(
             (
@@ -186,9 +226,19 @@ def process_file(files) -> str:
             )
         )
         g.add(
-            (CattleSample, onto.hasPathogen, Literal(row["Pathogen"], datatype=XSD.string))
+            (
+                CattleSample,
+                onto.hasPathogen,
+                Literal(row["Pathogen"], datatype=XSD.string),
+            )
         )
-        g.add((CattleSample, onto.hasResult, Literal(row["Result"], datatype=XSD.string)))
+        g.add(
+            (
+                CattleSample,
+                onto.hasResult,
+                Literal(row["Result"], datatype=XSD.string),
+            )
+        )
         g.add(
             (
                 CattleSample,

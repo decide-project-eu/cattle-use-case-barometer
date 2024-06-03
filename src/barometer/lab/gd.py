@@ -19,7 +19,6 @@ def process_file(files) -> str:
 
     barometer_dt_raw = dfs[0]
 
-
     # Rename columns and replace variable names
     barometer_dt = barometer_dt_raw.rename(
         columns={
@@ -34,11 +33,9 @@ def process_file(files) -> str:
         }
     )
 
-
     # Define functions for hashing
     def sha256_hash(text):
         return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
 
     # Define mappings for Sample_type, Diagnostic_test, Breed, and Province
     sample_type_mapping = {
@@ -81,9 +78,13 @@ def process_file(files) -> str:
         SampleType=barometer_dt["reason_of_sampling"]
         .map(sample_type_mapping)
         .fillna("Missing"),
-        DiagnosticTest=barometer_dt["test"].map(diagnostic_test_mapping).fillna("Missing"),
+        DiagnosticTest=barometer_dt["test"]
+        .map(diagnostic_test_mapping)
+        .fillna("Missing"),
         Breed=barometer_dt["breed"].map(breed_mapping).fillna("Unknown"),
-        Province=barometer_dt["provincie"].map(province_mapping).fillna("Missing"),
+        Province=barometer_dt["provincie"]
+        .map(province_mapping)
+        .fillna("Missing"),
     )
 
     barometer_dt = barometer_dt[
@@ -117,9 +118,10 @@ def process_file(files) -> str:
     barometer_dt["SampleNumber"] = (
         barometer_dt["SampleNumber"].astype(str).apply(sha256_hash)
     )
-    barometer_dt["FarmID"] = barometer_dt["FarmID"].astype(str).apply(sha256_hash)
+    barometer_dt["FarmID"] = (
+        barometer_dt["FarmID"].astype(str).apply(sha256_hash)
+    )
     # print(barometer_dt.head())
-
 
     barometer_dt_filtered = barometer_dt[
         (barometer_dt["Project"] == "monitoring")
@@ -153,7 +155,9 @@ def process_file(files) -> str:
     ).agg(agg_functions)
 
     # Convert to LONG
-    barometer_groupby.columns = [f"{col[0]}_{col[1]}" for col in barometer_groupby.columns]
+    barometer_groupby.columns = [
+        f"{col[0]}_{col[1]}" for col in barometer_groupby.columns
+    ]
     barometer_long = pd.melt(
         barometer_groupby.reset_index(),
         id_vars=[
@@ -172,13 +176,11 @@ def process_file(files) -> str:
     # Save file to CSV (long version)
     # barometer_long.to_csv("output/barometer_GD.csv", index=False)
 
-
     g = rdflib.Graph()
     onto = Namespace("http://www.purl.org/decide/LivestockHealthOnto")
     g.bind("onto", onto)
     xsd = Namespace("http://www.w3.org/2001/XMLSchema#")
     g.bind("xsd", xsd)
-
 
     # Iterate through the rows and create RDF triples
     for index, row in barometer_long.iterrows():
@@ -190,8 +192,12 @@ def process_file(files) -> str:
             row["DiagnosticTest"] if not pd.isna(row["DiagnosticTest"]) else ""
         )
         country = row["Country"] if not pd.isna(row["Country"]) else ""
-        lab_reference = row["LabReference"] if not pd.isna(row["LabReference"]) else ""
-        sample_type = row["SampleType"] if not pd.isna(row["SampleType"]) else ""
+        lab_reference = (
+            row["LabReference"] if not pd.isna(row["LabReference"]) else ""
+        )
+        sample_type = (
+            row["SampleType"] if not pd.isna(row["SampleType"]) else ""
+        )
         breed = row["Breed"] if not pd.isna(row["Breed"]) else ""
         Pathogen = row["Pathogen"] if not pd.isna(row["Pathogen"]) else ""
         result = row["Result"] if not pd.isna(row["Result"]) else "Missing"
@@ -206,7 +212,13 @@ def process_file(files) -> str:
                 Literal(diagnostic_test, datatype=XSD.string),
             )
         )
-        g.add((CattleSample, onto.hasCountry, Literal(country, datatype=XSD.string)))
+        g.add(
+            (
+                CattleSample,
+                onto.hasCountry,
+                Literal(country, datatype=XSD.string),
+            )
+        )
         g.add(
             (
                 CattleSample,
@@ -214,11 +226,31 @@ def process_file(files) -> str:
                 Literal(lab_reference, datatype=XSD.string),
             )
         )
-        g.add((CattleSample, onto.hasSampleType, Literal(sample_type, datatype=XSD.string)))
-        g.add((CattleSample, onto.hasBreed, Literal(breed, datatype=XSD.string)))
-        g.add((CattleSample, onto.hasResult, Literal(result, datatype=XSD.string)))
+        g.add(
+            (
+                CattleSample,
+                onto.hasSampleType,
+                Literal(sample_type, datatype=XSD.string),
+            )
+        )
+        g.add(
+            (CattleSample, onto.hasBreed, Literal(breed, datatype=XSD.string))
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasResult,
+                Literal(result, datatype=XSD.string),
+            )
+        )
         g.add((CattleSample, onto.hasDate, Literal(date, datatype=XSD.string)))
-        g.add((CattleSample, onto.hasProvince, Literal(province, datatype=XSD.string)))
+        g.add(
+            (
+                CattleSample,
+                onto.hasProvince,
+                Literal(province, datatype=XSD.string),
+            )
+        )
         g.add(
             (
                 CattleSample,
@@ -226,7 +258,13 @@ def process_file(files) -> str:
                 Literal(farm_id, datatype=XSD.string),
             )
         )
-        g.add((CattleSample, onto.hasPathogen, Literal(Pathogen, datatype=XSD.string)))
+        g.add(
+            (
+                CattleSample,
+                onto.hasPathogen,
+                Literal(Pathogen, datatype=XSD.string),
+            )
+        )
 
     filename_output = "RDFoutputCattleSampleLab2.ttl"
     g.serialize(destination=filename_output, format="turtle")

@@ -55,9 +55,13 @@ def process_file(files) -> str:
             ("OK", "BAC_AERO", "Culture", "Histophilus somni"),
             ("OK", "BAC_MYCOPLASMA", "Culture", "Mycoplasma bovis"),
         ],
-        columns=["Result", "Parameter_code", "Diagnostic_test", "Pathogen_identification"],
+        columns=[
+            "Result",
+            "Parameter_code",
+            "Diagnostic_test",
+            "Pathogen_identification",
+        ],
     )
-
 
     # Data manipulation MYCOPLASMA CULTURE results
     barometer_myco_cult = (
@@ -70,7 +74,10 @@ def process_file(files) -> str:
             }
         )
         .assign(Parameter_code="BAC_MYCOPLASMA", Result="OK")
-        .loc[barometer_myco_cult_raw["KIEMSTAAL IDENTIFICATIE"] == "Mycoplasma bovis"]
+        .loc[
+            barometer_myco_cult_raw["KIEMSTAAL IDENTIFICATIE"]
+            == "Mycoplasma bovis"
+        ]
         .drop_duplicates(
             subset=[
                 "Filenumber",
@@ -92,9 +99,7 @@ def process_file(files) -> str:
         ]
     )
 
-
     # print(barometer_myco_cult)
-
 
     # Data manipulation PCR results
     barometer_dtt = (
@@ -113,14 +118,18 @@ def process_file(files) -> str:
         )
         .assign(
             Country=np.where(
-                barometer_dt_raw["PARAMETER_CODE"].isin(["BAC_AERO", "BAC_MYCOPLASMA"]),
+                barometer_dt_raw["PARAMETER_CODE"].isin(
+                    ["BAC_AERO", "BAC_MYCOPLASMA"]
+                ),
                 "Belgium",
                 np.nan,
             )
         )
         .assign(
             Diagnostic_test=np.where(
-                barometer_dt_raw["PARAMETER_CODE"].isin(["BAC_AERO", "BAC_MYCOPLASMA"]),
+                barometer_dt_raw["PARAMETER_CODE"].isin(
+                    ["BAC_AERO", "BAC_MYCOPLASMA"]
+                ),
                 "Culture",
                 "PCR",
             )
@@ -147,10 +156,15 @@ def process_file(files) -> str:
                     barometer_dt_raw["MEAT"].isnull(),
                     "Unknown",
                     np.where(
-                        (barometer_dt_raw["MEAT"] / barometer_dt_raw["TOTAL"]) > 0.9,
+                        (barometer_dt_raw["MEAT"] / barometer_dt_raw["TOTAL"])
+                        > 0.9,
                         "Beef",
                         np.where(
-                            (barometer_dt_raw["MILK"] / barometer_dt_raw["TOTAL"]) > 0.9,
+                            (
+                                barometer_dt_raw["MILK"]
+                                / barometer_dt_raw["TOTAL"]
+                            )
+                            > 0.9,
                             "Dairy",
                             "Mixed",
                         ),
@@ -175,7 +189,6 @@ def process_file(files) -> str:
             ]
         ]
     )
-
 
     # Data manipulation PCR results
     barometer_dtt = barometer_dt_raw.rename(
@@ -255,7 +268,9 @@ def process_file(files) -> str:
     }
 
     # Create a new column 'Disease' based on the mapping between Pathogen and Disease
-    barometer_dtt["Disease"] = barometer_dtt["Pathogen"].replace(pathogen_mapping)
+    barometer_dtt["Disease"] = barometer_dtt["Pathogen"].replace(
+        pathogen_mapping
+    )
 
     # Create a mapping between postal codes and provinces
     province_map = [
@@ -277,11 +292,11 @@ def process_file(files) -> str:
     # Create a new column 'Province' based on the mapping between Postal_code and Province
     barometer_dtt["Province"] = pd.cut(
         barometer_dtt["Postal_code"],
-        bins=[p[0] - 1 for p in province_map] + [max([p[1] for p in province_map]) + 1],
+        bins=[p[0] - 1 for p in province_map]
+        + [max([p[1] for p in province_map]) + 1],
         labels=[p[2] for p in province_map],
         ordered=False,
     )
-
 
     # Select columns of interest and drop duplicates
     barometer_dtt = barometer_dtt.loc[
@@ -306,7 +321,6 @@ def process_file(files) -> str:
 
     # Show the resulting dataframe
     # print(barometer_dtt.head())
-
 
     # Join dataframes
     barometer = pd.merge(
@@ -351,7 +365,9 @@ def process_file(files) -> str:
                 barometer["Pathogen"] == "Mannheimia haemolytica",
                 "MH",
                 np.where(
-                    barometer["Pathogen"] == "Mycoplasma bovis", "MB", barometer["Pathogen"]
+                    barometer["Pathogen"] == "Mycoplasma bovis",
+                    "MB",
+                    barometer["Pathogen"],
                 ),
             ),
         ),
@@ -364,7 +380,8 @@ def process_file(files) -> str:
             barometer["Pathogen_identification"] == "Histophilus somni",
             "HS",
             np.where(
-                barometer["Pathogen_identification"] == "Mannheimia haemolytica",
+                barometer["Pathogen_identification"]
+                == "Mannheimia haemolytica",
                 "MH",
                 np.where(
                     barometer["Pathogen_identification"] == "Mycoplasma bovis",
@@ -408,13 +425,11 @@ def process_file(files) -> str:
     barometer["Result"] = np.select(conditions, choices, default=None)
     # print(barometer.head())
 
-
     g = rdflib.Graph()
     onto = Namespace("http://www.purl.org/decide/LivestockHealthOnto")
     g.bind("onto", onto)
     xsd = Namespace("http://www.w3.org/2001/XMLSchema#")
     g.bind("xsd", xsd)
-
 
     # iterate over each row in the dataframe and
     for _, row in barometer.iterrows():
@@ -426,22 +441,96 @@ def process_file(files) -> str:
         CattleSample = onto[f"CattleSample{row[0]}"]
         g.add((CattleSample, RDF.type, onto.CattleSample))
         # Add anonymized values to the RDF graph
-        g.add((CattleSample, onto.hasFileNumber, Literal(FileNumber, datatype=XSD.string)))
         g.add(
-            (CattleSample, onto.hasSampleNumber, Literal(SampleNumber, datatype=XSD.string))
+            (
+                CattleSample,
+                onto.hasFileNumber,
+                Literal(FileNumber, datatype=XSD.string),
+            )
         )
-        g.add((CattleSample, onto.hasDiagnosticTest, Literal(row[1], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasCountry, Literal(row[3], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasLabReference, Literal(row[4], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasSampleType, Literal(row[5], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasBreed, Literal(row[6], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasParameterCode, Literal(row[7], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasResult, Literal(row[8], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasPathogen, Literal(row[9], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasDate, Literal(row[10], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasPostalCode, Literal(row[11], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasProvince, Literal(row[12], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasFarmID, Literal(row[13], datatype=XSD.string)))
+        g.add(
+            (
+                CattleSample,
+                onto.hasSampleNumber,
+                Literal(SampleNumber, datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasDiagnosticTest,
+                Literal(row[1], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasCountry,
+                Literal(row[3], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasLabReference,
+                Literal(row[4], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasSampleType,
+                Literal(row[5], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (CattleSample, onto.hasBreed, Literal(row[6], datatype=XSD.string))
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasParameterCode,
+                Literal(row[7], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasResult,
+                Literal(row[8], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasPathogen,
+                Literal(row[9], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (CattleSample, onto.hasDate, Literal(row[10], datatype=XSD.string))
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasPostalCode,
+                Literal(row[11], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasProvince,
+                Literal(row[12], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasFarmID,
+                Literal(row[13], datatype=XSD.string),
+            )
+        )
         g.add(
             (
                 CattleSample,
@@ -449,9 +538,19 @@ def process_file(files) -> str:
                 Literal(row[14], datatype=XSD.string),
             )
         )
-        g.add((CattleSample, onto.hasPathogenResult, Literal(row[15], datatype=XSD.string)))
         g.add(
-            (CattleSample, onto.hasMicoplasmaResult, Literal(row[16], datatype=XSD.string))
+            (
+                CattleSample,
+                onto.hasPathogenResult,
+                Literal(row[15], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasMicoplasmaResult,
+                Literal(row[16], datatype=XSD.string),
+            )
         )
 
     # output RDF graph to file (replace with your desired filename)

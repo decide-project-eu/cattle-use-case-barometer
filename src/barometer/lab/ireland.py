@@ -19,15 +19,15 @@ def process_file(files) -> str:
     barometer_dt_raw_2021 = dfs[0]
     barometer_dt_raw_2022 = dfs[1]
 
-
     # Combine the datasets using pd.concat
     barometer_dt_combined = pd.concat(
         [barometer_dt_raw_2021, barometer_dt_raw_2022], ignore_index=True
     )
 
-
     # Filter data using pandas
-    conditions_system = barometer_dt_combined["SYSTEM"].isin(["Respiratory", "NA"])
+    conditions_system = barometer_dt_combined["SYSTEM"].isin(
+        ["Respiratory", "NA"]
+    )
     barometer_dt_filter = barometer_dt_combined[conditions_system]
 
     conditions_aliquot_matrix = barometer_dt_filter["ALIQUOTMATRIXTYPE"].isin(
@@ -73,7 +73,6 @@ def process_file(files) -> str:
         ]
     )
     barometer_dt_filter3 = barometer_dt_filter2[conditions_test]
-
 
     # Data manipulation
     barometer_dt = (
@@ -127,7 +126,12 @@ def process_file(files) -> str:
                 }
             ),
             Breed=lambda x: x["Breed"].map(
-                {"BEEF": "Beef", "DAIRY": "Dairy", "SUCKLER": "Suckler", "OTHER": "Unknown"}
+                {
+                    "BEEF": "Beef",
+                    "DAIRY": "Dairy",
+                    "SUCKLER": "Suckler",
+                    "OTHER": "Unknown",
+                }
             ),
             Province=lambda x: x["County"],
             Pathogen=lambda x: x["TEST"].map(
@@ -175,7 +179,6 @@ def process_file(files) -> str:
         )
     )
 
-
     # Add extra rows for cultuur (& MALDI & NGS?)
     pathogens = ["HS", "MH", "PM"]
     barometer_dt["HS"] = barometer_dt.apply(
@@ -212,10 +215,13 @@ def process_file(files) -> str:
     )
 
     barometer_dt_culture_wide["Pathogen"] = barometer_dt_culture_wide.apply(
-        lambda x: x["Pathogen_culture"] if x["Pathogen"] == "Missing" else x["Pathogen"],
+        lambda x: (
+            x["Pathogen_culture"]
+            if x["Pathogen"] == "Missing"
+            else x["Pathogen"]
+        ),
         axis=1,
     )
-
 
     # Create binary results PCR & culture
     def calculate_result(row):
@@ -249,15 +255,23 @@ def process_file(files) -> str:
         elif row["DiagnosticTest"] == "Culture":
             if row["Pathogen"] in ["MH", "PM", "HS"]:
                 if (
-                    (row["Pathogen"] == "MH" and row["RESULT"] == "Mannheimia haemolytica")
+                    (
+                        row["Pathogen"] == "MH"
+                        and row["RESULT"] == "Mannheimia haemolytica"
+                    )
                     or (
                         row["Pathogen"] == "PM"
-                        and row["RESULT"] in ["Pasteurella multocida", "P. multocida"]
+                        and row["RESULT"]
+                        in ["Pasteurella multocida", "P. multocida"]
                     )
                     or (
                         row["Pathogen"] == "HS"
                         and row["RESULT"]
-                        in ["Histophilus somni", "Histophilus somnus", "Histophilus somnii"]
+                        in [
+                            "Histophilus somni",
+                            "Histophilus somnus",
+                            "Histophilus somnii",
+                        ]
                     )
                 ):
                     return 1
@@ -265,9 +279,10 @@ def process_file(files) -> str:
                 return 0
         return None
 
-
     barometer_results = (
-        barometer_dt_culture_wide.assign(Result=lambda x: x.apply(calculate_result, axis=1))
+        barometer_dt_culture_wide.assign(
+            Result=lambda x: x.apply(calculate_result, axis=1)
+        )
         .filter(
             items=[
                 "FileNumber",
@@ -301,20 +316,21 @@ def process_file(files) -> str:
         )
     )
 
-
     barometer_results["Floored_date"] = (
-        pd.to_datetime(barometer_results["Date"]).dt.to_period("M").dt.to_timestamp()
+        pd.to_datetime(barometer_results["Date"])
+        .dt.to_period("M")
+        .dt.to_timestamp()
     )
 
-    barometer_results["Floored_date"] = barometer_results["Floored_date"].dt.date
-
+    barometer_results["Floored_date"] = barometer_results[
+        "Floored_date"
+    ].dt.date
 
     # barometer_groupby = barometer_results.groupby(['LabReference', 'Country', 'Breed', 'Floored_date', 'Province',
     #                                            'FarmID', 'DiagnosticTest', 'SampleType', 'Pathogen']) \
     # .apply(lambda group: group.max(numeric_only=True, skipna=True) if not group[["Result"]].isna().all().all() else pd.DataFrame({"Result": [None]}))
 
     # barometer_groupby.reset_index(inplace=True)
-
 
     barometer_groupby = barometer_results.groupby(
         [
@@ -328,16 +344,19 @@ def process_file(files) -> str:
             "SampleType",
             "Pathogen",
         ]
-    ).agg(Result=("Result", lambda x: np.nan if all(pd.isna(x)) else max(x.dropna())))
+    ).agg(
+        Result=(
+            "Result",
+            lambda x: np.nan if all(pd.isna(x)) else max(x.dropna()),
+        )
+    )
     barometer_groupby.reset_index(inplace=True)
-
 
     g = rdflib.Graph()
     onto = Namespace("http://www.purl.org/decide/LivestockHealthOnto")
     g.bind("onto", onto)
     xsd = Namespace("http://www.w3.org/2001/XMLSchema#")
     g.bind("xsd", xsd)
-
 
     # iterate over each row in the dataframe and
     for index, row in barometer_groupby.iterrows():
@@ -352,13 +371,33 @@ def process_file(files) -> str:
                 Literal(row["DiagnosticTest"], datatype=XSD.string),
             )
         )
-        g.add((CattleSample, onto.hasCountry, Literal(row["Country"], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasBreed, Literal(row["Breed"], datatype=XSD.string)))
         g.add(
-            (CattleSample, onto.hasDate, Literal(row["Floored_date"], datatype=XSD.string))
+            (
+                CattleSample,
+                onto.hasCountry,
+                Literal(row["Country"], datatype=XSD.string),
+            )
         )
         g.add(
-            (CattleSample, onto.hasProvince, Literal(row["Province"], datatype=XSD.string))
+            (
+                CattleSample,
+                onto.hasBreed,
+                Literal(row["Breed"], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasDate,
+                Literal(row["Floored_date"], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasProvince,
+                Literal(row["Province"], datatype=XSD.string),
+            )
         )
         g.add(
             (
@@ -375,9 +414,19 @@ def process_file(files) -> str:
             )
         )
         g.add(
-            (CattleSample, onto.hasPathogen, Literal(row["Pathogen"], datatype=XSD.string))
+            (
+                CattleSample,
+                onto.hasPathogen,
+                Literal(row["Pathogen"], datatype=XSD.string),
+            )
         )
-        g.add((CattleSample, onto.hasResult, Literal(row["Result"], datatype=XSD.string)))
+        g.add(
+            (
+                CattleSample,
+                onto.hasResult,
+                Literal(row["Result"], datatype=XSD.string),
+            )
+        )
         g.add(
             (
                 CattleSample,

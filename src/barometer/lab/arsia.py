@@ -20,7 +20,6 @@ def process_files(files) -> str:
 
     barometer_dt_raw = dfs[0]
 
-
     # Rename columns
     barometer_dt_raw.rename(
         columns={
@@ -41,9 +40,9 @@ def process_files(files) -> str:
     )
 
     # Separate ADDRESS column into Postal_code and City
-    barometer_dt_raw[["Postal_code", "City"]] = barometer_dt_raw["ADDRESS"].str.split(
-        n=1, expand=True
-    )
+    barometer_dt_raw[["Postal_code", "City"]] = barometer_dt_raw[
+        "ADDRESS"
+    ].str.split(n=1, expand=True)
 
     # Convert Postal_code to numeric
     barometer_dt_raw["Postal_code"] = pd.to_numeric(
@@ -51,14 +50,20 @@ def process_files(files) -> str:
     )
 
     # Create new columns
-    barometer_dt_raw["FileNumber"] = barometer_dt_raw["Dossier"].str.slice(stop=12)
-    barometer_dt_raw["SampleNumber"] = barometer_dt_raw["Dossier"].str.slice(start=-3)
+    barometer_dt_raw["FileNumber"] = barometer_dt_raw["Dossier"].str.slice(
+        stop=12
+    )
+    barometer_dt_raw["SampleNumber"] = barometer_dt_raw["Dossier"].str.slice(
+        start=-3
+    )
     barometer_dt_raw["Country"] = "Belgium"
     barometer_dt_raw["LabReference"] = "3"
 
     # Map Sample_type
     sample_type_mapping = {"BAL": "BAL", "SWAB": "Swab", "CARCASS": "Autopsy"}
-    barometer_dt_raw["SampleType"] = barometer_dt_raw["SampleType"].map(sample_type_mapping)
+    barometer_dt_raw["SampleType"] = barometer_dt_raw["SampleType"].map(
+        sample_type_mapping
+    )
 
     # Map Breed
     breed_mapping = {"MEAT": "Beef", "MILK": "Dairy", "MXD": "Mixed"}
@@ -97,7 +102,11 @@ def process_files(files) -> str:
     ]
     barometer_dt_raw["Province"] = pd.Series(
         pd.Categorical(
-            np.select(postal_code_conditions, province_choices, default="East Flanders")
+            np.select(
+                postal_code_conditions,
+                province_choices,
+                default="East Flanders",
+            )
         )
     )
 
@@ -139,7 +148,6 @@ def process_files(files) -> str:
         lambda x: hashlib.sha256(str(x).encode()).hexdigest()
     )
 
-
     # Floor date to 1st of month
     # barometer_dt['Floored_date'] = pd.to_datetime(barometer_dt['Date']).dt.to_period('M').dt.to_timestamp()
 
@@ -147,7 +155,6 @@ def process_files(files) -> str:
     barometer_dt["Floored_date"] = barometer_dt["Date"].apply(
         lambda x: x - pd.to_timedelta(x.day - 1, unit="d")
     )
-
 
     # Group and aggregate data
     barometer_groupby = (
@@ -162,7 +169,7 @@ def process_files(files) -> str:
                 "DiagnosticTest",
                 "SampleType",
             ],
-            observed=True
+            observed=True,
         )
         .agg(
             {
@@ -184,7 +191,6 @@ def process_files(files) -> str:
 
     # Save to CSV
     # barometer_long.to_csv("../Data/CleanedData/barometer_ARSIA.csv", index=False)
-
 
     # Aggregate data based on farm_ID & month
     barometer_groupby = (
@@ -214,7 +220,6 @@ def process_files(files) -> str:
         .reset_index()
     )
 
-
     # Convert the data to the long format:
     barometer_long = pd.melt(
         barometer_groupby,
@@ -232,13 +237,11 @@ def process_files(files) -> str:
         value_name="Result",
     )
 
-
     g = rdflib.Graph()
     onto = Namespace("http://www.purl.org/decide/LivestockHealthOnto")
     g.bind("onto", onto)
     xsd = Namespace("http://www.w3.org/2001/XMLSchema#")
     g.bind("xsd", xsd)
-
 
     # Iterate through the rows of the barometer_long dataframe and create RDF triples
     for index, row in barometer_long.iterrows():
@@ -253,13 +256,33 @@ def process_files(files) -> str:
                 Literal(row["DiagnosticTest"], datatype=XSD.string),
             )
         )
-        g.add((CattleSample, onto.hasCountry, Literal(row["Country"], datatype=XSD.string)))
-        g.add((CattleSample, onto.hasBreed, Literal(row["Breed"], datatype=XSD.string)))
         g.add(
-            (CattleSample, onto.hasDate, Literal(row["Floored_date"], datatype=XSD.string))
+            (
+                CattleSample,
+                onto.hasCountry,
+                Literal(row["Country"], datatype=XSD.string),
+            )
         )
         g.add(
-            (CattleSample, onto.hasProvince, Literal(row["Province"], datatype=XSD.string))
+            (
+                CattleSample,
+                onto.hasBreed,
+                Literal(row["Breed"], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasDate,
+                Literal(row["Floored_date"], datatype=XSD.string),
+            )
+        )
+        g.add(
+            (
+                CattleSample,
+                onto.hasProvince,
+                Literal(row["Province"], datatype=XSD.string),
+            )
         )
         g.add(
             (
@@ -276,9 +299,19 @@ def process_files(files) -> str:
             )
         )
         g.add(
-            (CattleSample, onto.hasPathogen, Literal(row["Pathogen"], datatype=XSD.string))
+            (
+                CattleSample,
+                onto.hasPathogen,
+                Literal(row["Pathogen"], datatype=XSD.string),
+            )
         )
-        g.add((CattleSample, onto.hasResult, Literal(row["Result"], datatype=XSD.string)))
+        g.add(
+            (
+                CattleSample,
+                onto.hasResult,
+                Literal(row["Result"], datatype=XSD.string),
+            )
+        )
         g.add(
             (
                 CattleSample,
