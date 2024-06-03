@@ -161,7 +161,8 @@ def process_files(files) -> str:
                 "FarmID",
                 "DiagnosticTest",
                 "SampleType",
-            ]
+            ],
+            observed=True
         )
         .agg(
             {
