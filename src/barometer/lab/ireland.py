@@ -1,12 +1,11 @@
+import hashlib
+
+import numpy as np
 import pandas as pd
 import rdflib
-import hashlib
-import numpy as np
-from rdflib import Literal, Namespace, RDF, URIRef
-from rdflib.namespace import FOAF, XSD
-from rdflib import Graph, Namespace, RDF, RDFS, OWL
-from rdflib.plugins.sparql import prepareQuery
-from pandas.tseries.offsets import MonthBegin
+from rdflib import Literal
+from rdflib import Namespace
+from rdflib.namespace import XSD
 
 
 def process_file(files) -> str:

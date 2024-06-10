@@ -1,14 +1,11 @@
+import hashlib
+
+import numpy as np
 import pandas as pd
 import rdflib
-import hashlib
-import numpy as np
-from datetime import datetime
-from datetime import timedelta
-from pandas.api.types import CategoricalDtype
-from rdflib import Literal, Namespace, RDF, URIRef
-from rdflib.namespace import FOAF, XSD
-from rdflib import Graph, Namespace, RDF, RDFS, OWL
-from rdflib.plugins.sparql import prepareQuery
+from rdflib import Graph, Namespace
+from rdflib import Literal
+from rdflib.namespace import XSD
 
 
 def process_files(files) -> str:
