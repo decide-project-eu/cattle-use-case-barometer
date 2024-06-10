@@ -151,7 +151,8 @@ def process_file(files) -> str:
             "FarmID",
             "DiagnosticTest",
             "SampleType",
-        ]
+        ],
+        observed=True
     ).agg(agg_functions)
 
     # Convert to LONG

@@ -140,7 +140,8 @@ def process_file(files) -> str:
             "FarmID",
             "DiagnosticTest",
             "SampleType",
-        ]
+        ],
+        observed=True
     )[["PM", "MH", "HS", "MB", "BRSV", "PI3", "BCV"]].max(min_count=1)
 
     # Convert to long

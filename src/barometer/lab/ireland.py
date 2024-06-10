@@ -343,7 +343,8 @@ def process_file(files) -> str:
             "DiagnosticTest",
             "SampleType",
             "Pathogen",
-        ]
+        ],
+        observed=True
     ).agg(
         Result=(
             "Result",
