@@ -175,9 +175,18 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
     pathogens = ['PM', 'MH', 'HS', 'MB', 'BRSV', 'PI3', 'BCV']
     barometer_long = pd.melt(
         barometer_grouped,
-        value_vars=pathogens,
-        var_name='Pathogen',
-        value_name='Result'
+        id_vars=[
+            "LabReference",
+            "Country",
+            "Breed",
+            "Floored_date",
+            "Province",
+            "FarmID",
+            "DiagnosticTest",
+            "SampleType",
+        ],
+        var_name="Pathogen",
+        value_name="Result",
     )
 
     return barometer_long
