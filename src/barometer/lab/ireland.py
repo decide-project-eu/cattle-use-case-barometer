@@ -435,6 +435,6 @@ def process_file(files) -> str:
             )
         )
 
-    filename_output = "RDFoutputCattleSampleLab5.ttl"
+    filename_output = "output/RDFOutputIreland.ttl"
     g.serialize(destination=filename_output, format="turtle")
     return filename_output

@@ -554,6 +554,6 @@ def process_file(files) -> str:
         )
 
     # output RDF graph to file (replace with your desired filename)
-    filename_output = "RDFoutputCattleSampleLab1.ttl"
+    filename_output = "output/RDFOutputDGZ.ttl"
     g.serialize(destination=filename_output, format="turtle")
     return filename_output
