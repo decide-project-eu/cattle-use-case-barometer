@@ -31,12 +31,24 @@ for (pkg in package_list) {
 ```{r message=FALSE, warning=FALSE}
 barometer_DGZ <- read.csv("../Data/CleanedData/barometer_DGZ.csv")
 barometer_ARSIA <- read.csv("../Data/CleanedData/barometer_ARSIA.csv")
-barometer_GD <- read.csv("../Data/CleanedData/barometer_GD_2.csv", sep = ";")
+barometer_GD <- read.csv("../Data/CleanedData/barometer_GD_2_flooreddate.csv", sep = ";")
   barometer_GD$X <- seq_len(nrow(barometer_GD))
 barometer_Ireland <- read.csv("../Data/CleanedData/barometer_Ireland.csv")
 barometer_PathoSense <- read.csv("../Data/CleanedData/barometer_PathoSense.csv")
 barometer_Vigigrip <- read.csv("../Data/CleanedData/barometer_Vigigrip.csv")
 
+
+```
+
+## Time stamp GD convert
+
+Only for barometer_GD: convert time
+
+```{r}
+barometer_GD <- barometer_GD %>%
+dplyr::mutate(
+  Floored_date = as.character(as.Date(Floored_date, "%d-%m-%Y"))
+)
 
 ```
 
@@ -72,3 +84,5 @@ new_filename <- paste0(folder_path, base_filename, "_", current_date, ".csv")
 write.csv(barometer_Tableau, file = new_filename, row.names = TRUE) 
 
 ```
+
+![](images/clipboard-9133593.png)
