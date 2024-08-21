@@ -1,12 +1,26 @@
 import hashlib
+import logging
 
 import numpy as np
 import pandas as pd
-import rdflib
-from pandas import DataFrame
-from rdflib import Literal
-from rdflib import Namespace
+from numpy import select
+from pandas import (
+    Categorical,
+    DataFrame,
+    Series,
+    melt,
+    to_numeric,
+    to_timedelta,
+)
+from rdflib import Graph, Literal, Namespace
 from rdflib.namespace import XSD
+
+logger = logging.getLogger(__name__)
+
+
+def hashing_function(variable):
+    if not pd.isnull(variable):
+        return hashlib.sha256(str(variable).encode()).hexdigest()
 
 
 def preprocess(dataframe_raw: DataFrame) -> DataFrame:
@@ -20,14 +34,17 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
     :param dataframe_raw: original, unprocessed data.
     :return: preprocessed data, ready for reporting.
     """
+    logger.info("Preprocessing ARSIA file")
+    logger.debug("Size of raw dataframe: %s rows", dataframe_raw.size)
+
     # Rename columns
     dataframe_raw.rename(
         columns={
-            "N° échantillon": "Dossier",
-            "Date of Sample": "Date",
-            "Sample Type": "SampleType",
-            "METH": "DiagnosticTest",
-            "TRP": "FarmID",
+            "N° échantillon": "dossier",
+            "Date of Sample": "date",
+            "Sample Type": "sample_type",
+            "METH": "diagnostic_test",
+            "TRP": "farm_id",
             "P_multocida": "PM",
             "M_haemolytica": "MH",
             "H_somnus": "HS",
@@ -40,84 +57,81 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
     )
 
     # Separate ADDRESS column into Postal_code and City
-    dataframe_raw[["Postal_code", "City"]] = dataframe_raw[
-        "ADDRESS"
-    ].str.split(n=1, expand=True)
-    # Convert Postal_code to numeric
-    dataframe_raw["Postal_code"] = pd.to_numeric(
-        dataframe_raw["Postal_code"], errors="coerce"
+    # dataframe_raw[["Postal_code", "City"]] = dataframe_raw[
+    #     "ADDRESS"
+    # ].str.split(n=1, expand=True)
+    dataframe_raw["postal_code"] = (
+        dataframe_raw["ADDRESS"].str.extract(r"(\d+)").astype("Int16")
     )
+
     # Create new columns
-    dataframe_raw["FileNumber"] = dataframe_raw["Dossier"].str.slice(
-        stop=12
-    )
-    dataframe_raw["SampleNumber"] = dataframe_raw["Dossier"].str.slice(
+    dataframe_raw["file_number"] = dataframe_raw["dossier"].str.slice(stop=12)
+    dataframe_raw["sample_number"] = dataframe_raw["dossier"].str.slice(
         start=-3
     )
-    dataframe_raw["Country"] = "Belgium"
-    dataframe_raw["LabReference"] = "3"
+    dataframe_raw["country"] = "Belgium"
+    dataframe_raw["lab_reference"] = "3"
 
     # Map Sample_type
     sample_type_mapping = {"BAL": "BAL", "SWAB": "Swab", "CARCASS": "Autopsy"}
-    dataframe_raw["SampleType"] = dataframe_raw["SampleType"].map(
+    dataframe_raw["sample_type"] = dataframe_raw["sample_type"].map(
         sample_type_mapping
     )
 
     # Map Breed
     breed_mapping = {"MEAT": "Beef", "MILK": "Dairy", "MXD": "Mixed"}
-    dataframe_raw["Breed"] = (
+    dataframe_raw["breed"] = (
         dataframe_raw["SPECUL"].map(breed_mapping).fillna("Unknown")
     )
-
-    # Map Province based on Postal_code
-    postal_code_conditions = [
-        (dataframe_raw["Postal_code"].between(1000, 1299)),
-        (dataframe_raw["Postal_code"].between(1300, 1499)),
-        (dataframe_raw["Postal_code"].between(1500, 1999)),
-        (dataframe_raw["Postal_code"].between(3000, 3499)),
-        (dataframe_raw["Postal_code"].between(2000, 2999)),
-        (dataframe_raw["Postal_code"].between(3500, 3999)),
-        (dataframe_raw["Postal_code"].between(4000, 4999)),
-        (dataframe_raw["Postal_code"].between(5000, 5999)),
-        (dataframe_raw["Postal_code"].between(6000, 6599)),
-        (dataframe_raw["Postal_code"].between(7000, 7999)),
-        (dataframe_raw["Postal_code"].between(6600, 6999)),
-        (dataframe_raw["Postal_code"].between(8000, 8999)),
-    ]
-    province_choices = [
-        "Brussels",
-        "Walloon Brabant",
-        "Flemish Brabant",
-        "Antwerp",
-        "Limburg",
-        "Limburg",
-        "Liège",
-        "Namur",
-        "Hainaut",
-        "Hainaut",
-        "Luxembourg",
-        "West Flanders",
-    ]
-    dataframe_raw["Province"] = pd.Series(
-        pd.Categorical(
-            np.select(
-                postal_code_conditions,
-                province_choices,
-                default="East Flanders",
-            )
+    dataframe_raw["province"] = (
+        pd.cut(
+            dataframe_raw["postal_code"],
+            bins=[
+                1000,
+                1299,
+                1499,
+                1999,
+                2999,
+                3499,
+                3999,
+                4999,
+                5999,
+                6599,
+                6999,
+                7999,
+                8999,
+            ],
+            labels=[
+                "Brussels",
+                "Walloon Brabant",
+                "Flemish Brabant",
+                "Limburg",
+                "Antwerp",
+                "Limburg",
+                "Liège",
+                "Namur",
+                "Hainaut",
+                "Luxembourg",
+                "Hainaut",
+                "West Flanders",
+            ],
+            include_lowest=True,
+            ordered=False,
         )
+        .cat.add_categories("East Flanders")
+        .fillna("East Flanders")
     )
 
     # Select columns
     dataframe = dataframe_raw[
         [
-            "FileNumber",
-            "DiagnosticTest",
-            "SampleNumber",
-            "Country",
-            "LabReference",
-            "SampleType",
-            "Breed",
+            "file_number",
+            "diagnostic_test",
+            "sample_number",
+            "country",
+            "lab_reference",
+            "sample_type",
+            "breed",
             "PM",
             "MH",
             "HS",
@@ -125,10 +139,10 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
             "BRSV",
             "PI3",
             "BCV",
-            "Date",
-            "Postal_code",
-            "Province",
-            "FarmID",
+            "date",
+            "postal_code",
+            "province",
+            "farm_id",
         ]
     ].copy()
 
@@ -136,19 +150,15 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
     dataframe.drop_duplicates(inplace=True)
 
     # Hash Filenumber, Samplenumber, and Farm_ID
-    dataframe["FileNumber"] = dataframe["FileNumber"].apply(
-        lambda x: hashlib.sha256(str(x).encode()).hexdigest()
+    dataframe["file_number"] = dataframe["file_number"].apply(hashing_function)
+    dataframe["sample_number"] = dataframe["sample_number"].apply(
+        hashing_function
     )
-    dataframe["SampleNumber"] = dataframe["SampleNumber"].apply(
-        lambda x: hashlib.sha256(str(x).encode()).hexdigest()
-    )
-    dataframe["FarmID"] = dataframe["FarmID"].apply(
-        lambda x: hashlib.sha256(str(x).encode()).hexdigest()
-    )
+    dataframe["farm_id"] = dataframe["farm_id"].apply(hashing_function)
 
     # Add a floored_date column
-    dataframe["Floored_date"] = dataframe["Date"].apply(
-        lambda x: x - pd.to_timedelta(x.day - 1, unit="d")
+    dataframe["floored_date"] = (
+        dataframe["date"].dt.to_period("M").dt.to_timestamp()
     )
 
     # Group and aggregate data
@@ -156,190 +166,153 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
     barometer_grouped = (
         dataframe.groupby(
             [
-                "LabReference",
-                "Country",
-                "Breed",
-                "Floored_date",
-                "Province",
-                "FarmID",
-                "DiagnosticTest",
-                "SampleType",
+                "lab_reference",
+                "country",
+                "breed",
+                "floored_date",
+                "province",
+                "farm_id",
+                "diagnostic_test",
+                "sample_type",
             ],
             observed=True,
+            dropna=False,
         )[columns_to_aggregate]
         .max()
         .reset_index()
     )
 
     # Convert to long format
-    pathogens = ['PM', 'MH', 'HS', 'MB', 'BRSV', 'PI3', 'BCV']
-    barometer_long = pd.melt(
+    barometer_long = melt(
         barometer_grouped,
         id_vars=[
-            "LabReference",
-            "Country",
-            "Breed",
-            "Floored_date",
-            "Province",
-            "FarmID",
-            "DiagnosticTest",
-            "SampleType",
+            "lab_reference",
+            "country",
+            "breed",
+            "floored_date",
+            "province",
+            "farm_id",
+            "diagnostic_test",
+            "sample_type",
         ],
-        var_name="Pathogen",
-        value_name="Result",
+        var_name="pathogen",
+        value_name="result",
     )
 
+    barometer_long = barometer_long.loc[
+        :,
+        [
+            "lab_reference",
+            "country",
+            "breed",
+            "floored_date",
+            "province",
+            "farm_id",
+            "diagnostic_test",
+            "sample_type",
+            "pathogen",
+            "result",
+        ],
+    ]
+
+    logger.debug(
+        "Size of preprocessed dataframe: %s rows", barometer_long.size
+    )
+    logger.info("Done preprocessing ARSIA file")
     return barometer_long
 
 
-def process_files(files) -> str:
-    # Load the data into Pandas dataframes
-    dfs = []
-    for file in files:
-        df = pd.read_excel(file, engine="openpyxl")
-        dfs.append(df)
-
-    barometer_dt_raw = dfs[0]
-
-    # Floor date to 1st of month
-    # barometer_dt['Floored_date'] = pd.to_datetime(barometer_dt['Date']).dt.to_period('M').dt.to_timestamp()
-
-    # Convert to long format
-    # pathogens = ['PM', 'MH', 'HS', 'MB', 'BRSV', 'PI3', 'BCV']
-    # barometer_long = pd.melt(barometer_groupby, id_vars=['Lab_reference', 'Country', 'Breed', 'Floored_date', 'Province', 'Farm_ID', 'Diagnostic_test', 'Sample_type'], value_vars=pathogens, var_name='Pathogen', value_name='Result')
-
-    # Save to CSV
-    # barometer_long.to_csv("../Data/CleanedData/barometer_ARSIA.csv", index=False)
-
-    # Aggregate data based on farm_ID & month
-    barometer_groupby = (
-        barometer_dt.groupby(
-            [
-                "LabReference",
-                "Country",
-                "Breed",
-                "Floored_date",
-                "Province",
-                "FarmID",
-                "DiagnosticTest",
-                "SampleType",
-            ]
-        )
-        .agg(
-            {
-                "PM": "max",
-                "MH": "max",
-                "HS": "max",
-                "MB": "max",
-                "BRSV": "max",
-                "PI3": "max",
-                "BCV": "max",
-            }
-        )
-        .reset_index()
-    )
-
-    # Convert the data to the long format:
-    barometer_long = pd.melt(
-        barometer_groupby,
-        id_vars=[
-            "LabReference",
-            "Country",
-            "Breed",
-            "Floored_date",
-            "Province",
-            "FarmID",
-            "DiagnosticTest",
-            "SampleType",
-        ],
-        var_name="Pathogen",
-        value_name="Result",
-    )
+def build_graph(dataframe: DataFrame) -> Graph:
+    logger.info("Building ARSIA RDF graph")
+    logger.debug("Size of dataframe: %s rows", dataframe.size)
 
     # Graph creation
-    g = rdflib.Graph()
+    g = Graph()
     onto = Namespace("http://www.purl.org/decide/LivestockHealthOnto")
     g.bind("onto", onto)
     xsd = Namespace("http://www.w3.org/2001/XMLSchema#")
     g.bind("xsd", xsd)
 
     # Iterate through the rows of the barometer_long dataframe and create RDF triples
-    for index, row in barometer_long.iterrows():
+    for index, row in dataframe.iterrows():
         # Create a URI for the CattleSample based on the index
-        CattleSample = onto[f"CattleSample_{index}"]
+        cattle_sample = onto[f"CattleSample_{index}"]
 
         # Add triples for each attribute in the row
         g.add(
             (
-                CattleSample,
+                cattle_sample,
                 onto.hasDiagnosticTest,
-                Literal(row["DiagnosticTest"], datatype=XSD.string),
+                Literal(row["diagnostic_test"], datatype=XSD.string),
             )
         )
         g.add(
             (
-                CattleSample,
+                cattle_sample,
                 onto.hasCountry,
-                Literal(row["Country"], datatype=XSD.string),
+                Literal(row["country"], datatype=XSD.string),
             )
         )
         g.add(
             (
-                CattleSample,
+                cattle_sample,
                 onto.hasBreed,
-                Literal(row["Breed"], datatype=XSD.string),
+                Literal(row["breed"], datatype=XSD.string),
             )
         )
         g.add(
             (
-                CattleSample,
+                cattle_sample,
                 onto.hasDate,
-                Literal(row["Floored_date"], datatype=XSD.string),
+                Literal(row["floored_date"], datatype=XSD.string),
             )
         )
         g.add(
             (
-                CattleSample,
+                cattle_sample,
                 onto.hasProvince,
-                Literal(row["Province"], datatype=XSD.string),
+                Literal(row["province"], datatype=XSD.string),
             )
         )
         g.add(
             (
-                CattleSample,
+                cattle_sample,
                 onto.hasFarmIdentification,
-                Literal(row["FarmID"], datatype=XSD.string),
+                Literal(row["farm_id"], datatype=XSD.string),
             )
         )
         g.add(
             (
-                CattleSample,
+                cattle_sample,
                 onto.hasSampleType,
-                Literal(row["SampleType"], datatype=XSD.string),
+                Literal(row["sample_type"], datatype=XSD.string),
             )
         )
         g.add(
             (
-                CattleSample,
+                cattle_sample,
                 onto.hasPathogen,
-                Literal(row["Pathogen"], datatype=XSD.string),
+                Literal(row["pathogen"], datatype=XSD.string),
             )
         )
         g.add(
             (
-                CattleSample,
+                cattle_sample,
                 onto.hasResult,
-                Literal(row["Result"], datatype=XSD.string),
+                Literal(row["result"], datatype=XSD.string),
             )
         )
         g.add(
             (
-                CattleSample,
+                cattle_sample,
                 onto.hasLabreference,
-                Literal(row["LabReference"], datatype=XSD.string),
+                Literal(row["lab_reference"], datatype=XSD.string),
             )
         )
 
-    filename_output = "output/RDFOutputArsia.ttl"
-    g.serialize(destination=filename_output, format="turtle")
-    return filename_output
+    logger.debug("Size of RDF graph: %s nodes", len(g))
+    logger.info("Done building ARSIA RDF graph")
+    return g
+    # filename_output = "output/RDFOutputArsia.ttl"
+    # g.serialize(destination=filename_output, format="turtle")
+    # return filename_output
