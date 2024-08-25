@@ -1,101 +1,86 @@
-import hashlib
+import logging
 
+import numpy as np
 import pandas as pd
-import rdflib
-from rdflib import Literal
-from rdflib import Namespace
+from pandas import DataFrame
+from rdflib import Graph, Literal, Namespace
 from rdflib.namespace import XSD
 
+from barometer.lab._common import hashing_function
 
-def process_file(files) -> str:
-    # Load the data into Pandas dataframes
-    dfs = []
-    for file in files:
-        df = pd.read_csv(file)
-        dfs.append(df)
+logger = logging.getLogger(__name__)
 
-    barometer_dt_raw = dfs[0]
 
-    # Rename columns
-    barometer_dt_raw.rename(
+def preprocess(dataframe_raw: DataFrame) -> DataFrame:
+    logger.info("Preprocessing PathoSense file")
+    logger.debug("Size of raw dataframe: %s rows", dataframe_raw.size)
+
+    dataframe_raw.rename(
         columns={
-            "sample_id": "FileNumber",
-            "farm_id": "FarmID",
-            "created": "Date",
+            "sample_id": "file_number",
+            "farm_id": "farm_id",
+            "created": "date",
         },
         inplace=True,
     )
-
-    # Mutate new columns
-    barometer_dt_raw["LabReference"] = "4"
-    barometer_dt_raw["DiagnosticTest"] = "NPS"
-    barometer_dt_raw["Breed"] = "Unknown"
-    barometer_dt_raw["Province"] = pd.NA
-
-    # Map values for Country column
-    country_mapping = {"BE": "Belgium", "NL": "The Netherlands"}
-    barometer_dt_raw["Country"] = barometer_dt_raw["country"].map(
-        country_mapping
+    dataframe_raw["lab_reference"] = "4"
+    dataframe_raw["diagnostic_test"] = "NPS"
+    dataframe_raw["breed"] = "Unknown"
+    dataframe_raw["province"] = np.nan
+    dataframe_raw["country"] = dataframe_raw["country"].map(
+        {"BE": "Belgium", "NL": "The Netherlands"}
     )
-
-    # Map values for Sample_type column
-    sample_type_mapping = {"balFluid": "BAL", "noseSwab": "Swab"}
-    barometer_dt_raw["SampleType"] = (
-        barometer_dt_raw["type"].map(sample_type_mapping).fillna("Other")
+    dataframe_raw["sample_type"] = (
+        dataframe_raw["type"]
+        .map({"balFluid": "BAL", "noseSwab": "Swab"})
+        .fillna("Other")
     )
-    barometer_dt_raw["Province"].fillna("Unknown", inplace=True)
-
-    # Fill missing values in pathogens column with empty string
-    barometer_dt_raw["pathogens"].fillna("", inplace=True)
-
-    # Create new columns for pathogens
-    barometer_dt_raw["HS"] = (
-        barometer_dt_raw["pathogens"]
+    dataframe_raw["HS"] = (
+        dataframe_raw["pathogens"]
         .str.contains("Histophilus somni")
-        .astype(int)
+        .astype("Int8")
     )
-    barometer_dt_raw["MH"] = (
-        barometer_dt_raw["pathogens"]
+    dataframe_raw["MH"] = (
+        dataframe_raw["pathogens"]
         .str.contains("Mannheimia haemolytica")
-        .astype(int)
+        .astype("Int8")
     )
-    barometer_dt_raw["PM"] = (
-        barometer_dt_raw["pathogens"]
-        .str.contains("Pasteurella multocida")
-        .astype(int)
+    dataframe_raw["PM"] = (
+        dataframe_raw["pathogens"]
+        .str.contains("Pasteurella multocid")
+        .astype("Int8")
     )
-    barometer_dt_raw["BCV"] = (
-        barometer_dt_raw["pathogens"]
+    dataframe_raw["BCV"] = (
+        dataframe_raw["pathogens"]
         .str.contains("Bovine coronavirus")
-        .astype(int)
+        .astype("Int8")
     )
-    barometer_dt_raw["MB"] = (
-        barometer_dt_raw["pathogens"]
+    dataframe_raw["MB"] = (
+        dataframe_raw["pathogens"]
         .str.contains("Mycoplasmopsis bovis")
-        .astype(int)
+        .astype("Int8")
     )
-    barometer_dt_raw["PI3"] = (
-        barometer_dt_raw["pathogens"]
+    dataframe_raw["PI3"] = (
+        dataframe_raw["pathogens"]
         .str.contains("Bovine respirovirus 3")
-        .astype(int)
+        .astype("Int8")
     )
-    barometer_dt_raw["BRSV"] = (
-        barometer_dt_raw["pathogens"]
+    dataframe_raw["BRSV"] = (
+        dataframe_raw["pathogens"]
         .str.contains("Bovine orthopneumovirus")
-        .astype(int)
+        .astype("Int8")
     )
 
-    # Select desired columns
-    barometer_dt = barometer_dt_raw[
+    dataframe_raw = dataframe_raw[
         [
-            "FileNumber",
-            "LabReference",
-            "Country",
-            "Breed",
-            "Province",
-            "FarmID",
-            "DiagnosticTest",
-            "SampleType",
+            "file_number",
+            "lab_reference",
+            "country",
+            "breed",
+            "province",
+            "farm_id",
+            "diagnostic_test",
+            "sample_type",
             "PM",
             "MH",
             "HS",
@@ -103,148 +88,60 @@ def process_file(files) -> str:
             "BRSV",
             "PI3",
             "BCV",
-            "Date",
+            "date",
         ]
-    ]
+    ].copy()
 
-    # Drop duplicates
-    barometer_dt.drop_duplicates(inplace=True)
-
-    # Convert Filenumber and Farm_ID to SHA256 hash
-    barometer_dt["FileNumber"] = barometer_dt["FileNumber"].apply(
-        lambda x: hashlib.sha256(str(x).encode()).hexdigest()
+    dataframe_raw.loc[:, "file_number"] = dataframe_raw["file_number"].apply(
+        hashing_function
     )
-    barometer_dt["FarmID"] = barometer_dt["FarmID"].apply(
-        lambda x: hashlib.sha256(str(x).encode()).hexdigest()
+    dataframe_raw.loc[:, "farm_id"] = dataframe_raw["farm_id"].apply(
+        hashing_function
     )
 
-    # Convert Date column to datetime
-    barometer_dt["Date"] = pd.to_datetime(barometer_dt["Date"])
-
-    # Floor date to 1st of month
-    barometer_dt["Floored_date"] = (
-        barometer_dt["Date"].dt.to_period("M").dt.to_timestamp()
+    dataframe_raw["floored_date"] = (
+        dataframe_raw["date"].dt.to_period("M").dt.to_timestamp()
     )
 
-    # Aggregate data based on farm_ID & month
-    barometer_groupby = barometer_dt.groupby(
-        [
-            "LabReference",
-            "Country",
-            "Breed",
-            "Floored_date",
-            "Province",
-            "FarmID",
-            "DiagnosticTest",
-            "SampleType",
-        ],
-        observed=True
-    )[["PM", "MH", "HS", "MB", "BRSV", "PI3", "BCV"]].max(min_count=1)
+    # Group and aggregate data
+    columns_to_aggregate = ["PM", "MH", "HS", "MB", "BRSV", "PI3", "BCV"]
+    barometer_grouped = (
+        dataframe_raw.groupby(
+            [
+                "lab_reference",
+                "country",
+                "breed",
+                "floored_date",
+                "province",
+                "farm_id",
+                "diagnostic_test",
+                "sample_type",
+            ],
+            observed=True,
+            dropna=False,
+        )[columns_to_aggregate]
+        .max()
+        .reset_index()
+    )
 
-    # Convert to long
-    barometer_long = barometer_groupby.reset_index().melt(
+    barometer_long = pd.melt(
+        barometer_grouped,
         id_vars=[
-            "LabReference",
-            "Country",
-            "Breed",
-            "Floored_date",
-            "Province",
-            "FarmID",
-            "DiagnosticTest",
-            "SampleType",
+            "lab_reference",
+            "country",
+            "breed",
+            "floored_date",
+            "province",
+            "farm_id",
+            "diagnostic_test",
+            "sample_type",
         ],
-        var_name="Pathogen",
-        value_name="Result",
+        var_name="pathogen",
+        value_name="result",
     )
 
-    # Convert Floored_date back to datetime (for consistency)
-    barometer_long["Floored_date"] = pd.to_datetime(
-        barometer_long["Floored_date"]
+    logger.debug(
+        "Size of preprocessed dataframe: %s rows", barometer_long.size
     )
-
-    g = rdflib.Graph()
-    onto = Namespace("http://www.purl.org/decide/LivestockHealthOnto")
-    g.bind("onto", onto)
-    xsd = Namespace("http://www.w3.org/2001/XMLSchema#")
-    g.bind("xsd", xsd)
-
-    # Iterate through the rows of the barometer_long dataframe and create RDF triples
-    for index, row in barometer_long.iterrows():
-        # Create a URI for the CattleSample based on the index
-        CattleSample = onto[f"CattleSample_{index}"]
-
-        # Add triples for each attribute in the row
-        g.add(
-            (
-                CattleSample,
-                onto.hasDiagnosticTest,
-                Literal(row["DiagnosticTest"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasCountry,
-                Literal(row["Country"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasBreed,
-                Literal(row["Breed"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasDate,
-                Literal(row["Floored_date"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasProvince,
-                Literal(row["Province"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasFarmIdentification,
-                Literal(row["FarmID"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasSampleType,
-                Literal(row["SampleType"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasPathogen,
-                Literal(row["Pathogen"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasResult,
-                Literal(row["Result"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasLabreference,
-                Literal(row["LabReference"], datatype=XSD.string),
-            )
-        )
-
-    filename_output = "output/RDFOutputPathoSense.ttl"
-    g.serialize(destination=filename_output, format="turtle")
-    return filename_output
+    logger.info("Done preprocessing PathoSense file")
+    return barometer_long
