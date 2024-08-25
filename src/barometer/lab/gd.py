@@ -1,98 +1,94 @@
-import hashlib
+import logging
 
+import numpy as np
 import pandas as pd
-import rdflib
-from rdflib import Literal
-from rdflib import Namespace, RDF
-from rdflib.namespace import XSD
+from pandas import DataFrame
+
+from barometer.lab._common import hashing_function
+
+logger = logging.getLogger(__name__)
 
 
-def process_file(files) -> str:
-    # Load the data into Pandas dataframes
-    dfs = []
-    for file in files:
-        df = pd.read_excel(file, engine="openpyxl")
-        dfs.append(df)
+def preprocess(dataframe_raw: DataFrame) -> DataFrame:
+    logger.info("Preprocessing GD file")
+    logger.debug("Size of raw dataframe: %s rows", dataframe_raw.size)
 
-    barometer_dt_raw = dfs[0]
-
-    # Rename columns and replace variable names
-    barometer_dt = barometer_dt_raw.rename(
+    dataframe_raw.rename(
         columns={
-            "Dossier_ID": "FileNumber",
-            "sample_id": "SampleNumber",
-            "farm_ID": "FarmID",
-            "project": "Project",
-            "date": "Date",
-            "Lab_reference": "LabReference",
-            "Sample_type": "SampleType",
-            "Diagnostic_test": "DiagnosticTest",
-        }
+            "Dossier_ID": "file_number",
+            "sample_id": "sample_number",
+            "farm_ID": "farm_id",
+        },
+        inplace=True,
     )
-
-    # Define functions for hashing
-    def sha256_hash(text):
-        return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-    # Define mappings for Sample_type, Diagnostic_test, Breed, and Province
-    sample_type_mapping = {
-        "Autopsy": "Autopsy",
-        "BAL": "BAL",
-        "SWABS": "Swab",
-        "OTHER": "Unknown",
-    }
-
-    diagnostic_test_mapping = {"PCR": "PCR", "Kweek": "Culture"}
-
-    breed_mapping = {
-        "beef": "Beef",
-        "dairy": "Dairy",
-        "mixed": "Mixed",
-        "veal": "Veal",
-        "other": "Unknown",
-        "rearing": "Unknown",
-        "unknown": "Unknown",
-    }
-
-    province_mapping = {
-        "DR": "Drenthe",
-        "FL": "Flevoland",
-        "FR": "Friesland",
-        "GL": "Gelderland",
-        "GR": "Groningen",
-        "LB": "Limburg",
-        "NB": "North Brabant",
-        "NH": "North Holland",
-        "OV": "Overijssel",
-        "UT": "Utrecht",
-        "ZH": "South Holland",
-        "ZL": "Zeeland",
-    }
-    # Perform the data manipulation using pandas
-    barometer_dt = barometer_dt.assign(
-        Country="The Netherlands",
-        LabReference="2",
-        SampleType=barometer_dt["reason_of_sampling"]
-        .map(sample_type_mapping)
-        .fillna("Missing"),
-        DiagnosticTest=barometer_dt["test"]
-        .map(diagnostic_test_mapping)
-        .fillna("Missing"),
-        Breed=barometer_dt["breed"].map(breed_mapping).fillna("Unknown"),
-        Province=barometer_dt["provincie"]
-        .map(province_mapping)
-        .fillna("Missing"),
+    dataframe_raw["file_number"] = dataframe_raw["file_number"].astype("str")
+    dataframe_raw["sample_number"] = dataframe_raw["sample_number"].astype(
+        "str"
     )
+    dataframe_raw["farm_id"] = dataframe_raw["farm_id"].astype("str")
 
-    barometer_dt = barometer_dt[
+    dataframe_raw["country"] = "The Netherlands"
+    dataframe_raw["lab_reference"] = "2"
+    dataframe_raw["sample_type"] = np.select(
         [
-            "FileNumber",
-            "DiagnosticTest",
-            "SampleNumber",
-            "Country",
-            "LabReference",
-            "SampleType",
-            "Breed",
+            dataframe_raw["reason_of_sampling"] == "Autopsy",
+            dataframe_raw["sample"] == "BAL",
+            dataframe_raw["sample"] == "SWABS",
+            dataframe_raw["sample"] == "OTHER",
+        ],
+        ["Autopsy", "BAL", "Swab", "Unknown"],
+        default="Missing",
+    )
+    dataframe_raw["diagnostic_test"] = (
+        dataframe_raw["test"]
+        .map({"PCR": "PCR", "Kweek": "Culture"})
+        .fillna("Missing")
+    )
+    dataframe_raw["breed"] = (
+        dataframe_raw["breed"]
+        .map(
+            {
+                "beef": "Beef",
+                "dairy": "Dairy",
+                "mixed": "Mixed",
+                "veal": "Veal",
+                "other": "Unknown",
+                "rearing": "Unknown",
+                "unknown": "Unknown",
+            }
+        )
+        .fillna("Unknown")
+    )
+    dataframe_raw["province"] = (
+        dataframe_raw["provincie"]
+        .map(
+            {
+                "DR": "Drenthe",
+                "FL": "Flevoland",
+                "FR": "Friesland",
+                "GL": "Gelderland",
+                "GR": "Groningen",
+                "LB": "Limburg",
+                "NB": "North Brabant",
+                "NH": "North Holland",
+                "OV": "Overijssel",
+                "UT": "Utrecht",
+                "ZH": "South Holland",
+                "ZL": "Zeeland",
+            }
+        )
+        .fillna("Missing")
+    )
+
+    dataframe_raw = dataframe_raw[
+        [
+            "file_number",
+            "diagnostic_test",
+            "sample_number",
+            "country",
+            "lab_reference",
+            "sample_type",
+            "breed",
             "PM",
             "MH",
             "HS",
@@ -100,170 +96,87 @@ def process_file(files) -> str:
             "BRSV",
             "PI3",
             "BCV",
-            "Date",
-            "Province",
-            "Project",
-            "FarmID",
+            "date",
+            "province",
+            "project",
+            "farm_id",
         ]
-    ]
+    ].copy()
 
-    # Drop duplicate rows
-    barometer_dt = barometer_dt.drop_duplicates()
+    dataframe_raw.drop_duplicates(inplace=True)
 
-    # Apply sha256 hashing on FileNumber, SampleNumber, and FarmID columns
-    barometer_dt["FileNumber"] = barometer_dt["FileNumber"].apply(sha256_hash)
-    barometer_dt["SampleNumber"] = (
-        barometer_dt["SampleNumber"].astype(str).apply(sha256_hash)
+    dataframe_raw.loc[:, "file_number"] = dataframe_raw["file_number"].apply(
+        hashing_function
     )
-    barometer_dt["FarmID"] = (
-        barometer_dt["FarmID"].astype(str).apply(sha256_hash)
+    dataframe_raw.loc[:, "sample_number"] = dataframe_raw[
+        "sample_number"
+    ].apply(hashing_function)
+    dataframe_raw.loc[:, "farm_id"] = dataframe_raw["farm_id"].apply(
+        hashing_function
     )
-    # print(barometer_dt.head())
 
-    barometer_dt_filtered = barometer_dt[
-        (barometer_dt["Project"] == "monitoring")
-        | (barometer_dt["Project"] == "no project")
+    dataframe_raw = dataframe_raw.loc[
+        dataframe_raw["project"].isin(["monitoring", "no project"])
     ]
-    # Floor date to the 1st of the month using .loc method
-    barometer_dt_filtered["Floored_date"] = (
-        barometer_dt_filtered["Date"].dt.to_period("M").dt.to_timestamp()
+    dataframe_raw["floored_date"] = (
+        dataframe_raw["date"].dt.to_period("M").dt.to_timestamp()
     )
-    # Aggregate data based on farm_ID and month (WIDE)
-    agg_functions = {
-        "PM": "max",
-        "MH": "max",
-        "HS": "max",
-        "MB": "max",
-        "BRSV": "max",
-        "PI3": "max",
-        "BCV": "max",
-    }
-    barometer_groupby = barometer_dt_filtered.groupby(
-        [
-            "LabReference",
-            "Country",
-            "Breed",
-            "Floored_date",
-            "Province",
-            "FarmID",
-            "DiagnosticTest",
-            "SampleType",
-        ],
-        observed=True
-    ).agg(agg_functions)
 
-    # Convert to LONG
-    barometer_groupby.columns = [
-        f"{col[0]}_{col[1]}" for col in barometer_groupby.columns
-    ]
+    # Group and aggregate data
+    columns_to_aggregate = ["PM", "MH", "HS", "MB", "BRSV", "PI3", "BCV"]
+    barometer_grouped = (
+        dataframe_raw.groupby(
+            [
+                "lab_reference",
+                "country",
+                "breed",
+                "floored_date",
+                "province",
+                "farm_id",
+                "diagnostic_test",
+                "sample_type",
+            ],
+            observed=True,
+            dropna=False,
+        )[columns_to_aggregate]
+        .max()
+        .reset_index()
+    )
+
     barometer_long = pd.melt(
-        barometer_groupby.reset_index(),
+        barometer_grouped,
         id_vars=[
-            "LabReference",
-            "Country",
-            "Breed",
-            "Floored_date",
-            "Province",
-            "FarmID",
-            "DiagnosticTest",
-            "SampleType",
+            "lab_reference",
+            "country",
+            "breed",
+            "floored_date",
+            "province",
+            "farm_id",
+            "diagnostic_test",
+            "sample_type",
         ],
-        var_name="Pathogen",
-        value_name="Result",
+        var_name="pathogen",
+        value_name="result",
     )
-    # Save file to CSV (long version)
-    # barometer_long.to_csv("output/barometer_GD.csv", index=False)
 
-    g = rdflib.Graph()
-    onto = Namespace("http://www.purl.org/decide/LivestockHealthOnto")
-    g.bind("onto", onto)
-    xsd = Namespace("http://www.w3.org/2001/XMLSchema#")
-    g.bind("xsd", xsd)
+    barometer_long = barometer_long.loc[
+        :,
+        [
+            "lab_reference",
+            "country",
+            "breed",
+            "floored_date",
+            "province",
+            "farm_id",
+            "diagnostic_test",
+            "sample_type",
+            "pathogen",
+            "result"
+        ],
+    ]
 
-    # Iterate through the rows and create RDF triples
-    for index, row in barometer_long.iterrows():
-        CattleSample = onto[f'CattleSample{row["LabReference"]}_{index}']
-        g.add((CattleSample, RDF.type, onto.CattleSample))
-
-        # Handle nan values in literals
-        diagnostic_test = (
-            row["DiagnosticTest"] if not pd.isna(row["DiagnosticTest"]) else ""
-        )
-        country = row["Country"] if not pd.isna(row["Country"]) else ""
-        lab_reference = (
-            row["LabReference"] if not pd.isna(row["LabReference"]) else ""
-        )
-        sample_type = (
-            row["SampleType"] if not pd.isna(row["SampleType"]) else ""
-        )
-        breed = row["Breed"] if not pd.isna(row["Breed"]) else ""
-        Pathogen = row["Pathogen"] if not pd.isna(row["Pathogen"]) else ""
-        result = row["Result"] if not pd.isna(row["Result"]) else "Missing"
-        date = row["Floored_date"] if not pd.isna(row["Floored_date"]) else ""
-        province = row["Province"] if not pd.isna(row["Province"]) else ""
-        farm_id = row["FarmID"] if not pd.isna(row["FarmID"]) else ""
-
-        g.add(
-            (
-                CattleSample,
-                onto.hasDiagnosticTest,
-                Literal(diagnostic_test, datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasCountry,
-                Literal(country, datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasLabReference,
-                Literal(lab_reference, datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasSampleType,
-                Literal(sample_type, datatype=XSD.string),
-            )
-        )
-        g.add(
-            (CattleSample, onto.hasBreed, Literal(breed, datatype=XSD.string))
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasResult,
-                Literal(result, datatype=XSD.string),
-            )
-        )
-        g.add((CattleSample, onto.hasDate, Literal(date, datatype=XSD.string)))
-        g.add(
-            (
-                CattleSample,
-                onto.hasProvince,
-                Literal(province, datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasFarmIdentification,
-                Literal(farm_id, datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasPathogen,
-                Literal(Pathogen, datatype=XSD.string),
-            )
-        )
-
-    filename_output = "output/RDFOutputDG.ttl"
-    g.serialize(destination=filename_output, format="turtle")
-    return filename_output
+    logger.debug(
+        "Size of preprocessed dataframe: %s rows", barometer_long.size
+    )
+    logger.info("Done preprocessing GD file")
+    return barometer_long
