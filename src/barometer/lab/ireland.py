@@ -1,440 +1,378 @@
+import csv
 import hashlib
+import logging
 
 import numpy as np
 import pandas as pd
 import rdflib
-from rdflib import Literal
-from rdflib import Namespace
+from pandas import DataFrame
+from rdflib import Literal, Namespace
 from rdflib.namespace import XSD
+from barometer.lab._common import hashing_function
+
+logger = logging.getLogger(__name__)
 
 
-def process_file(files) -> str:
-    # Load the data into Pandas dataframes
-    dfs = []
-    for file in files:
-        df = pd.read_excel(file, engine="openpyxl")
-        dfs.append(df)
+def get_result(row):
+    if row["diagnostic_test"] == "PCR":
+        if row["RESULT"] in [
+            "Positive",
+            "Weak Positive",
+            "Mycoplasma bovis PCR Positive",
+            "Strong Positive",
+        ]:
+            return 1
+        elif row["RESULT"] in [
+            "No Pathogen detected",
+            "Negative",
+            "Sterile",
+            "No Significant Growth",
+            "No CT",
+            "Mycoplasma bovis PCR Negative",
+            "Mixed Non-Significant Bacterial Growth",
+            "No Significant Growth @48hrs",
+            "No Growth",
+            "No Pathogen detectedn",
+            "No RNA detected",
+            "No DNA detected",
+            "No Virus Detected",
+            "Not Detected",
+        ]:
+            return 0
+        elif row["RESULT"] in [
+            "Inconclusive",
+            "Mixed Bacterial Growth",
+            "Mixed Growth",
+            "Very Mixed Growth",
+        ]:
+            return np.nan
+    elif row["diagnostic_test"] == "Culture" and row["pathogen"] in [
+        "MH",
+        "PM",
+        "HS",
+    ]:
+        if (
+            row["pathogen"] == "MH"
+            and row["RESULT"] == "Mannheimia haemolytica"
+        ):
+            return 1
+        elif row["pathogen"] == "PM" and row["RESULT"] in [
+            "Pasteurella multocida",
+            "P. multocida",
+        ]:
+            return 1
+        elif row["pathogen"] == "HS" and row["RESULT"] in [
+            "Histophilus somni",
+            "Histophilus somnus",
+            "Histophilus somnii",
+        ]:
+            return 1
+        else:
+            return 0
+    return np.nan
 
-    barometer_dt_raw_2021 = dfs[0]
-    barometer_dt_raw_2022 = dfs[1]
 
-    # Combine the datasets using pd.concat
-    barometer_dt_combined = pd.concat(
-        [barometer_dt_raw_2021, barometer_dt_raw_2022], ignore_index=True
+def preprocess(dataframe_raw: DataFrame) -> DataFrame:
+    logger.info("Preprocessing Ireland file")
+    logger.debug("Size of raw dataframe: %s rows", dataframe_raw.shape[0])
+
+    dataframe_filtered: DataFrame = dataframe_raw.loc[
+        (
+            dataframe_raw["SYSTEM"]
+            .str.strip()
+            .isin(
+                [
+                    "Respiratory",
+                ]
+            )
+        )  # np.nan
+        & (
+            dataframe_raw["ALIQUOTMATRIXTYPE"].isin(
+                [
+                    "Pleural Fluid",
+                    "Tissue swab",
+                    "Tonsil",
+                    "Lymph Node - Multiple",
+                    "Trachea",
+                    "Thoracic Fluid",
+                    "Lung",
+                    "Swab",
+                    "Culture",
+                    "Thymus",
+                    "Part Carcass",
+                    "Tissue swab",
+                    "Nasal Swab",
+                    "Nasal Fluid",
+                    "Tissue-Pool",
+                    "Tissue (VTM)",
+                    "Carcass",
+                    "Lymph Node",
+                    "Pooled swab",
+                    "Misc.",
+                ]
+            )
+        )
+        & (
+            dataframe_raw["TEST"].isin(
+                [
+                    "PI3V PCR",
+                    "PCR M. haemolytica - ARVL",
+                    "Mycoplasma bovis (PCR)",
+                    "PCR H. somni - ARVL",
+                    "PCR P. multocida - ARVL",
+                    "Miscellaneous Test",
+                    "Routine Culture",
+                    "PCR M. bovis - ARVL",
+                    "BRSV PCR",
+                    "Culture Growth",
+                    "PCR BoCoV",
+                    "Mycoplasma bovis (PCR)",
+                ]
+            )
+        )
+    ].copy()
+
+    dataframe_filtered.rename(
+        columns={
+            "SDGa": "file_number",
+            "SAMPLEa": "sample_number",
+            "HERD_NOa": "farm_id",
+            "DELIVERY_DATE": "date",
+            "Herd.Type": "breed",
+            "County": "province",
+        },
+        inplace=True,
     )
 
-    # Filter data using pandas
-    conditions_system = barometer_dt_combined["SYSTEM"].isin(
-        ["Respiratory", "NA"]
-    )
-    barometer_dt_filter = barometer_dt_combined[conditions_system]
-
-    conditions_aliquot_matrix = barometer_dt_filter["ALIQUOTMATRIXTYPE"].isin(
+    dataframe_filtered["country"] = "Ireland"
+    dataframe_filtered["lab_reference"] = "5"
+    dataframe_filtered["sample_type"] = np.select(
         [
-            "Pleural Fluid",
-            "Tissue swab",
-            "Tonsil",
-            "Lymph Node - Multiple",
-            "Trachea",
-            "Thoracic Fluid",
-            "Lung",
-            "Swab",
-            "Culture",
-            "Thymus",
-            "Part Carcass",
-            "Tissue swab",
-            "Nasal Swab",
-            "Nasal Fluid",
-            "Tissue-Pool",
-            "Tissue (VTM)",
-            "Carcass",
-            "Lymph Node",
-            "Pooled swab",
-            "Misc.",
-        ]
+            dataframe_filtered["SUBCLASS"] == "Carcass",
+            dataframe_filtered["ALIQUOTMATRIXTYPE"].isin(
+                [
+                    "Carcass",
+                    "Lung",
+                    "Thymus",
+                    "Lymph Node - Multiple",
+                    "Tissue-Pool",
+                    "Lymph Node",
+                    "Tissue (VTM)",
+                    "Part Carcass",
+                ]
+            ),
+            dataframe_filtered["ALIQUOTMATRIXTYPE"].isin(
+                ["Swab", "Nasal Swab", "Pooled swab", "Nasal Fluid"]
+            ),
+            dataframe_filtered["ALIQUOTMATRIXTYPE"].isin(
+                [
+                    "Trachea",
+                    "Thoracic Fluid",
+                    "Culture",
+                    "Fluid",
+                    "Misc.",
+                    "Pleural Fluid",
+                ]
+            ),
+        ],
+        ["Autopsy", "Autopsy", "Swab", "Unknown"],
+        default="Missing",
     )
-    barometer_dt_filter2 = barometer_dt_filter[conditions_aliquot_matrix]
-
-    conditions_test = barometer_dt_filter2["TEST"].isin(
-        [
-            "PI3V PCR",
-            "PCR M. haemolytica - ARVL",
-            "Mycoplasma bovis (PCR)",
-            "PCR H. somni - ARVL",
-            "PCR P. multocida - ARVL",
-            "Miscellaneous Test",
-            "Routine Culture",
-            "PCR M. bovis - ARVL",
-            "BRSV PCR",
-            "Culture Growth",
-            "PCR BoCoV",
-            "Mycoplasma bovis (PCR)",
-        ]
-    )
-    barometer_dt_filter3 = barometer_dt_filter2[conditions_test]
-
-    # Data manipulation
-    barometer_dt = (
-        barometer_dt_filter3.rename(
-            columns={
-                "SDGa": "FileNumber",
-                "SAMPLEa": "SampleNumber",
-                "HERD_NOa": "FarmID",
-                "DELIVERY_DATE": "Date",
-                "Herd.Type": "Breed",
+    dataframe_filtered["diagnostic_test"] = (
+        dataframe_filtered["TEST"]
+        .map(
+            {
+                "PI3V PCR": "PCR",
+                "PCR M. haemolytica - ARVL": "PCR",
+                "Mycoplasma bovis (PCR)": "PCR",
+                "PCR H. somni - ARVL": "PCR",
+                "PCR M. bovis - ARVL": "PCR",
+                "BRSV PCR": "PCR",
+                "PCR BoCoV": "PCR",
+                "PCR P. multocida - ARVL": "PCR",
+                "Routine Culture": "Culture",
+                "Culture Growth": "Culture",
             }
         )
-        .assign(
-            Country="Ireland",
-            LabReference="5",
-            SampleType=lambda x: x["ALIQUOTMATRIXTYPE"].map(
-                {
-                    "Carcass": "Autopsy",
-                    "Lung": "Autopsy",
-                    "Thymus": "Autopsy",
-                    "Lymph Node - Multiple": "Autopsy",
-                    "Tissue-Pool": "Autopsy",
-                    "Lymph Node": "Autopsy",
-                    "Tissue (VTM)": "Autopsy",
-                    "Part Carcass": "Autopsy",
-                    "Swab": "Swab",
-                    "Nasal Swab": "Swab",
-                    "Pooled swab": "Swab",
-                    "Nasal Fluid": "Swab",
-                    "Trachea": "Unknown",
-                    "Thoracic Fluid": "Unknown",
-                    "Culture": "Unknown",
-                    "Fluid": "Unknown",
-                    "Misc.": "Unknown",
-                    "Pleural Fluid": "Unknown",
-                }
-            ),
-            DiagnosticTest=lambda x: x["TEST"].map(
-                {
-                    "PI3V PCR": "PCR",
-                    "PCR M. haemolytica - ARVL": "PCR",
-                    "Mycoplasma bovis (PCR)": "PCR",
-                    "PCR H. somni - ARVL": "PCR",
-                    "PCR M. bovis - ARVL": "PCR",
-                    "BRSV PCR": "PCR",
-                    "PCR BoCoV": "PCR",
-                    "Mycoplasma bovis (PCR)": "PCR",
-                    "PCR P. multocida - ARVL": "PCR",
-                    "Routine Culture": "Culture",
-                    "Culture Growth": "Culture",
-                }
-            ),
-            Breed=lambda x: x["Breed"].map(
-                {
-                    "BEEF": "Beef",
-                    "DAIRY": "Dairy",
-                    "SUCKLER": "Suckler",
-                    "OTHER": "Unknown",
-                }
-            ),
-            Province=lambda x: x["County"],
-            Pathogen=lambda x: x["TEST"].map(
-                {
-                    "PCR P. multocida - ARVL": "PM",
-                    "PCR M. haemolytica - ARVL": "MH",
-                    "PCR H. somni - ARVL": "HS",
-                    "Mycoplasma bovis (PCR)": "MB",
-                    "PCR M. bovis - ARVL": "MB",
-                    "PI3V PCR": "PI3",
-                    "PCR BoCoV": "BCV",
-                    "BRSV PCR": "BRSV",
-                }
-            ),
+        .fillna("Missing")
+    )
+    dataframe_filtered["breed"] = (
+        dataframe_filtered["breed"]
+        .map(
+            {
+                "BEEF": "Beef",
+                "DAIRY": "Dairy",
+                "SUCKLER": "Suckler",
+                "OTHER": "Unknown",
+            }
         )
-        .filter(
-            items=[
-                "FileNumber",
-                "SampleNumber",
-                "DiagnosticTest",
-                "Country",
-                "LabReference",
-                "SampleType",
-                "Breed",
-                "Pathogen",
-                "Date",
-                "Province",
-                "RESULT",
-                "RESULTNAME",
-                "AGENT",
-                "FarmID",
-            ]
+        .fillna("Unknown")
+    )
+    dataframe_filtered["pathogen"] = (
+        dataframe_filtered["TEST"]
+        .map(
+            {
+                "PCR P. multocida - ARVL": "PM",
+                "PCR M. haemolytica - ARVL": "MH",
+                "PCR H. somni - ARVL": "HS",
+                "H. somni PCR": "HS",
+                "Mycoplasma bovis (PCR)": "MB",
+                "PCR M. bovis - ARVL": "MB",
+                "PI3V PCR": "PI3",
+                "PCR BoCoV": "BCV",
+                "BRSV PCR": "BRSV",
+            }
         )
-        .drop_duplicates()
-        .assign(
-            FileNumber=lambda x: x["FileNumber"].apply(
-                lambda val: hashlib.sha256(str(val).encode()).hexdigest()
-            ),
-            SampleNumber=lambda x: x["SampleNumber"].apply(
-                lambda val: hashlib.sha256(str(val).encode()).hexdigest()
-            ),
-            FarmID=lambda x: x["FarmID"].apply(
-                lambda val: hashlib.sha256(str(val).encode()).hexdigest()
-            ),
-        )
+        .fillna("Missing")
     )
 
-    # Add extra rows for cultuur (& MALDI & NGS?)
-    pathogens = ["HS", "MH", "PM"]
-    barometer_dt["HS"] = barometer_dt.apply(
-        lambda x: 0 if x["DiagnosticTest"] == "Culture" else None, axis=1
-    )
-    barometer_dt["MH"] = barometer_dt.apply(
-        lambda x: 0 if x["DiagnosticTest"] == "Culture" else None, axis=1
-    )
-    barometer_dt["PM"] = barometer_dt.apply(
-        lambda x: 0 if x["DiagnosticTest"] == "Culture" else None, axis=1
-    )
-
-    barometer_dt_culture_wide = pd.melt(
-        barometer_dt,
-        id_vars=[
-            "FileNumber",
-            "SampleNumber",
-            "DiagnosticTest",
-            "Country",
-            "LabReference",
-            "SampleType",
-            "Breed",
-            "Pathogen",
-            "Date",
-            "Province",
+    barometer_dt = dataframe_filtered[
+        [
+            "file_number",
+            "sample_number",
+            "diagnostic_test",
+            "country",
+            "lab_reference",
+            "sample_type",
+            "breed",
+            "pathogen",
+            "date",
+            "province",
             "RESULT",
             "RESULTNAME",
             "AGENT",
-            "FarmID",
+            "farm_id",
+        ]
+    ].copy()
+
+    barometer_dt.drop_duplicates(inplace=True)
+    barometer_dt.loc[:, "file_number"] = barometer_dt["file_number"].apply(
+        hashing_function
+    )
+    barometer_dt.loc[:, "sample_number"] = barometer_dt["sample_number"].apply(
+        hashing_function
+    )
+    barometer_dt.loc[:, "farm_id"] = barometer_dt["farm_id"].apply(
+        hashing_function
+    )
+
+    barometer_dt["HS"] = np.where(
+        barometer_dt["diagnostic_test"] == "Culture", 0, np.nan
+    )
+    barometer_dt["MH"] = np.where(
+        barometer_dt["diagnostic_test"] == "Culture", 0, np.nan
+    )
+    barometer_dt["PM"] = np.where(
+        barometer_dt["diagnostic_test"] == "Culture", 0, np.nan
+    )
+    barometer_dt = barometer_dt.astype(
+        {
+            "HS": "Int8",
+            "MH": "Int8",
+            "PM": "Int8",
+        }
+    )
+
+    barometer_long = pd.melt(
+        barometer_dt,
+        id_vars=[
+            "file_number",
+            "sample_number",
+            "diagnostic_test",
+            "country",
+            "lab_reference",
+            "sample_type",
+            "breed",
+            "pathogen",
+            "date",
+            "province",
+            "RESULT",
+            "RESULTNAME",
+            "AGENT",
+            "farm_id",
         ],
-        value_vars=pathogens,
-        var_name="Pathogen_culture",
-        value_name="Result_culture",
+        value_vars=["PM", "MH", "HS"],
+        var_name="pathogen_culture",
+        value_name="result_culture",
     )
 
-    barometer_dt_culture_wide["Pathogen"] = barometer_dt_culture_wide.apply(
-        lambda x: (
-            x["Pathogen_culture"]
-            if x["Pathogen"] == "Missing"
-            else x["Pathogen"]
-        ),
-        axis=1,
+    barometer_long.loc[barometer_long["pathogen"] == "Missing", "pathogen"] = (
+        barometer_long["pathogen_culture"]
     )
 
-    # Create binary results PCR & culture
-    def calculate_result(row):
-        if row["DiagnosticTest"] == "PCR":
-            if row["RESULT"] in [
-                "Positive",
-                "Weak Positive",
-                "Mycoplasma bovis PCR Positive",
-                "Strong Positive",
-            ]:
-                return 1
-            elif row["RESULT"] in [
-                "No Pathogen detected",
-                "Negative",
-                "Sterile",
-                "No Significant Growth",
-                "No CT",
-                "Mycoplasma bovis PCR Negative",
-                "Mixed Non-Significant Bacterial Growth",
-                "No Significant Growth @48hrs",
-                "No Growth",
-                "No Pathogen detectedn",
-                "No RNA detected",
-                "No DNA detected",
-                "No Virus Detected",
-                "Not Detected",
-            ]:
-                return 0
-            else:
-                return None
-        elif row["DiagnosticTest"] == "Culture":
-            if row["Pathogen"] in ["MH", "PM", "HS"]:
-                if (
-                    (
-                        row["Pathogen"] == "MH"
-                        and row["RESULT"] == "Mannheimia haemolytica"
-                    )
-                    or (
-                        row["Pathogen"] == "PM"
-                        and row["RESULT"]
-                        in ["Pasteurella multocida", "P. multocida"]
-                    )
-                    or (
-                        row["Pathogen"] == "HS"
-                        and row["RESULT"]
-                        in [
-                            "Histophilus somni",
-                            "Histophilus somnus",
-                            "Histophilus somnii",
-                        ]
-                    )
-                ):
-                    return 1
-            else:
-                return 0
-        return None
+    barometer_long['result'] = barometer_long.apply(
+        get_result, axis=1)
 
-    barometer_results = (
-        barometer_dt_culture_wide.assign(
-            Result=lambda x: x.apply(calculate_result, axis=1)
-        )
-        .filter(
-            items=[
-                "FileNumber",
-                "SampleNumber",
-                "DiagnosticTest",
-                "Country",
-                "LabReference",
-                "SampleType",
-                "Breed",
-                "Pathogen",
-                "Result",
-                "Date",
-                "Province",
-                "RESULT",
-                "RESULTNAME",
-                "AGENT",
-                "FarmID",
-            ]
-        )
-        .drop_duplicates()
-        .assign(
-            Filenumber=lambda x: x["FileNumber"].apply(
-                lambda val: hashlib.sha256(str(val).encode()).hexdigest()
-            ),
-            Samplenumber=lambda x: x["SampleNumber"].apply(
-                lambda val: hashlib.sha256(str(val).encode()).hexdigest()
-            ),
-            Farm_ID=lambda x: x["FarmID"].apply(
-                lambda val: hashlib.sha256(str(val).encode()).hexdigest()
-            ),
-        )
-    )
-
-    barometer_results["Floored_date"] = (
-        pd.to_datetime(barometer_results["Date"])
-        .dt.to_period("M")
-        .dt.to_timestamp()
-    )
-
-    barometer_results["Floored_date"] = barometer_results[
-        "Floored_date"
-    ].dt.date
-
-    # barometer_groupby = barometer_results.groupby(['LabReference', 'Country', 'Breed', 'Floored_date', 'Province',
-    #                                            'FarmID', 'DiagnosticTest', 'SampleType', 'Pathogen']) \
-    # .apply(lambda group: group.max(numeric_only=True, skipna=True) if not group[["Result"]].isna().all().all() else pd.DataFrame({"Result": [None]}))
-
-    # barometer_groupby.reset_index(inplace=True)
-
-    barometer_groupby = barometer_results.groupby(
+    barometer_results = barometer_long.astype({"result": "Int8"})[
         [
-            "LabReference",
-            "Country",
-            "Breed",
-            "Floored_date",
-            "Province",
-            "FarmID",
-            "DiagnosticTest",
-            "SampleType",
-            "Pathogen",
-        ],
-        observed=True
-    ).agg(
-        Result=(
-            "Result",
-            lambda x: np.nan if all(pd.isna(x)) else max(x.dropna()),
-        )
+            "file_number",
+            "sample_number",
+            "diagnostic_test",
+            "country",
+            "lab_reference",
+            "sample_type",
+            "breed",
+            "pathogen",
+            "result",
+            "date",
+            "province",
+            "RESULT",
+            "RESULTNAME",
+            "AGENT",
+            "farm_id"
+        ]
+    ]
+    barometer_results.drop_duplicates(inplace=True)
+
+    barometer_results["floored_date"] = (
+        barometer_results["date"].dt.to_period("M").dt.to_timestamp()
     )
-    barometer_groupby.reset_index(inplace=True)
 
-    g = rdflib.Graph()
-    onto = Namespace("http://www.purl.org/decide/LivestockHealthOnto")
-    g.bind("onto", onto)
-    xsd = Namespace("http://www.w3.org/2001/XMLSchema#")
-    g.bind("xsd", xsd)
+    barometer_grouped = (
+        barometer_results.groupby(
+            [
+                "lab_reference",
+                "country",
+                "breed",
+                "floored_date",
+                "province",
+                "farm_id",
+                "diagnostic_test",
+                "sample_type",
+                "pathogen"
+            ],
+            observed=True,
+            dropna=False,
+        )["result"]
+        .max()
+        .reset_index()
+    )
 
-    # iterate over each row in the dataframe and
-    for index, row in barometer_groupby.iterrows():
-        # Create a URI for the CattleSample based on the index
-        CattleSample = onto[f"CattleSample_{index}"]
 
-        # Add triples for each attribute in the row
-        g.add(
-            (
-                CattleSample,
-                onto.hasDiagnosticTest,
-                Literal(row["DiagnosticTest"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasCountry,
-                Literal(row["Country"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasBreed,
-                Literal(row["Breed"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasDate,
-                Literal(row["Floored_date"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasProvince,
-                Literal(row["Province"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasFarmIdentification,
-                Literal(row["FarmID"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasSampleType,
-                Literal(row["SampleType"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasPathogen,
-                Literal(row["Pathogen"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasResult,
-                Literal(row["Result"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                CattleSample,
-                onto.hasLabreference,
-                Literal(row["LabReference"], datatype=XSD.string),
-            )
-        )
+    # barometer_long = barometer_long.loc[
+    #     :,
+    #     [
+    #         "file_number",
+    #         "sample_number",
+    #         "diagnostic_test",
+    #         "country",
+    #         "lab_reference",
+    #         "sample_type",
+    #         "breed",
+    #         "pathogen",
+    #         "date",
+    #         "province",
+    #         "RESULT",
+    #         "RESULTNAME",
+    #         "AGENT",
+    #         "farm_id",
+    #         "pathogen",
+    #         "result",
+    #     ],
+    # ]
 
-    filename_output = "output/RDFOutputIreland.ttl"
-    g.serialize(destination=filename_output, format="turtle")
-    return filename_output
+    logger.debug(
+        "Size of preprocessed dataframe: %s rows", barometer_grouped.shape[0]
+    )
+    logger.info("Done preprocessing GD file")
+    return barometer_grouped
