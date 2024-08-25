@@ -1,26 +1,13 @@
-import hashlib
 import logging
 
-import numpy as np
 import pandas as pd
-from numpy import select
-from pandas import (
-    Categorical,
-    DataFrame,
-    Series,
-    melt,
-    to_numeric,
-    to_timedelta,
-)
+from pandas import DataFrame, melt
 from rdflib import Graph, Literal, Namespace
 from rdflib.namespace import XSD
 
+from barometer.lab._common import hashing_function
+
 logger = logging.getLogger(__name__)
-
-
-def hashing_function(variable):
-    if not pd.isnull(variable):
-        return hashlib.sha256(str(variable).encode()).hexdigest()
 
 
 def preprocess(dataframe_raw: DataFrame) -> DataFrame:
