@@ -171,7 +171,7 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
             "diagnostic_test",
             "sample_type",
             "pathogen",
-            "result"
+            "result",
         ],
     ]
 
