@@ -1,13 +1,9 @@
-import csv
-import hashlib
 import logging
 
 import numpy as np
 import pandas as pd
-import rdflib
 from pandas import DataFrame
-from rdflib import Literal, Namespace
-from rdflib.namespace import XSD
+
 from barometer.lab._common import hashing_function
 
 logger = logging.getLogger(__name__)
@@ -52,8 +48,8 @@ def get_result(row):
         "HS",
     ]:
         if (
-            row["pathogen"] == "MH"
-            and row["RESULT"] == "Mannheimia haemolytica"
+                row["pathogen"] == "MH"
+                and row["RESULT"] == "Mannheimia haemolytica"
         ):
             return 1
         elif row["pathogen"] == "PM" and row["RESULT"] in [
@@ -130,7 +126,7 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
                 ]
             )
         )
-    ].copy()
+        ].copy()
 
     dataframe_filtered.rename(
         columns={
@@ -300,8 +296,7 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
         barometer_long["pathogen_culture"]
     )
 
-    barometer_long['result'] = barometer_long.apply(
-        get_result, axis=1)
+    barometer_long["result"] = barometer_long.apply(get_result, axis=1)
 
     barometer_results = barometer_long.astype({"result": "Int8"})[
         [
@@ -319,7 +314,7 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
             "RESULT",
             "RESULTNAME",
             "AGENT",
-            "farm_id"
+            "farm_id",
         ]
     ]
     barometer_results.drop_duplicates(inplace=True)
@@ -339,7 +334,7 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
                 "farm_id",
                 "diagnostic_test",
                 "sample_type",
-                "pathogen"
+                "pathogen",
             ],
             observed=True,
             dropna=False,
@@ -347,29 +342,6 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
         .max()
         .reset_index()
     )
-
-
-    # barometer_long = barometer_long.loc[
-    #     :,
-    #     [
-    #         "file_number",
-    #         "sample_number",
-    #         "diagnostic_test",
-    #         "country",
-    #         "lab_reference",
-    #         "sample_type",
-    #         "breed",
-    #         "pathogen",
-    #         "date",
-    #         "province",
-    #         "RESULT",
-    #         "RESULTNAME",
-    #         "AGENT",
-    #         "farm_id",
-    #         "pathogen",
-    #         "result",
-    #     ],
-    # ]
 
     logger.debug(
         "Size of preprocessed dataframe: %s rows", barometer_grouped.shape[0]

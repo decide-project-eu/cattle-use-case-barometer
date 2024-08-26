@@ -3,8 +3,6 @@ import logging
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
-from rdflib import Graph, Literal, Namespace
-from rdflib.namespace import XSD
 
 from barometer.lab._common import hashing_function
 
