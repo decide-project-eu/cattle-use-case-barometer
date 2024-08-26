@@ -320,4 +320,4 @@ pyrightconfig.json
 
 main.py
 data/*
-output/*
+output*/*
