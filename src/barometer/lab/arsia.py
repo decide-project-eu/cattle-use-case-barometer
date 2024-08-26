@@ -2,8 +2,6 @@ import logging
 
 import pandas as pd
 from pandas import DataFrame, melt
-from rdflib import Graph, Literal, Namespace
-from rdflib.namespace import XSD
 
 from barometer.lab._common import hashing_function
 
@@ -207,99 +205,3 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
     )
     logger.info("Done preprocessing ARSIA file")
     return barometer_long
-
-
-def build_graph(dataframe: DataFrame) -> Graph:
-    logger.info("Building ARSIA RDF graph")
-    logger.debug("Size of dataframe: %s rows", dataframe.size)
-
-    # Graph creation
-    g = Graph()
-    onto = Namespace("http://www.purl.org/decide/LivestockHealthOnto")
-    g.bind("onto", onto)
-    xsd = Namespace("http://www.w3.org/2001/XMLSchema#")
-    g.bind("xsd", xsd)
-
-    # Iterate through the rows of the barometer_long dataframe and create RDF triples
-    for index, row in dataframe.iterrows():
-        # Create a URI for the CattleSample based on the index
-        cattle_sample = onto[f"CattleSample_{index}"]
-
-        # Add triples for each attribute in the row
-        g.add(
-            (
-                cattle_sample,
-                onto.hasDiagnosticTest,
-                Literal(row["diagnostic_test"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                cattle_sample,
-                onto.hasCountry,
-                Literal(row["country"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                cattle_sample,
-                onto.hasBreed,
-                Literal(row["breed"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                cattle_sample,
-                onto.hasDate,
-                Literal(row["floored_date"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                cattle_sample,
-                onto.hasProvince,
-                Literal(row["province"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                cattle_sample,
-                onto.hasFarmIdentification,
-                Literal(row["farm_id"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                cattle_sample,
-                onto.hasSampleType,
-                Literal(row["sample_type"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                cattle_sample,
-                onto.hasPathogen,
-                Literal(row["pathogen"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                cattle_sample,
-                onto.hasResult,
-                Literal(row["result"], datatype=XSD.string),
-            )
-        )
-        g.add(
-            (
-                cattle_sample,
-                onto.hasLabreference,
-                Literal(row["lab_reference"], datatype=XSD.string),
-            )
-        )
-
-    logger.debug("Size of RDF graph: %s nodes", len(g))
-    logger.info("Done building ARSIA RDF graph")
-    return g
-    # filename_output = "output/RDFOutputArsia.ttl"
-    # g.serialize(destination=filename_output, format="turtle")
-    # return filename_output
