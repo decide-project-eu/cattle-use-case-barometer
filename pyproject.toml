@@ -11,23 +11,23 @@ requires-python = ">=3.8"
 license = "MIT"
 keywords = []
 authors = [
-  { name = "Max Nollet", email = "github.lunchroom278@slmails.com" },
+    { name = "Max Nollet", email = "github.lunchroom278@slmails.com" },
 ]
 classifiers = [
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "pandas>=2.2.0",
-  "openpyxl",
-  "rdflib>=7.0.0",
-  "click>=8.0.0"
+    "pandas>=2.2.0",
+    "openpyxl",
+    "rdflib>=7.0.0",
+    "click>=8.0.0"
 ]
 
 [project.urls]
@@ -43,26 +43,26 @@ path = "src/barometer/__about__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
-  "coverage[toml]>=6.5",
-  "pytest",
-  "pre-commit"
+    "coverage[toml]>=6.5",
+    "pytest",
+    "pre-commit"
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
 cov-report = [
-  "- coverage combine",
-  "coverage report",
+    "- coverage combine",
+    "coverage report",
 ]
 cov = [
-  "test-cov",
-  "cov-report",
+    "test-cov",
+    "cov-report",
 ]
 
 [tool.hatch.envs.lint]
 description = "Environment for formatting code and static type checking"
 dependencies = [
-  "black"
+    "black"
 ]
 [tool.hatch.envs.lint.scripts]
 fmt = "black {args:.}"
@@ -72,7 +72,7 @@ python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.types]
 dependencies = [
-  "mypy>=1.0.0",
+    "mypy>=1.0.0",
 ]
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/barometer tests}"
@@ -83,7 +83,7 @@ source_pkgs = ["barometer", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/barometer/__about__.py",
+    "src/barometer/__about__.py",
 ]
 
 [tool.coverage.paths]
@@ -92,11 +92,28 @@ tests = ["tests", "*/barometer/tests"]
 
 [tool.coverage.report]
 exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
+    "no cov",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
 ]
 
 
-[tool.black]
+[tool.ruff]
+include = [
+    "./src/barometer/*",
+    "./tests",
+    "tableau_data_updater.py"
+]
 line-length = 79
+
+[tool.ruff.lint]
+select = [
+    "I", # isort
+    "N", # pep8-naming
+    #    "D",    # pydocstyle
+    "UP", # pyupgrade
+    "RUF", # Ruff-specific rules
+]
+
+[rool.ruff.format]
+docstring-code-format = true
