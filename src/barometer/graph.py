@@ -1,16 +1,17 @@
+import logging
+
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
 from rdflib import OWL, RDFS, XSD, Graph, Literal, Namespace
 from rdflib.query import Result
 
-from barometer.lab.arsia import logger
-from main import logger
+logger = logging.getLogger(__name__)
 
 
 def build(dataframe: DataFrame) -> Graph:
     logger.info("Building RDF graph")
-    logger.debug("Size of dataframe: %s rows", dataframe.size)
+    logger.debug("Size of dataframe: %s rows", dataframe.shape[0])
 
     # Graph creation
     g = Graph()
@@ -99,9 +100,6 @@ def build(dataframe: DataFrame) -> Graph:
     logger.debug("Size of RDF graph: %s nodes", len(g))
     logger.info("Done building RDF graph")
     return g
-    # filename_output = "output/RDFOutputArsia.ttl"
-    # g.serialize(destination=filename_output, format="turtle")
-    # return filename_output
 
 
 def query(graph: Graph) -> Result:
@@ -165,6 +163,6 @@ def to_dataframe(results):
     df["Date"] = pd.to_datetime(df["Date"])
     df = df.replace(to_replace="<NA>", value=np.nan)
 
-    logger.debug("Size of query result dataframe: %s rows", df.size)
+    logger.debug("Size of query result dataframe: %s rows", df.shape[0])
     logger.info("Done converting query result into dataframe")
     return df

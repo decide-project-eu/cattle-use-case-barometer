@@ -321,3 +321,4 @@ pyrightconfig.json
 main.py
 data/*
 output*/*
+tableau_conf.json

@@ -1,10 +1,14 @@
-import csv
 import logging
+from datetime import datetime
 
 import pandas as pd
+import pantab
 
 from barometer import graph
-from barometer.lab import arsia, gd, ireland, pathosense
+from barometer.lab import arsia, gd, ireland, pathosense, dgz
+from barometer.tableau import Tableau
+
+logger = logging.getLogger(__name__)
 
 
 def process_arsia():
@@ -44,7 +48,24 @@ def process_arsia():
 
 
 def process_dgz():
-    pass
+    dgz_input = [
+        r"data\DGZ\DECIDE_MTA_UGENT_14nov2022.xlsx",
+        r"data\DGZ\DECIDE_MTA_UGENT_BAC_AERO_14nov2022.xlsx",
+        r"data\DGZ\DECIDE_MTA_UGENTBAC_MYCO_14nov2022.xlsx"
+    ]
+    dgz_raw = [pd.read_excel(file, engine="openpyxl") for file in dgz_input]
+    dgz_preprocessed = dgz.preprocess(*dgz_raw)
+    dgz_graph = graph.build(dgz_preprocessed)
+    dgz_results = graph.query(dgz_graph)
+    dgz_final = graph.to_dataframe(dgz_results)
+
+    dgz_preprocessed.to_csv(
+        "output/dgz_preprocessed.csv", na_rep="NA", index=False
+    )
+    dgz_final.to_csv(
+        "output/dgz_final.csv", na_rep="NA", index=False
+    )
+    return dgz_final
 
 
 def process_dg():
@@ -135,11 +156,14 @@ def main():
     merged = pd.concat(
         [
             process_arsia(),
+            process_dgz(),
             process_dg(),
             process_ireland(),
             process_pathosense(),
         ]
     )
+
+    logger.info("Processing RDF query results for Hyper conversion")
     merged["Month"] = merged["Date"].dt.month.astype("Int64")
     merged["Year"] = merged["Date"].dt.year.astype("Int64")
     merged.rename(
@@ -151,6 +175,19 @@ def main():
     )
 
     merged.to_csv("output/barometer_combined.csv", na_rep="NA", quoting=1)
+    logger.info("Writing RDF query results to Hyper file")
+    pantab.frame_to_hyper(merged, "output/barometer_combined.hyper", table="Cattle barometer")
+    logger.info("Done writing RDF query results to Hyper file")
+
+
+    logger.info("Publishing Hyper file to Tableau Cloud")
+    tableau = Tableau.from_conf("tableau_conf.json")
+    tableau.publish_hyper(
+        "output/barometer_combined.hyper",
+        "decide-project-eu",
+        f"Cattle barometer {datetime.today().strftime('%Y-%m-%d')}"
+    )
+    logger.info("Done publishing Hyper file to Tableau Cloud")
 
 
 if __name__ == "__main__":

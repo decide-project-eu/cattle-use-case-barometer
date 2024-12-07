@@ -27,7 +27,8 @@ dependencies = [
     "pandas>=2.2.0",
     "openpyxl",
     "rdflib>=7.0.0",
-    "click>=8.0.0"
+    "pantab>=5.0.0",
+    "tableauserverclient~=0.34"
 ]
 
 [project.urls]

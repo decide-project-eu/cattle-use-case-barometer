@@ -69,6 +69,16 @@ def get_result(row):
 
 
 def preprocess(dataframe_raw: DataFrame) -> DataFrame:
+    """Preprocess data into report-ready format.
+
+    The data provided was in an awkward format and wasn't suitable for
+    reporting-purposes. This function makes data anonym, molds existing
+    columns into multiple usable columns and shapes the data in a report-ready
+    format.
+
+    :param dataframe_raw: original, unprocessed data.
+    :return: preprocessed data, ready for reporting.
+    """
     logger.info("Preprocessing Ireland file")
     logger.debug("Size of raw dataframe: %s rows", dataframe_raw.shape[0])
 

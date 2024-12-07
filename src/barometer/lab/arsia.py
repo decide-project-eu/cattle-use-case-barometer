@@ -20,7 +20,7 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
     :return: preprocessed data, ready for reporting.
     """
     logger.info("Preprocessing ARSIA file")
-    logger.debug("Size of raw dataframe: %s rows", dataframe_raw.size)
+    logger.debug("Size of raw dataframe: %s rows", dataframe_raw.shape[0])
 
     # Rename columns
     dataframe_raw.rename(
@@ -201,7 +201,7 @@ def preprocess(dataframe_raw: DataFrame) -> DataFrame:
     ]
 
     logger.debug(
-        "Size of preprocessed dataframe: %s rows", barometer_long.size
+        "Size of preprocessed dataframe: %s rows", barometer_long.shape[0]
     )
     logger.info("Done preprocessing ARSIA file")
     return barometer_long
