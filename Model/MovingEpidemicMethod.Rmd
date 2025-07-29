@@ -1,0 +1,101 @@
+---
+title: "MEM_Belgium"
+output: html_document
+date: "2025-07-16"
+---
+
+## Load the libraries
+
+lib = where to save the library (zonder = default)
+
+```{r message=FALSE, warning=FALSE}
+
+package_list <- c("mem", "data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr", "openssl"
+                  )
+for (pkg in package_list) {
+  if (pkg %in% rownames(.packages()) == FALSE)
+  {library(pkg, character.only = TRUE)}
+
+}
+```
+
+Load data sheet
+```{r}
+
+# Load Excel file
+data <- read.csv("../Data/CleanedData/barometer_combined_2025-07-29.csv") 
+
+```
+
+Filter to include only the surveillance season weeks
+
+```{r onlysurveillance, eval=TRUE}
+
+# Keep only weeks 40–53 and 1–20
+data <- subset(data, week >= 40 | week <= 20)
+
+```
+
+
+Transform the Data for MEM: MEM expects a wide format: each column is a season (e.g., "2015/2016"), each row is a week.
+
+```{r}
+# Create a season label based on week and year
+data$season <- ifelse(data$week >= 40,
+                      paste(data$year, data$year + 1, sep = "/"),
+                      paste(data$year - 1, data$year, sep = "/"))
+
+# Use MEM's transformdata function
+transformed <- transformdata(
+  i.data = data,
+  i.range.x = c(40, 20),       # Week range
+  i.name = "rate"             # Column with rates
+)
+
+# Extract the transformed data
+mem_data <- transformed$data
+
+```
+
+Selection of seasons to include
+
+```{r}
+# Keep only the desired seasons
+mem_data <- mem_data[, colnames(mem_data) %in% c(
+  "2017/2018", "2018/2019", "2019/2020",
+  "2020/2021", "2021/2022", "2022/2023"
+)]
+```
+
+
+
+Aanvullen van missing values
+```{r missing values, eval=TRUE}
+
+mem_data <- transformseries(mem_data, i.transformation = 3)
+
+```
+
+
+Run the MEM Model
+
+```{r}
+
+mem_model <- memmodel(mem_data)
+# View summary
+summary(mem_model)
+plot(mem_model)  # Basic plot of the epidemic model
+full.series.graph(mem_data)
+intensity <- memintensity(mem_model)
+print(intensity)
+
+```
+
+Evaluate model performance
+
+```{r}
+goodness <- memgoodness(mem_data)
+print(goodness$results)
+```
+
+
