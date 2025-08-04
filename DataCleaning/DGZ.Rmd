@@ -279,7 +279,8 @@ barometer <-
       barometer_myco_cult, by = c('Filenumber', 'Samplenumber', 'Result', 'Parameter_code', 'Pathogen_identification')
   ) %>%
   dplyr::mutate( 
-    Floored_date = lubridate::floor_date(Date, "month"),
+    Date_month = lubridate::floor_date(Date, "month"),
+    Date_week = lubridate::floor_date(Date, "week"),
       Pathogen = case_when(
       
       (Pathogen == 'Pasteurella multocida') ~ 'PM',
@@ -311,15 +312,33 @@ barometer <-
   group_by(
     Lab_reference, 
     Country, 
-    Breed, 
-    Floored_date, 
+    Breed,
     Province,
     Farm_ID, 
     Diagnostic_test, 
     Sample_type, 
-    Pathogen
+    Samplenumber,
+    Pathogen,
+    Date,
+    Date_month,
+    Date_week
     ) %>%
-  summarise(across(c(Result), max))
+  summarise(across(c(Result), max))%>%
+  select(
+    Lab_reference,
+    Country,
+    Breed,
+    Province,
+    Farm_ID,
+    Diagnostic_test,
+    Sample_type,
+    Samplenumber,
+    Date,
+    Date_month,
+    Date_week,
+    Pathogen,
+    Result
+  )
 
 ```
 

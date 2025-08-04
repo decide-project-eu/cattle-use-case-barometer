@@ -39,29 +39,17 @@ barometer_Vigigrip <- read.csv("../Data/CleanedData/barometer_Vigigrip.csv")
 
 ```
 
-## Time stamp GD convert
-
-Only for barometer_GD: convert time
-
-```{r}
-barometer_GD <- barometer_GD %>%
-dplyr::mutate(
-  Floored_date = as.character(as.Date(Floored_date, "%d-%m-%Y"))
-)
-
-```
 
 ## Combine data to one format and add column with month and year for Tableau
 
 ```{r message=FALSE, warning=FALSE}
-barometer_Tableau <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, barometer_Ireland, barometer_PathoSense, barometer_Vigigrip) %>% 
+barometer_Tableau <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, barometer_Ireland, barometer_PathoSense, barometer_Vigigrip) %>%
   dplyr::mutate(
-    Month = month(as.Date(Floored_date)),
-    Year = year(as.Date(Floored_date))
+    Month = month(Date),
+    Year = year(Date)
     ) %>%
   dplyr::rename(
    LabReference = Lab_reference,
-   FlooredDate = Floored_date,
    FarmIdentifier = Farm_ID, 
    DiagnosticTest = Diagnostic_test,
    SampleType = Sample_type

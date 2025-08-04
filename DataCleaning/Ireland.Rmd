@@ -196,7 +196,9 @@ barometer_dt_culture_wide$Pathogen <-
 ```{r message=FALSE, warning=FALSE}
 
 barometer_results <- barometer_dt_culture_wide %>% 
-  dplyr::mutate(
+    dplyr::mutate(
+     Date_month = lubridate::floor_date(Date,"month"),
+      Date_week = lubridate::floor_date(Date,"week"),
     Result = case_when(
       # Positive tests
       Diagnostic_test == 'PCR' & 
@@ -244,17 +246,11 @@ barometer_results <- barometer_dt_culture_wide %>%
     RESULT,
     RESULTNAME,
     AGENT,
-    Farm_ID
+    Farm_ID,
+    Date_month,
+    Date_week
   ) %>%
   dplyr::distinct()
-```
-
-## Floor date to 1st of month
-
-```{r message=FALSE, warning=FALSE}
-
-barometer_results$Floored_date <- lubridate::floor_date(barometer_results$Date, 
-                                                        "month")
 ```
 
 ## Aggregate data based on farm_ID & month
@@ -262,9 +258,24 @@ barometer_results$Floored_date <- lubridate::floor_date(barometer_results$Date,
 ```{r message=FALSE, warning=FALSE}
 
 barometer_groupby <- barometer_results %>%
-  group_by(Lab_reference, Country, Breed, Floored_date, Province,
-           Farm_ID, Diagnostic_test, Sample_type, Pathogen) %>%
-  summarise(across(c(Result), ~ ifelse(all(is.na(.)), NA, max(., na.rm = TRUE))))
+  group_by(Lab_reference, Country, Breed, Province,
+           Farm_ID, Diagnostic_test, Sample_type, Pathogen,Samplenumber,Date_month,Date_week,Date) %>%
+  summarise(across(c(Result), ~ ifelse(all(is.na(.)), NA, max(., na.rm = TRUE))))%>%
+  select(
+    Lab_reference,
+    Country,
+    Breed,
+    Province,
+    Farm_ID,
+    Diagnostic_test,
+    Sample_type,
+    Samplenumber,
+    Date,
+    Date_month,
+    Date_week,
+    Pathogen,
+    Result
+  )
 
 # If all are NA, than NA, if not (else): max in group, while ignoring NA 
 ```

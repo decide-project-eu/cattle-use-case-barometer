@@ -72,6 +72,10 @@ barometer_dt <- barometer_dt_raw %>%
     Date = created
     ) %>%
   dplyr::mutate(
+    Date = lubridate::ymd_hms(Date),
+    Date_month = lubridate::floor_date(Date, "month"),
+    Date_week = lubridate::floor_date(Date, "week"),
+    Samplenumber = sha256_hash(as.character(Filenumber)),
     Lab_reference ='4',
     Diagnostic_test = 'NPS',
     Breed = 'Unknown',
@@ -110,7 +114,10 @@ barometer_dt <- barometer_dt_raw %>%
     BRSV,
     PI3,
     BCV,
-    Date
+    Date,
+    Samplenumber,
+    Date_month,
+    Date_week
   ) %>%
   dplyr::distinct()%>%
 dplyr::mutate(
@@ -119,20 +126,12 @@ dplyr::mutate(
     )
 ```
 
-## Floor date to 1st of month
-
-```{r message=FALSE, warning=FALSE}
-
-barometer_dt$Date <- lubridate::ymd_hms(barometer_dt$Date)
-barometer_dt$Floored_date <- lubridate::floor_date(barometer_dt$Date, "month")
-```
-
 ## Aggregate data based on farm_ID & month
 
 ```{r message=FALSE, warning=FALSE}
 
 barometer_groupby <- barometer_dt %>%
-  group_by(Lab_reference, Country, Breed, Floored_date, Province, Farm_ID, Diagnostic_test, Sample_type) %>%
+  group_by(Lab_reference, Country, Breed, Province, Farm_ID, Diagnostic_test, Sample_type, Samplenumber,Date_month,Date_week,Date) %>%
   summarise(across(c(PM, MH, HS, MB, BRSV, PI3, BCV), max))
 
 # If all are NA, than NA, if not (else): max in group, while ignoring NA 
@@ -147,6 +146,21 @@ barometer_long <- barometer_groupby %>%
     cols = c('PM', 'MH', 'HS', 'MB', 'BRSV', 'PI3', 'BCV'),
     names_to = 'Pathogen',
     values_to = 'Result',
+  )%>%
+  select(
+    Lab_reference,
+    Country,
+    Breed,
+    Province,
+    Farm_ID,
+    Diagnostic_test,
+    Sample_type,
+    Samplenumber,
+    Date,
+    Date_month,
+    Date_week,
+    Pathogen,
+    Result
   )
 ```
 
