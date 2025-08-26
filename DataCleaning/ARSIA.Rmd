@@ -12,7 +12,7 @@ output:
     df_print: paged
 ---
 
-# DATACLEANING FOR ARSIA
+# DATACLEANING FOR ARSIA - Version 2025
 
 ## Load the libraries
 
@@ -40,15 +40,18 @@ sha256_hash <- function(data) {
 }
 ```
 
+
 ## Data loading
 
 ```{r message=FALSE, warning=FALSE}
 
-# Data up to 2022
+# Data up to 2025
 
-barometer_dt_raw_1 <- readxl::read_excel("../Data/ARSIA/ARSIA_DECIDE_20221201.xlsx")
+#barometer_dt_raw_1 <- readxl::read_excel("../Data/ARSIA/ARSIA_DECIDE_20221201.xlsx")
 
-barometer_dt_raw_2 <- readxl::read_excel("../Data/ARSIA/ARSIA_DECIDE_20240408_adjtitle.xlsx")
+#barometer_dt_raw_2 <- readxl::read_excel("../Data/ARSIA/ARSIA_DECIDE_20240408_adjtitle.xlsx")
+
+barometer_dt_raw_2 <- readxl::read_excel("../Data/ARSIA/DECIDE_COMPIL_DATA__202501272012.xlsx")
 
 ```
 
@@ -56,29 +59,29 @@ barometer_dt_raw_2 <- readxl::read_excel("../Data/ARSIA/ARSIA_DECIDE_20240408_ad
 
 ```{r}
 
-barometer_dt_raw_2$SAMPLE_NUM <- paste("CI", barometer_dt_raw_2$SAMPLE_NUM, sep = "-")
-barometer_dt_raw_2$SAMPLE_NUM <- substr(barometer_dt_raw_2$SAMPLE_NUM, start = 1, stop = 16)
+#barometer_dt_raw_2$SAMPLE_NUM <- paste("CI", barometer_dt_raw_2$SAMPLE_NUM, sep = "-")
+#barometer_dt_raw_2$SAMPLE_NUM <- substr(barometer_dt_raw_2$SAMPLE_NUM, start = 1, stop = 16)
 
 barometer_dt_raw_2 <- barometer_dt_raw_2 %>% 
   dplyr::rename(
-    clean = 'N° échantillon',
-    'N° échantillon' = 'SAMPLE_NUM'
+    clean = 'DOSSIER',
+    'DOSSIER' = 'SAMPL_NR'
     ) %>%
   dplyr::select(
-    'N° échantillon',
-    'Date of Sample',
-    TRP,
-    ADDRESS,
+    'DOSSIER',
+    'SAMPL_DATE',
+    HERD_ANONYM,
+    ADRESS,
     SPECUL,
-    'Sample Type',
-    METH,
-    M_haemolytica,
-    P_multocida,
-    H_somnus,
-    M_bovis,
+    'SAMPL_TYPE',
+    METHOD,
+    MHA,
+    PMU,
+    HSO,
+    MBO,
     BRSV,
     PI3,
-    Coronavirus
+    BCO
   )
     
 
@@ -88,7 +91,9 @@ barometer_dt_raw_2 <- barometer_dt_raw_2 %>%
 
 ```{r}
 
-barometer_dt_raw <- rbind(barometer_dt_raw_1, barometer_dt_raw_2)
+#barometer_dt_raw <- rbind(barometer_dt_raw_1, barometer_dt_raw_2)
+
+barometer_dt_raw <- barometer_dt_raw_2
 ```
 
 ## Data manipulation
@@ -126,20 +131,20 @@ The result can be either 'negative' (0), 'positive' (1) or 'not tested' (NA):
 ```{r message=FALSE, warning=FALSE}
 barometer_dt <- barometer_dt_raw %>% 
   dplyr::rename(
-    Dossier = 'N° échantillon',
-    Date = 'Date of Sample',
-    Sample_type= 'Sample Type',
-    Diagnostic_test = METH,
-    Farm_ID = TRP,
-    PM = P_multocida,
-    MH = M_haemolytica,
-    HS = H_somnus,
-    MB = M_bovis,
+    Dossier = 'DOSSIER',
+    Date = 'SAMPL_DATE',
+    Sample_type= 'SAMPL_TYPE',
+    Diagnostic_test = METHOD,
+    Farm_ID = HERD_ANONYM,
+    PM = PMU,
+    MH = MHA,
+    HS = HSO,
+    MB = MBO,
     BRSV = BRSV,
     PI3 = PI3,
-    BCV = Coronavirus
+    BCV = BCO
     ) %>% 
-  tidyr::separate(ADDRESS, c('Postal_code', 'City')) %>%
+  tidyr::separate(ADRESS, c('Postal_code', 'City')) %>%
   dplyr::mutate(
     Postal_code = as.double(Postal_code),
     Filenumber = str_sub(Dossier, 1, 12),
@@ -197,20 +202,39 @@ barometer_dt <- barometer_dt_raw %>%
   ) %>%
   dplyr::distinct() %>%
   dplyr::mutate(
-    Filenumber = sha256_hash(as.character(Filenumber)),
-    Samplenumber = sha256_hash(as.character(Samplenumber)),
-    Farm_ID = sha256_hash(as.character(Farm_ID)),
+  # Robust date parsing: try ymd_hms (with tz/offset), then ymd, then dmy
+    Date = dplyr::coalesce(
+      suppressWarnings(lubridate::as_date(lubridate::ymd_hms(Date, quiet = TRUE))),
+      suppressWarnings(lubridate::ymd(Date)),
+      suppressWarnings(lubridate::dmy(Date))
+    ),
     Date_month = lubridate::floor_date(Date, "month"),
-    Date_week = lubridate::floor_date(Date, "week")
+    # Make weeks start Monday (Belgian convention); adjust if you prefer Sunday
+    Date_week  = lubridate::floor_date(Date, "week", week_start = 1),
+    
+    # Hash IDs
+    Filenumber   = sha256_hash(as.character(Filenumber)),
+    Samplenumber = sha256_hash(as.character(Samplenumber)),
+    Farm_ID      = sha256_hash(as.character(Farm_ID))
   ) 
+
+
 ```
 
+## Floor date to 1st of month
+
+```{r message=FALSE, warning=FALSE}
+
+#barometer_dt$Date <- ymd(barometer_dt$Date)
+#barometer_dt$Floored_date <- lubridate::floor_date(barometer_dt$Date, "month")
+
+```
 
 ## Aggregate data based on farm_ID and month (WIDE)
 
 ```{r message=FALSE, warning=FALSE}
 barometer_groupby <- barometer_dt %>%
-  group_by(Lab_reference, Country, Breed, Province, Farm_ID, Diagnostic_test, Sample_type,Samplenumber,Date_month,Date_week,Date) %>%
+  group_by(Lab_reference, Country, Breed, Province, Farm_ID, Diagnostic_test, Sample_type, Samplenumber, Date_month, Date_week, Date) %>%
   summarise(across(c(PM, MH, HS, MB, BRSV, PI3, BCV), max))
 ```
 
@@ -223,24 +247,10 @@ barometer_long <- barometer_groupby %>%
     cols = c('PM', 'MH', 'HS', 'MB', 'BRSV', 'PI3', 'BCV'),
     names_to = 'Pathogen',
     values_to = 'Result',
-  ) %>%
-  select(
-    Lab_reference,
-    Country,
-    Breed,
-    Province,
-    Farm_ID,
-    Diagnostic_test,
-    Sample_type,
-    Samplenumber,
-    Date,
-    Date_month,
-    Date_week,
-    Pathogen,
-    Result
   )
       
 ```
+
 
 ## Save file to csv (long version)
 

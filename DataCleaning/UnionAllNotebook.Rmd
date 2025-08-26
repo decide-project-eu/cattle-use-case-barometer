@@ -8,7 +8,7 @@ output:
     toc_depth: 2
 ---
 
-# Union of documents
+# Union of documents -VERSION 1
 
 ## Loading libraries
 
@@ -56,6 +56,60 @@ barometer_Tableau <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, baromet
   ) %>%
   dplyr::select(-X)
 
+```
+
+#VERSION 2
+
+## Loading libraries
+
+```{r message=FALSE, warning=FALSE}
+
+# lib = where to save the library  (zonder = default)
+
+package_list <- c("data.table", "tidyverse", "naniar", "stringr", "readr",  "dplyr", "magrittr", "readxl", "writexl", "sjmisc", "tidyr", "rmarkdown"
+                  )
+
+for (pkg in package_list) {
+  if (pkg %in% rownames(.packages()) == FALSE)
+  {library(pkg, character.only = TRUE)}
+
+}
+```
+
+## Data creation and loading
+
+```{r message=FALSE, warning=FALSE}
+barometer_DGZ <- read.csv("../Data/CleanedData/barometer_DGZ.csv")
+barometer_ARSIA <- read.csv("../Data/CleanedData/barometer_ARSIA.csv")
+barometer_GD <- read.csv("../Data/CleanedData/barometer_GD.csv")
+barometer_Ireland <- read.csv("../Data/CleanedData/barometer_Ireland.csv")
+barometer_PathoSense <- read.csv("../Data/CleanedData/barometer_PathoSense.csv")
+barometer_Vigigrip <- read.csv("../Data/CleanedData/barometer_Vigigrip.csv")
+
+
+```
+
+## Combine data to one format and add column with month and year for Tableau
+
+```{r message=FALSE, warning=FALSE}
+barometer_Tableau <- rbind(barometer_DGZ, barometer_ARSIA, barometer_GD, barometer_Ireland, barometer_PathoSense, barometer_Vigigrip) %>%
+  dplyr::mutate(
+    Month = month(Date),
+    Year = year(Date)
+    ) %>%
+  dplyr::rename(
+   LabReference = Lab_reference,
+   FarmIdentifier = Farm_ID, 
+   DiagnosticTest = Diagnostic_test,
+   SampleType = Sample_type
+  ) %>%
+  dplyr::select(-X)
+
+```
+
+# Check number of duplicates in final dataset
+```{r}
+any(duplicated(barometer %>% ungroup()))
 ```
 
 ## Save file (with current date)

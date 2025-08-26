@@ -161,6 +161,11 @@ barometer_long <- barometer_groupby %>%
   )
 ```
 
+# Check number of duplicates in final dataset
+```{r}
+any(duplicated(barometer %>% ungroup()))
+```
+
 ## Save file to csv (long version)
 
 ```{r message=FALSE, warning=FALSE}

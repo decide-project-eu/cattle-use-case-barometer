@@ -12,7 +12,7 @@ output:
     latex_engine: pdflatex
 ---
 
-# Data cleaning for DGZ
+#VERSION 2025
 
 ## Load the libraries
 
@@ -43,7 +43,7 @@ sha256_hash <- function(data) {
 In this case, more datasets (one for PCR, one for *Pasteurellaceae* culture, one for *Mycoplasma bovis* culture).
 
 ```{r message=FALSE, warning=FALSE}
-barometer_dt_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_14nov2022.xlsx")
+barometer_dt_raw <- readxl::read_excel("../Data/DGZ/MTA_DECIDE_Ugent2025.xlsx")
 barometer_aero_cult_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENT_BAC_AERO_14nov2022.xlsx")
 barometer_myco_cult_raw <- readxl::read_excel("../Data/DGZ/DECIDE_MTA_UGENTBAC_MYCO_14nov2022.xlsx")
 ```
@@ -269,8 +269,7 @@ Here
 -   Sha256 function added to anonymize Farm_ID
 
 ```{r message=FALSE, warning=FALSE}
-barometer <-
-  barometer_dt %>%
+barometer <-  barometer_dt %>%
   dplyr::left_join(df_samples, by = c('Diagnostic_test','Result', 'Parameter_code')) %>%
   dplyr::left_join(
       barometer_aero_cult, by = c('Filenumber', 'Samplenumber', 'Result', 'Parameter_code', 'Pathogen_identification')
@@ -341,6 +340,13 @@ barometer <-
   )
 
 ```
+
+# Check number of duplicates in final dataset
+```{r}
+any(duplicated(barometer %>% ungroup()))
+```
+
+
 
 ## Save file (long version)
 

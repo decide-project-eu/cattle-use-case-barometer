@@ -8,7 +8,7 @@ output:
     toc_depth: 2
 ---
 
-# DATACLEANING IRELAND
+# DATACLEANING IRELAND - Dataset 3 bijgevoegd door SJ
 
 ## Load the libraries
 
@@ -42,6 +42,8 @@ sha256_hash <- function(data) {
 
 barometer_dt_raw_2021 <- readxl::read_excel("../Data/Ireland/Jade_2021_Final_Anonymised_data_Only_2023-04-20.v2.xlsx")
 barometer_dt_raw_2022 <- readxl::read_excel("../Data/Ireland/Jade_2022_Final_Anonymised_data_Only_2023-04-21.xlsx")
+barometer_dt_raw_2023 <- readxl::read_excel("../Data/Ireland/Final_Anonymised_data_Only_2023_2025-03-04.xlsx")
+
                                        
                                        
 ```
@@ -50,7 +52,7 @@ barometer_dt_raw_2022 <- readxl::read_excel("../Data/Ireland/Jade_2022_Final_Ano
 
 ```{r message=FALSE, warning=FALSE}
 
-barometer_dt_combined <- rbind(barometer_dt_raw_2021, barometer_dt_raw_2022)
+barometer_dt_combined <- rbind(barometer_dt_raw_2021, barometer_dt_raw_2022, barometer_dt_raw_2023)
 
 ```
 
@@ -279,6 +281,12 @@ barometer_groupby <- barometer_results %>%
 
 # If all are NA, than NA, if not (else): max in group, while ignoring NA 
 ```
+
+# Check number of duplicates in final dataset
+```{r}
+any(duplicated(barometer %>% ungroup()))
+```
+
 
 ## Save file (long version)
 

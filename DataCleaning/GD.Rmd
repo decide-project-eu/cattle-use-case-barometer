@@ -10,6 +10,8 @@ output:
 
 # DATACLEANING FOR GD
 
+##VERSION 2025
+
 ## Load the libraries
 
 ```{r message=FALSE, warning=FALSE}
@@ -38,7 +40,9 @@ sha256_hash <- function(data) {
 ## Data loading
 
 ```{r message=FALSE, warning=FALSE}
-barometer_dt_raw <- readxl::read_excel("../Data/GD/221122_data_RGD_DECIDE_nw.xlsx")
+barometer_dt_raw <- readxl::read_excel("../Data/GD/250808_data_RGD_DECIDE.xlsx")
+str(barometer_dt_raw$date)
+
 ```
 
 ## Data manipulation
@@ -117,6 +121,7 @@ dplyr::mutate(
     Filenumber = sha256_hash(as.character(Filenumber)),
     Samplenumber = sha256_hash(as.character(Samplenumber)),
     Farm_ID = sha256_hash(as.character(Farm_ID)),
+    Date = dmy(Date), 
     Date_month = lubridate::floor_date(Date, "month"),
     Date_week = lubridate::floor_date(Date, "week")
     )
@@ -163,6 +168,11 @@ barometer_long <- barometer_groupby %>%
     Pathogen,
     Result
   )
+```
+
+# Check number of duplicates in final dataset
+```{r}
+any(duplicated(barometer %>% ungroup()))
 ```
 
 ## Save file to csv (long version)
